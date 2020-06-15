@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <RootNamespace>Web</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CMS.Helper\CMS.Helper.csproj" />
+      <ProjectReference Include="..\CMS.WebApi\CMS.WebApi.csproj" />
+      <ProjectReference Include="..\CMS.WebView\CMS.WebView.csproj" />
+    </ItemGroup>
+
+</Project>

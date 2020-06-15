@@ -1,0 +1,7 @@
+admin/mock
+admin/src/e2e
+admin/tests
+cms/.idea
+*/obj
+*obj
+*bin
