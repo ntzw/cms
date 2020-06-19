@@ -2,7 +2,14 @@ import { Settings as ProSettings } from '@ant-design/pro-layout';
 
 type DefaultSettings = ProSettings & {
   pwa: boolean;
+  basePath: string;
 };
+
+let basePath = '';
+const { NODE_ENV } = process.env;
+if (NODE_ENV === 'development') {
+  basePath = 'https://localhost:5005';
+}
 
 const proSettings: DefaultSettings = {
   navTheme: 'dark',
@@ -19,7 +26,10 @@ const proSettings: DefaultSettings = {
   title: 'Ant Design Pro',
   pwa: false,
   iconfontUrl: '',
+  basePath,
 };
+
+
 
 export type { DefaultSettings };
 

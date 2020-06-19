@@ -1,3 +1,4 @@
+using Foundation.ControllerFormatter;
 using Helper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,7 +26,11 @@ namespace Web
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();
             services.AddSession();
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(options =>
+            {
+                options.InputFormatters.Insert(0, new JsonInputFormatter()); //�����ʽ��
+                options.OutputFormatters.Insert(0, new JsonOutputFormatter()); //�����ʽ��
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

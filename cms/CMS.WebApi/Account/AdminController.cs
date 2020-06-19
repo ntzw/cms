@@ -5,7 +5,7 @@ using Service.Account;
 
 namespace WebApi.Account
 {
-    [Route("api/account/[controller]/[action]")]
+    [Route("api/Account/[controller]/[action]")]
     public class AdminController : ControllerBase
     {
         public async Task<Administrator> Get()

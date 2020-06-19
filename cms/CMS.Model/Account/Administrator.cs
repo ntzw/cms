@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Dapper.Contrib.Extensions;
 
 namespace Model.Account

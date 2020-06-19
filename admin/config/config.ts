@@ -38,6 +38,11 @@ export default defineConfig({
       ],
     },
     {
+      path: '/code',
+      name:'code',
+      component: './CodeGenerate',
+    },
+    {
       path: '/',
       component: '../layouts/SecurityLayout',
       routes: [

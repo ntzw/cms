@@ -3,6 +3,7 @@ import { Subscription, Reducer, Effect } from 'umi';
 import { NoticeIconData } from '@/components/NoticeIcon';
 import { queryNotices } from '@/services/user';
 import { ConnectState } from './connect.d';
+import { postAjax } from '@/services/global';
 
 export interface NoticeItem extends NoticeIconData {
   id: string;
@@ -22,6 +23,7 @@ export interface GlobalModelType {
     fetchNotices: Effect;
     clearNotices: Effect;
     changeNoticeReadState: Effect;
+    post: Effect;
   };
   reducers: {
     changeLayoutCollapsed: Reducer<GlobalModelState>;
@@ -29,6 +31,12 @@ export interface GlobalModelType {
     saveClearedNotices: Reducer<GlobalModelState>;
   };
   subscriptions: { setup: Subscription };
+}
+
+export interface HandleResult<T = any> {
+  isSuccess: boolean;
+  message: string;
+  data?: T;
 }
 
 const GlobalModel: GlobalModelType = {
@@ -40,6 +48,11 @@ const GlobalModel: GlobalModelType = {
   },
 
   effects: {
+    *post({ url, data, callback }, { call }) {
+      const res: HandleResult = yield call(postAjax, url, data);
+      if (typeof callback === 'function')
+        callback(res)
+    },
     *fetchNotices(_, { call, put, select }) {
       const data = yield call(queryNotices);
       yield put({

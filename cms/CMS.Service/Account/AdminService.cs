@@ -1,15 +1,14 @@
-using System.Threading.Tasks;
+using DataAccess.Interface.Account;
 using DataAccess.SqlServer.Account;
-using Foundation.Result;
 using Model.Account;
 
 namespace Service.Account
 {
-    public class AdminService : DefaultService<Administrator, AdminDapper>
+    public class AdminService : DefaultService<Administrator, IAdminDapper>
     {
-        private readonly AdminDapper _dapper = new AdminDapper();
+        private AdminDapper _dapper;
 
-        protected override AdminDapper GetDapper() => _dapper;
+        protected override IAdminDapper GetDapper() => _dapper ??= new AdminDapper();
 
         private AdminService()
         {

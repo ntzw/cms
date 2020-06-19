@@ -2,9 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <link rel="stylesheet" href="/lib/editormd/css/editormd.css"/>
 
+</head>
+<body style="margin: 0;">
+<div id="test-editor">
+    <textarea style="display:none;"></textarea>
+</div>
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/editormd/editormd.min.js"></script>
+<script type="text/javascript">
+    var iframeId = window.location.search.replace('?id=', '');
+
+    function createEditorMd(config) {
+        var _config = Object.assign(config, {
+            width: "100%",
+            path: "/lib/editormd/lib/",
+            onload: function () {
+                editor.fullscreen();
+                top.window.postMessage({
+                    id: iframeId,
+                    action: 'onload',
+                }, '*');
+            },
+        })
+
+        var editorHandles = ['onresize', 'onchange', 'onpreviewing', 'onpreviewed', 'onfullscreen', 'onfullscreenExit', 'onscroll', 'onpreviewscroll'];
+        for (var i = 0; i < editorHandles.length; i++) {
+            var handleName = editorHandles[i];
+            (function (actionName) {
+                _config[actionName] = function () {
+                    var data = null;
+                    switch (actionName) {
+                        case 'onchange':
+                            data = this.getValue();
+                            break;
+                        default:
+                            break;
+                    }
+
+                    top.window.postMessage({
+                        id: iframeId,
+                        action: actionName,
+                        data: data,
+                    }, '*');
+                }
+            })(handleName);
+        }
+        var editor = editormd("test-editor", _config);
+
+        var resizeTime;
+        $(window).resize(function () {
+            clearTimeout(resizeTime);
+            resizeTime = setTimeout(function () {
+                editor.fullscreen().fullscreen();
+            }, 500)
+        });
+
+        return editor;
+    }
+
+    $(function () {
+        let editorMd;
+        window.addEventListener("message", function (event) {
+            if (event.data && event.data.action) {
+                let callAction = event.data.callback;
+                let data = event.data.data;
+                let action = event.data.action;
+                switch (action) {
+                    case 'init':
+                        if (data) {
+                            editorMd = createEditorMd(data);
+                        }
+                        break;
+                    default:
+                        if (typeof editorMd[action] === 'function') {
+                            var callData = editorMd[action].apply(editorMd, data || []);
+                            if (typeof callAction === 'string') {
+                                top.window.postMessage({
+                                    id: iframeId,
+                                    action: callAction,
+                                    data: callData,
+                                }, '*');
+                            }
+                        }
+                        break;
+                }
+            }
+        }, false);
+
+        top.window.postMessage({
+            id: iframeId,
+            action: 'onReady',
+        }, '*');
+    });
+</script>
 </body>
 </html>

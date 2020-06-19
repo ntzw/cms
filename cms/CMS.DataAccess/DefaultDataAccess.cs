@@ -4,12 +4,16 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Extension;
+using Foundation.DataAccess.Connections;
 
 namespace DataAccess
 {
-    public abstract class DefaultDataAccess<T> where T : class, new()
+    public class DefaultDataAccess<T> where T : class, new()
     {
-        protected abstract IDbConnection Connection();
+        protected virtual IDbConnection Connection()
+        {
+            return MainConnection.Interface.GetConnection();
+        }
 
         public Task<T> GetById(int id)
         {
