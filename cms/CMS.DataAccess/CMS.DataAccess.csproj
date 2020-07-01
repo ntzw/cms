@@ -11,10 +11,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="SqlServer" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\CMS.Extension\CMS.Extension.csproj" />
       <ProjectReference Include="..\CMS.Foundation\CMS.Foundation.csproj" />
       <ProjectReference Include="..\CMS.Model\CMS.Model.csproj" />

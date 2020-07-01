@@ -4,6 +4,7 @@ import { NoticeIconData } from '@/components/NoticeIcon';
 import { queryNotices } from '@/services/user';
 import { ConnectState } from './connect.d';
 import { postAjax } from '@/services/global';
+import { HandleResult } from '@/utils/request';
 
 export interface NoticeItem extends NoticeIconData {
   id: string;
@@ -31,12 +32,6 @@ export interface GlobalModelType {
     saveClearedNotices: Reducer<GlobalModelState>;
   };
   subscriptions: { setup: Subscription };
-}
-
-export interface HandleResult<T = any> {
-  isSuccess: boolean;
-  message: string;
-  data?: T;
 }
 
 const GlobalModel: GlobalModelType = {

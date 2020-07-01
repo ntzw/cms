@@ -1,19 +1,12 @@
 import { Effect, Reducer } from 'umi';
 
 import { queryCurrent, query as queryUsers } from '@/services/user';
+import { HandleResult } from '@/utils/request';
 
 export interface CurrentUser {
-  avatar?: string;
-  name?: string;
-  title?: string;
-  group?: string;
-  signature?: string;
-  tags?: {
-    key: string;
-    label: string;
-  }[];
-  userid?: string;
-  unreadCount?: number;
+  accountName?: string;
+  trueName?: string;
+  num?: string;
 }
 
 export interface UserModelState {
@@ -49,10 +42,10 @@ const UserModel: UserModelType = {
       });
     },
     *fetchCurrent(_, { call, put }) {
-      const response = yield call(queryCurrent);
+      const response: HandleResult = yield call(queryCurrent);
       yield put({
         type: 'saveCurrentUser',
-        payload: response,
+        payload: response.data,
       });
     },
   },

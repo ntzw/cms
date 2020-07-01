@@ -6,7 +6,7 @@ import { PauseCircleOutlined, LoadingOutlined, CheckCircleOutlined, CloseCircleO
 
 import jsZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { buildTemplateValue } from './Generate';
+import { buildTemplateValue, getModalName } from './Generate';
 
 
 interface BatchGenerateProps {
@@ -118,7 +118,7 @@ const BatchGenerate: React.FC<BatchGenerateProps> = ({ visible, tableData, onClo
                 // 使用了FileSaver.js  
 
                 saveAs(content, "example.zip");
-            });            
+            });
             return;
         };
 
@@ -135,7 +135,7 @@ const BatchGenerate: React.FC<BatchGenerateProps> = ({ visible, tableData, onClo
         const folder = zip.folder(templateName);
         checkedRows.forEach(item => {
             const value = buildTemplateValue(tempalteInfo.template, item);
-            folder?.file(`${item.name}.${ext}`, value)
+            folder?.file(`${getModalName(item.name)}.${ext}`, value)
         })
 
         setTimeout(() => {

@@ -121,7 +121,7 @@ class GlobalHeaderRight extends Component<GlobalHeaderRightProps> {
     return (
       <NoticeIcon
         className={styles.action}
-        count={currentUser && currentUser.unreadCount}
+        count={0}
         onItemClick={(item) => {
           this.changeReadState(item as NoticeItem);
         }}

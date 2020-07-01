@@ -4,6 +4,7 @@ import { history, Reducer, Effect } from 'umi';
 import { fakeAccountLogin } from '@/services/login';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
+import { HandleResult } from '@/utils/request';
 
 export interface StateType {
   status?: 'ok' | 'error';
@@ -32,13 +33,13 @@ const Model: LoginModelType = {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
+      const response : HandleResult = yield call(fakeAccountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
         payload: response,
       });
       // Login successfully
-      if (response.status === 'ok') {
+      if (response.isSuccess) {
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params as { redirect: string };
@@ -74,11 +75,10 @@ const Model: LoginModelType = {
 
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      setAuthority(payload.authority);
       return {
         ...state,
-        status: payload.status,
-        type: payload.type,
+        status: payload.isSuccess ? "ok" : "error",
       };
     },
   },

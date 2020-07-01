@@ -4,6 +4,7 @@
  */
 import { extend } from 'umi-request';
 import { notification } from 'antd';
+import defaultSettings from '../../config/defaultSettings'
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -45,12 +46,24 @@ const errorHandler = (error: { response: Response }): Response => {
   return response;
 };
 
+let config: any = {
+  errorHandler, // 默认错误处理
+  credentials: 'include', // 默认请求是否带上cookie
+}
+
+const { NODE_ENV } = process.env;
+if (NODE_ENV === 'development') {
+  config.prefix = defaultSettings.basePath;
+}
+
 /**
  * 配置request请求时的默认参数
  */
-const request = extend({
-  errorHandler, // 默认错误处理
-  credentials: 'include', // 默认请求是否带上cookie
-});
-
+const request = extend(config);
 export default request;
+
+export interface HandleResult<T = any> {
+  isSuccess: boolean;
+  message: string;
+  data?: T;
+}

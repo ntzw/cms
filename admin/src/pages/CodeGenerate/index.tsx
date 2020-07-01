@@ -122,7 +122,7 @@ const CodeGenerate: React.FC<CodeGenerateProps> = ({ dispatch }) => {
 
     return <>
         <Row>
-            <Col span={10} style={{ padding: '0 2px 0 0' }}>
+            <Col span={8} style={{ padding: '0 2px 0 0' }}>
                 <Card
                     title="模板列表"
                     extra={<Button.Group>
@@ -206,7 +206,7 @@ const CodeGenerate: React.FC<CodeGenerateProps> = ({ dispatch }) => {
 
                 </Card>
             </Col>
-            <Col span={14}>
+            <Col span={16}>
                 <Card
                     title="模板内容"
                     bodyStyle={{ padding: 0 }}

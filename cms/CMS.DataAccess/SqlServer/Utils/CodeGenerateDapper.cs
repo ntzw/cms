@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using DataAccess.Interface.Utils;
+using Foundation.Modal;
+using Foundation.Modal.RequestModal;
 using Model.Account;
 
 namespace DataAccess.SqlServer.Utils
@@ -16,11 +18,11 @@ namespace DataAccess.SqlServer.Utils
 
         public Task<IEnumerable<dynamic>> GetTableFields(string tableName)
         {
-            string sql = $@"SELECT col.name AS ColumnName,
-                                     t.name AS DataType,
-                                     col.max_length AS DataLength,
-                                     col.is_nullable AS IsNullable,
-                                     ep.value AS Description
+            string sql = $@"SELECT col.name AS columnName,
+                                     t.name AS dataType,
+                                     col.max_length AS dataLength,
+                                     col.is_nullable AS isNullable,
+                                     ep.value AS description
                             FROM sys.objects obj
                             INNER JOIN sys.columns col
                                 ON obj.object_id=col.object_id
@@ -31,6 +33,11 @@ namespace DataAccess.SqlServer.Utils
                                     AND ep.minor_id=col.column_id
                             WHERE obj.name= @TableName ";
             return Connection().QueryAsync<dynamic>(sql, new {TableName = tableName});
-        } 
+        }
+
+        public Task<PageResponse> Page(IPageRequest req)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

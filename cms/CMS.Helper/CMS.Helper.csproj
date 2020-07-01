@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CMS.Enums\CMS.Enums.csproj" />
       <ProjectReference Include="..\CMS.Extension\CMS.Extension.csproj" />
     </ItemGroup>
 

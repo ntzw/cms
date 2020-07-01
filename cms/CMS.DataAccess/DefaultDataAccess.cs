@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Extension;
 using Foundation.DataAccess.Connections;
+using Foundation.Modal;
 
 namespace DataAccess
 {
@@ -79,6 +81,28 @@ namespace DataAccess
         protected static string GetTableName()
         {
             return new T().GetAttribute<TableAttribute>()?.Name;
+        }
+
+        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams,
+            out List<string> whereSql)
+        {
+            whereSql = new List<string>();
+            whereParams = new ExpandoObject();
+            if (queries != null)
+            {
+                foreach (var query in queries)
+                {
+                    whereSql.Add(query.QuerySql.ToWhereString());
+                    whereParams.Add(query.QuerySql.ParamName, query.Value);
+                }
+            }
+
+            return whereSql.Count > 0 ? $"AND {string.Join(" AND ", whereSql)}" : "";
+        }
+
+        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
+        {
+            return OutDefaultPageParams(queries, out whereParams, out List<string> whereSql);
         }
     }
 }

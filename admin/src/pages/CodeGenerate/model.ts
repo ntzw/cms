@@ -1,5 +1,6 @@
 import { Reducer, Effect } from 'umi';
 import { postAjax } from '@/services/global';
+import { HandleResult } from '@/utils/request';
 
 export interface ModelState {
     tableData: TableType[]
@@ -27,12 +28,6 @@ export interface ModelType {
     reducers: {
         saveTableData: Reducer<ModelState>;
     };
-}
-
-export interface HandleResult<T = any> {
-    isSuccess: boolean;
-    message: string;
-    data?: T;
 }
 
 const GlobalModel: ModelType = {

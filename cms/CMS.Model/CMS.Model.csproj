@@ -9,4 +9,9 @@
       <PackageReference Include="Dapper.Contrib" Version="2.0.35" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CMS.Helper\CMS.Helper.csproj" />
+      <ProjectReference Include="..\CMS.React\CMS.React.csproj" />
+    </ItemGroup>
+
 </Project>

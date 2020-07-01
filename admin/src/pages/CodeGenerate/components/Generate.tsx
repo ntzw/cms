@@ -5,6 +5,7 @@ import EditorMd, { EditorMdInstance } from '@/components/Editor/EditorMd';
 import artTemplate from "art-template/lib/template-web"
 import jsZip from 'jszip'
 import { saveAs } from 'file-saver'
+import moment from 'moment';
 
 interface GenerateProps {
     dispatch: Dispatch;
@@ -15,17 +16,20 @@ interface GenerateProps {
     onClose: () => void;
 }
 
-const getModalName = (tableName: string) => {
+export const getModalName = (tableName: string) => {
     const names = tableName.split('_');
     return names[names.length - 1];
 }
 
 export const buildTemplateValue = (template?: string, tableData?: TableType) => {
     if (template && tableData) {
+        const fields = tableData.fields || [];
         return artTemplate.render(template, {
             ModalName: getModalName(tableData.name),
             TableName: tableData.name,
-            Fields: tableData.fields || []
+            NowDateTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+            Fields: fields,
+            ModalFields: fields.filter(temp => ['Id','Num','CreateDate','UpdateDate','CreateAccountNum','UpdateAccountNum'].indexOf(temp.columnName) === -1)
         });
     }
     return '';
@@ -139,7 +143,7 @@ const Generate: React.FC<GenerateProps> = ({ visible, onClose, template, templat
                                     var zip = new jsZip();
                                     checkedRows.forEach(item => {
                                         const value = buildTemplateValue(template, item);
-                                        zip.file(`${item.name}.${ext}`, value)
+                                        zip.file(`${getModalName(item.name)}.${ext}`, value)
                                     })
 
                                     zip.generateAsync({ type: "blob" }).then(function (content) {
