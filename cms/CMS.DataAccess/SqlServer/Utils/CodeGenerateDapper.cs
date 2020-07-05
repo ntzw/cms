@@ -34,10 +34,5 @@ namespace DataAccess.SqlServer.Utils
                             WHERE obj.name= @TableName ";
             return Connection().QueryAsync<dynamic>(sql, new {TableName = tableName});
         }
-
-        public Task<PageResponse> Page(IPageRequest req)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

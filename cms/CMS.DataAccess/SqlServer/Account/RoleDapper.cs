@@ -3,7 +3,9 @@
  * email：ntzw.geek@gmail.com
  */
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dapper;
 using DataAccess.Interface.Account;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
@@ -13,9 +15,6 @@ namespace DataAccess.SqlServer.Account
 {
     public class RoleDapper : DefaultDataAccess<Role>, IRoleDapper
     {
-        public Task<PageResponse> Page(IPageRequest req)
-        {
-            throw new System.NotImplementedException();
-        }
+        
     }
 }

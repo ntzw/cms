@@ -4,5 +4,6 @@ namespace CMS.Enums
     {
         Input,
         Password,
+        Select,
     }
 }

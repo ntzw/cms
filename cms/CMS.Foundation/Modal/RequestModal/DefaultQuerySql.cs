@@ -10,7 +10,7 @@ namespace Foundation.Modal.RequestModal
         private readonly QuerySymbol _symbol;
 
         public DefaultQuerySql(string fieldName, QuerySymbol symbol = QuerySymbol.Equal) :
-            this(fieldName, fieldName)
+            this(fieldName, fieldName, symbol)
         {
         }
 
@@ -27,9 +27,9 @@ namespace Foundation.Modal.RequestModal
         }
 
         public string FieldName => _fieldName;
-        
+
         public string ParamName => _paramName;
-        
+
         public QuerySymbol Symbol => _symbol;
 
         private string GetSymbol()

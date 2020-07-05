@@ -29,11 +29,13 @@ namespace Model.Account
         /// 密码
         /// </summary>
         [Description("")]
-        [Password("密码", Required = true)]
+        [Password("密码", Required = true, UpdateShow = false)]
         public string Password { get; set; }
 
-        [Description("")] public string PermissionsCode { get; set; }
+        [Description("")]
+        public string PermissionsCode { get; set; }
 
-        [Description("")] public string GroupNum { get; set; }
+        [Description("")]
+        public string GroupNum { get; set; }
     }
 }

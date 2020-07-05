@@ -13,9 +13,5 @@ namespace DataAccess.SqlServer.Account
 {
     public class PermissionsDapper : DefaultDataAccess<Permissions>, IPermissionsDapper
     {
-        public Task<PageResponse> Page(IPageRequest req)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

@@ -1,14 +1,14 @@
-import ModalForm, { ActionType } from './ModalForm'
+import ModalForm, { ModalFormAction } from './ModalForm'
 
-
-export interface ModalFormState {
+interface ModalFormState {
     visible: boolean;
     title: string;
     params?: { [key: string]: any }
 }
 
-export {
-    ActionType as ModalFormAction
+export type {
+    ModalFormState,
+    ModalFormAction
 }
 
 export default ModalForm;

@@ -13,7 +13,7 @@ namespace CMS.React
     {
         private static readonly Type ComponentType = typeof(BaseComponent);
 
-        public static List<IDictionary<string, object>> ToFormFields<T>()
+        public static List<IDictionary<string, object>> ToFormFields<T>(bool isUpdate)
         {
             Type obj = typeof(T);
             List<IDictionary<string, object>> fieldData = new List<IDictionary<string, object>>();
@@ -22,6 +22,7 @@ namespace CMS.React
             {
                 var attr = propertyInfo.GetCustomAttribute(ComponentType) as BaseComponent;
                 if (attr == null) continue;
+                if (attr.UpdateShow == false && isUpdate) continue;
 
                 var field = new ExpandoObject();
                 List<Rule> rules = new List<Rule>();
@@ -30,23 +31,11 @@ namespace CMS.React
                 field.TryAdd("name", ToNameLower(propertyInfo.Name));
 
                 if (attr is InputAttribute input)
-                {
-                    field.TryAdd("type", ReactFormItemType.Input);
-                    field.TryAdd("input", new
-                    {
-                        input.MaxLength,
-                        attr.Placeholder,
-                    });
-                }
+                    SetInput(field, input);
                 else if (attr is PasswordAttribute password)
-                {
-                    field.TryAdd("type", ReactFormItemType.Password);
-                    field.TryAdd("password", new
-                    {
-                        password.MaxLength,
-                        attr.Placeholder,
-                    });
-                }
+                    SetPassword(field, password);
+                else if (attr is SelectAttribute select)
+                    SetSelect(field, select);
 
                 if (attr.Required)
                 {
@@ -62,6 +51,39 @@ namespace CMS.React
             }
 
             return fieldData;
+        }
+
+        private static void SetSelect(ExpandoObject field, SelectAttribute @select)
+        {
+            field.TryAdd("type", ReactFormItemType.Select);
+            field.TryAdd("dataAction", select.DataAction);
+            field.TryAdd("select", new
+            {
+                select.Mode,
+                select.AllowClear,
+                select.ShowSearch,
+                select.Placeholder
+            });
+        }
+
+        private static void SetPassword(ExpandoObject field, PasswordAttribute password)
+        {
+            field.TryAdd("type", ReactFormItemType.Password);
+            field.TryAdd("password", new
+            {
+                password.MaxLength,
+                password.Placeholder,
+            });
+        }
+
+        private static void SetInput(ExpandoObject field, InputAttribute input)
+        {
+            field.TryAdd("type", ReactFormItemType.Input);
+            field.TryAdd("input", new
+            {
+                input.MaxLength,
+                input.Placeholder,
+            });
         }
 
         private static string ToNameLower(string name)

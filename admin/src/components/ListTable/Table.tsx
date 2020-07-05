@@ -37,6 +37,38 @@ import ErrorBoundary from './component/ErrorBoundary';
 
 type TableRowSelection = TableProps<any>['rowSelection'];
 
+export enum QuerySymbol {
+  /**
+   * 等于
+   */
+  Equal,
+
+  /**
+   * 不相等
+   */
+  NotEqual,
+  /**
+   * 大于
+   */
+  Great,
+  /**
+   * 大于等于
+   */
+  GreatEqual,
+  /**
+   * 小于
+   */
+  Little,
+  /**
+   * 小于等于
+   */
+  LittleEqual,
+  /**
+   * 模糊查询
+   */
+  Like
+}
+
 export interface ActionType {
   reload: (resetPageIndex?: boolean) => void;
   reloadAndRest: () => void;
@@ -156,6 +188,10 @@ export interface ProColumnType<T = unknown>
    * form 的排序
    */
   order?: number;
+  /**
+   * 查询符号
+   */
+  querySymbol?: QuerySymbol;
 }
 
 export interface ProColumnGroupType<RecordType> extends ProColumnType<RecordType> {
@@ -192,6 +228,7 @@ export interface ProTableProps<T, U extends { [key: string]: any }>
     sort: {
       [key: string]: 'ascend' | 'descend';
     },
+    querySymbol: { [key: string]: QuerySymbol },
     filter: { [key: string]: React.ReactText[] },
   ) => Promise<RequestData<T>>;
 
@@ -613,15 +650,25 @@ const ProTable = <T extends {}, U extends object>(
           success: true,
         } as RequestData<T>;
       }
+
+      let querySymbol = {};
+      if (formSearch) {
+        Object.keys(formSearch).forEach(keyName => {
+          const symbol = propsColumns.find(temp => temp.dataIndex === keyName)?.querySymbol
+          querySymbol[keyName] = symbol || QuerySymbol.Equal;
+        });
+      }
+
+
       const msg = await request(
         {
           current,
           pageSize,
           ...formSearch,
-
           ...params,
         } as U,
         proSort,
+        querySymbol,
         proFilter,
       );
       if (postData) {

@@ -23,11 +23,6 @@ namespace Service.Account
         private static AdminService _interface;
         public static AdminService Interface => _interface ??= new AdminService();
 
-        public Task<PageResponse> Page(IPageRequest req)
-        {
-            return GetDapper().Page(req);
-        }
-
         /// <summary>
         /// 生成管理员密码
         /// </summary>

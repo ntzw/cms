@@ -7,6 +7,7 @@ using Dapper.Contrib.Extensions;
 using Extension;
 using Foundation.DataAccess.Connections;
 using Foundation.Modal;
+using Foundation.Modal.RequestModal;
 
 namespace DataAccess
 {
@@ -103,6 +104,18 @@ namespace DataAccess
         protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
         {
             return OutDefaultPageParams(queries, out whereParams, out List<string> whereSql);
+        }
+        
+        public virtual async Task<PageResponse> Page(IPageRequest req)
+        {
+            string whereSql = OutDefaultPageParams(req.Queries, out IDictionary<string, object> whereParams);
+            string dataSql =
+                $"SELECT * FROM (SELECT *,ROW_NUMBER() OVER({req.Sort.ToSql()}) AS RowNum FROM [{GetTableName()}] WHERE 1=1 {whereSql}) AS temp WHERE RowNum BETWEEN {req.Begin} AND {req.End} ";
+            string countSql =
+                $"SELECT COUNT(Id) FROM {GetTableName()} WHERE 1=1 {whereSql}";
+
+            return new PageResponse(await Connection().QueryAsync<dynamic>(dataSql, whereParams),
+                await Connection().QueryFirstAsync<long>(countSql, whereParams));
         }
     }
 }

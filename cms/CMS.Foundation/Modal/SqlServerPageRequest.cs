@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using CMS.Enums;
 using Extension;
 using Foundation.Modal.RequestModal;
 using Newtonsoft.Json.Linq;
@@ -32,7 +34,9 @@ namespace Foundation.Modal
                             this.Size = keyValue.Value.ToInt();
                             break;
                         default:
-                            Queries.Add(new DefaultQuery(GetValue(keyValue.Value), new DefaultQuerySql(keyValue.Key)));
+                            if (keyValue.Key.IsSqlField())
+                                Queries.Add(new DefaultQuery(GetValue(keyValue.Value),
+                                    new DefaultQuerySql(keyValue.Key, GetQuerySymbol(form, keyValue.Key))));
                             break;
                     }
                 }
@@ -42,13 +46,25 @@ namespace Foundation.Modal
             {
                 foreach (var jToken in sort)
                 {
-                    Sort.Add(jToken.Key, jToken.Value.ToStr());
+                    if (jToken.Key.IsSqlField())
+                        Sort.Add(jToken.Key, jToken.Value.ToStr());
                 }
             }
             else
             {
                 Sort.Add("Id", "DESC");
             }
+        }
+
+        private QuerySymbol GetQuerySymbol(JObject form, string key)
+        {
+            if (!form.ContainsKey("query")) return QuerySymbol.Equal;
+            if (!(form["query"] is JObject querySymbol)) return QuerySymbol.Equal;
+            if (!querySymbol.ContainsKey(key)) return QuerySymbol.Equal;
+
+            int symbolIndex = querySymbol[key].ToInt();
+            if (!Enum.TryParse(symbolIndex.ToString(), out QuerySymbol symbol)) return QuerySymbol.Equal;
+            return symbol;
         }
 
         public long Current { get; set; } = 1;

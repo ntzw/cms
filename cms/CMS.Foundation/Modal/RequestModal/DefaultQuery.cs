@@ -1,10 +1,23 @@
+using System;
+using CMS.Enums;
+
 namespace Foundation.Modal.RequestModal
 {
     public class DefaultQuery : IQuery
     {
         public DefaultQuery(object value, IQuerySql querySql)
         {
-            Value = value;
+            switch (querySql.Symbol)
+            {
+                case QuerySymbol.Like:
+                    Value = $"%{value}%";
+                    break;
+                default:
+                    Value = value;
+                    break;
+            }
+            
+           
             QuerySql = querySql;
         }
 

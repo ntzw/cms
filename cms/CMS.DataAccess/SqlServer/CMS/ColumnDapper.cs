@@ -13,9 +13,5 @@ namespace DataAccess.SqlServer.CMS
 {
     public class ColumnDapper : DefaultDataAccess<Column>, IColumnDapper
     {
-        public Task<PageResponse> Page(IPageRequest req)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

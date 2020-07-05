@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
+import ProTable, { ActionType as TableAction, ProColumns, QuerySymbol } from '@/components/ListTable';
 import { AdminListProps, Administrator } from './data';
 import { page, Submit } from './service';
 import { Button, message, Tooltip } from 'antd';
@@ -19,6 +19,7 @@ const AdminList: React.FC<AdminListProps> = () => {
         dataIndex: 'accountName',
         title: '账户名称',
         sorter: true,
+        querySymbol: QuerySymbol.Like,
     }, {
         dataIndex: 'trueName',
         title: '真实姓名',
@@ -52,8 +53,9 @@ const AdminList: React.FC<AdminListProps> = () => {
         <ProTable<Administrator>
             headerTitle="管理员列表"
             actionRef={tableAction}
-            request={(params, sort) => page(params, sort)}
+            request={(params, sort, querySymbol) => page(params, sort, querySymbol)}
             columns={columns}
+            rowSelection={{}}
             toolBarRender={(action, { selectedRowKeys }) => [
                 <Button
                     type="primary"

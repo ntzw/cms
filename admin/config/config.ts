@@ -70,8 +70,8 @@ export default defineConfig({
               routes: [
                 {
                   path: 'adminlist',
-                  name: 'sub-page',
-                  icon: 'smile',
+                  name: 'adminlist',
+                  icon: 'user',
                   component: './account/adminlist',
                   //authority: ['admin'],
                 },
