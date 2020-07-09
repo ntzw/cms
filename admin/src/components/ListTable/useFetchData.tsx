@@ -3,7 +3,6 @@ import { usePrevious, useDebounceFn } from './component/util';
 
 export interface RequestData<T> {
   data: T[];
-  success?: boolean;
   total?: number;
   [key: string]: any;
 }

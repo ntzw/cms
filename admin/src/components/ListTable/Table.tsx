@@ -647,7 +647,6 @@ const ProTable = <T extends {}, U extends object>(
       if (!request) {
         return {
           data: props.dataSource || [],
-          success: true,
         } as RequestData<T>;
       }
 
@@ -867,8 +866,7 @@ const ProTable = <T extends {}, U extends object>(
     if (action.loading !== false || propsRowSelection === false) {
       return;
     }
-    const tableKey = rest.rowKey;
-
+    const tableKey = rest.rowKey || 'num';
     // dataSource maybe is a null
     // eg: api has 404 error
     const duplicateRemoveMap = new Map();
@@ -880,6 +878,7 @@ const ProTable = <T extends {}, U extends object>(
         if (!tableKey) {
           return (selectedRowKeys as any).includes(index);
         }
+        
         if (typeof tableKey === 'function') {
           rowKey = tableKey(item, index) as string;
         } else {

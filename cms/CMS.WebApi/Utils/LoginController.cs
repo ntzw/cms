@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Extension;
 using Foundation.Attribute;
 using Foundation.Attribute.AuthorizeModel;
-using Foundation.Result;
+using Foundation.Modal;
 using Helper;
 using Microsoft.AspNetCore.Mvc;
 using Model.Account;

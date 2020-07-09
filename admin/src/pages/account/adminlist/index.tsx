@@ -2,10 +2,31 @@ import React, { useRef, useState } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ActionType as TableAction, ProColumns, QuerySymbol } from '@/components/ListTable';
 import { AdminListProps, Administrator } from './data';
-import { page, Submit } from './service';
-import { Button, message, Tooltip } from 'antd';
+import { page, Submit, Delete } from './service';
+import { Button, message, Tooltip, Dropdown, Menu } from 'antd';
 import ModalForm, { ModalFormState, ModalFormAction } from '@/components/ModalForm';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, DownOutlined } from '@ant-design/icons';
+import { DeleteConfirm } from '@/utils/msg';
+
+const handleDelete = (rows: Administrator[] | undefined, action: React.MutableRefObject<TableAction | undefined>) => {
+    if (!rows || rows.length <= 0) {
+        message.error('请选择要删除的数据');
+        return;
+    }
+
+    DeleteConfirm(() => {
+        const ids = rows.map(temp => temp.id);
+        Delete(ids).then(res => {
+            if (res.isSuccess) {
+                message.success('删除成功');
+                action.current?.reload();
+                action.current?.clearSelected();
+            } else {
+                message.error(res.message || '删除失败');
+            }
+        })
+    })
+}
 
 const AdminList: React.FC<AdminListProps> = () => {
     const [editForm, setEditForm] = useState<ModalFormState>({
@@ -18,12 +39,10 @@ const AdminList: React.FC<AdminListProps> = () => {
     const columns: ProColumns<Administrator>[] = [{
         dataIndex: 'accountName',
         title: '账户名称',
-        sorter: true,
         querySymbol: QuerySymbol.Like,
     }, {
         dataIndex: 'trueName',
         title: '真实姓名',
-        sorter: true,
     }, {
         dataIndex: '-',
         title: '操作',
@@ -56,7 +75,7 @@ const AdminList: React.FC<AdminListProps> = () => {
             request={(params, sort, querySymbol) => page(params, sort, querySymbol)}
             columns={columns}
             rowSelection={{}}
-            toolBarRender={(action, { selectedRowKeys }) => [
+            toolBarRender={(action, { selectedRows, selectedRowKeys }) => [
                 <Button
                     type="primary"
                     onClick={() => {
@@ -68,6 +87,26 @@ const AdminList: React.FC<AdminListProps> = () => {
                 >
                     添加
                 </Button>,
+                selectedRows && selectedRows.length > 0 && (
+                    <Dropdown
+                        overlay={
+                            <Menu
+                                onClick={async (e) => {
+                                    if (e.key === 'remove') {
+                                        handleDelete(selectedRows, tableAction);
+                                    }
+                                }}
+                                selectedKeys={[]}
+                            >
+                                <Menu.Item key="remove">批量删除</Menu.Item>
+                            </Menu>
+                        }
+                    >
+                        <Button>
+                            批量操作 <DownOutlined />
+                        </Button>
+                    </Dropdown>
+                ),
             ]}
         >
 
@@ -84,6 +123,10 @@ const AdminList: React.FC<AdminListProps> = () => {
             }}
             onFinish={(value) => {
                 editAction.current?.setSubmitLoading(true);
+
+                if (value.groupNum instanceof Array)
+                    value.groupNum = value.groupNum[value.groupNum.length - 1];
+
                 Submit(value).then(res => {
                     editAction.current?.setSubmitLoading(false);
                     if (res.isSuccess) {

@@ -4,19 +4,30 @@
  */
 
 using System.ComponentModel;
+using CMS.React.Component;
 using Dapper.Contrib.Extensions;
 
 namespace Model.Account
 {
-	[Table("Account_Role")]
-	public class Role : ModalBase 
-	{
-		
-		[Description("")]
-		public string Name { get; set; }
-		
-		[Description("")]
-		public string ParentNum { get; set; }
-		
-	}
+    [Table("Account_Role")]
+    public class Role : ModalBase
+    {
+        /// <summary>
+        /// 所属角色
+        /// </summary>
+        [Cascader("所属角色", DataAction = "/Api/Account/Role/CascaderData", ChangeOnSelect = true)]
+        public string ParentNum { get; set; }
+        
+        /// <summary>
+        /// 名称
+        /// </summary>
+        [Input("名称", Required = true)]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 描述
+        /// </summary>
+        [TextArea("描述")]
+        public string Desc { get; set; }
+    }
 }

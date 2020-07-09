@@ -53,7 +53,7 @@
     "@ant-design/icons": "^4.0.0",
     "@ant-design/pro-layout": "^5.0.8",
     "@ant-design/pro-table": "2.2.9",
-    "antd": "4.2.5",
+    "antd": "4.4.1",
     "art-template": "^4.13.2",
     "classnames": "^2.2.6",
     "file-saver": "^2.0.2",

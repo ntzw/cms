@@ -94,7 +94,7 @@ const CodeGenerate: React.FC<CodeGenerateProps> = ({ dispatch }) => {
                 setTemplateData(data);
             })
         });
-
+       
         dispatch({
             type: 'codeGenerate/load'
         })

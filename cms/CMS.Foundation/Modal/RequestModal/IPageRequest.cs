@@ -21,5 +21,12 @@ namespace Foundation.Modal.RequestModal
         ///     分页截止
         /// </summary>
         long End { get; }
+        
+        /// <summary>
+        /// 是否存在某个查询字段
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        bool ContainsQueryField(string field);
     }
 }

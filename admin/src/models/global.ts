@@ -12,21 +12,32 @@ export interface NoticeItem extends NoticeIconData {
   status: string;
 }
 
+export interface SiteSelectItem {
+  name: string;
+  num: string;
+  isDefault: boolean;
+}
+
 export interface GlobalModelState {
   collapsed: boolean;
   notices: NoticeItem[];
+  siteData: SiteSelectItem[];
+  selectedSite?: SiteSelectItem;
 }
 
 export interface GlobalModelType {
   namespace: 'global';
   state: GlobalModelState;
   effects: {
+    fetchSites: Effect;
     fetchNotices: Effect;
     clearNotices: Effect;
     changeNoticeReadState: Effect;
     post: Effect;
   };
   reducers: {
+    setCurrentSite: Reducer<GlobalModelState>;
+    setSiteData: Reducer<GlobalModelState>;
     changeLayoutCollapsed: Reducer<GlobalModelState>;
     saveNotices: Reducer<GlobalModelState>;
     saveClearedNotices: Reducer<GlobalModelState>;
@@ -40,6 +51,7 @@ const GlobalModel: GlobalModelType = {
   state: {
     collapsed: false,
     notices: [],
+    siteData: [],
   },
 
   effects: {
@@ -47,6 +59,27 @@ const GlobalModel: GlobalModelType = {
       const res: HandleResult = yield call(postAjax, url, data);
       if (typeof callback === 'function')
         callback(res)
+    },
+    *fetchSites(_, { call, put, select }) {
+      const res: HandleResult<SiteSelectItem[]> = yield call(postAjax, '/Api/CMS/Site/SelectData');
+      if (res.isSuccess) {
+        yield put({
+          type: 'setSiteData',
+          payload: res.data
+        });
+
+        const selectedSite: SiteSelectItem | undefined = yield select(
+          (state: ConnectState) => state.global.selectedSite,
+        );
+        if (!selectedSite) {
+          const defaultSite = res.data?.find(temp => temp.isDefault);
+          yield put({
+            type: 'setCurrentSite',
+            payload: defaultSite || res.data?.[0],
+          });
+        }
+
+      }
     },
     *fetchNotices(_, { call, put, select }) {
       const data = yield call(queryNotices);
@@ -109,24 +142,45 @@ const GlobalModel: GlobalModelType = {
   },
 
   reducers: {
-    changeLayoutCollapsed(state = { notices: [], collapsed: true }, { payload }): GlobalModelState {
+    setSiteData(state, { payload }): GlobalModelState {
       return {
+        notices: [],
+        collapsed: false,
+        ...state,
+        siteData: payload || [],
+      };
+    },
+    setCurrentSite(state, { payload }): GlobalModelState {
+      return {
+        siteData: [],
+        notices: [],
+        collapsed: false,
+        ...state,
+        selectedSite: state?.siteData.find(temp => temp.value = payload)
+      };
+    },
+    changeLayoutCollapsed(state, { payload }): GlobalModelState {
+      return {
+        siteData: [],
+        notices: [],
         ...state,
         collapsed: payload,
       };
     },
     saveNotices(state, { payload }): GlobalModelState {
       return {
+        siteData: [],
         collapsed: false,
         ...state,
         notices: payload,
       };
     },
-    saveClearedNotices(state = { notices: [], collapsed: true }, { payload }): GlobalModelState {
+    saveClearedNotices(state, { payload }): GlobalModelState {
       return {
+        siteData: [],
         ...state,
         collapsed: false,
-        notices: state.notices.filter((item): boolean => item.type !== payload),
+        notices: state?.notices.filter((item): boolean => item.type !== payload) || [],
       };
     },
   },

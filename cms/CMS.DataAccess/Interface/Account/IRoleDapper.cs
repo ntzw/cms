@@ -10,5 +10,6 @@ namespace DataAccess.Interface.Account
 {
     public interface IRoleDapper : IDefaultDataAccess<Role>
     {
+        
     }
 }

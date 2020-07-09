@@ -21,5 +21,10 @@ namespace Model.CMS
 		[Description("")]
 		public string SiteNum { get; set; }
 		
+		/// <summary>
+		/// 模型编号
+		/// </summary>
+		public string ModelNum { get; set; }
+		
 	}
 }

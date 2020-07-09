@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Foundation.Result;
+using Foundation.Modal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

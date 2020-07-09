@@ -79,6 +79,13 @@ namespace Foundation.Modal
 
         public long End => Current * Size;
 
+        public bool ContainsQueryField(string field)
+        {
+            if (field.IsEmpty()) return false;
+            return Queries.Exists(temp =>
+                string.Equals(temp.QuerySql.FieldName, field, StringComparison.OrdinalIgnoreCase));
+        }
+
         private object GetValue(JToken token)
         {
             switch (token.Type)

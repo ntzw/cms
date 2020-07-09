@@ -18,6 +18,11 @@ namespace DataAccess
             return MainConnection.Interface.GetConnection();
         }
 
+        public Task<IEnumerable<T>> GetAll()
+        {
+            return Connection().GetAllAsync<T>();
+        }
+
         public Task<T> GetById(int id)
         {
             return Connection().GetAsync<T>(id);
@@ -34,6 +39,8 @@ namespace DataAccess
             string sql = $"SELECT * FROM {GetTableName()} WHERE Num IN @Num";
             return Connection().QueryAsync<T>(sql, new {Num = num});
         }
+
+        #region 增删改
 
         public async Task<bool> Delete(string num)
         {
@@ -79,13 +86,26 @@ namespace DataAccess
             return Connection().UpdateAsync(t);
         }
 
-        protected static string GetTableName()
+        #endregion
+
+        #region 分页查询相关
+
+        public virtual async Task<PageResponse> Page(IPageRequest req)
         {
-            return new T().GetAttribute<TableAttribute>()?.Name;
+            string whereSql = OutDefaultPageParams(req.Queries, out IDictionary<string, object> whereParams);
+            string dataSql = GetPageDataSql(req, whereSql);
+            string countSql = GetPageCountSql(whereSql);
+
+            return new PageResponse(await Connection().QueryAsync<dynamic>(dataSql, whereParams),
+                await Connection().QueryFirstAsync<long>(countSql, whereParams));
         }
 
-        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams,
-            out List<string> whereSql)
+        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
+        {
+            return OutDefaultPageParams(queries, out whereParams, out List<string> whereSql);
+        }
+
+        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams, out List<string> whereSql)
         {
             whereSql = new List<string>();
             whereParams = new ExpandoObject();
@@ -101,21 +121,33 @@ namespace DataAccess
             return whereSql.Count > 0 ? $"AND {string.Join(" AND ", whereSql)}" : "";
         }
 
-        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
+        /// <summary>
+        /// 获取分页查询总数SQL
+        /// </summary>
+        /// <param name="whereSql"></param>
+        /// <returns></returns>
+        protected virtual string GetPageCountSql(string whereSql)
         {
-            return OutDefaultPageParams(queries, out whereParams, out List<string> whereSql);
+            return $"SELECT COUNT(Id) FROM {GetTableName()} WHERE 1=1 {whereSql}";
         }
-        
-        public virtual async Task<PageResponse> Page(IPageRequest req)
-        {
-            string whereSql = OutDefaultPageParams(req.Queries, out IDictionary<string, object> whereParams);
-            string dataSql =
-                $"SELECT * FROM (SELECT *,ROW_NUMBER() OVER({req.Sort.ToSql()}) AS RowNum FROM [{GetTableName()}] WHERE 1=1 {whereSql}) AS temp WHERE RowNum BETWEEN {req.Begin} AND {req.End} ";
-            string countSql =
-                $"SELECT COUNT(Id) FROM {GetTableName()} WHERE 1=1 {whereSql}";
 
-            return new PageResponse(await Connection().QueryAsync<dynamic>(dataSql, whereParams),
-                await Connection().QueryFirstAsync<long>(countSql, whereParams));
+        /// <summary>
+        /// 获取分页查询数据SQL
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="whereSql"></param>
+        /// <returns></returns>
+        protected virtual string GetPageDataSql(IPageRequest req, string whereSql)
+        {
+            return
+                $"SELECT * FROM (SELECT *,ROW_NUMBER() OVER({req.Sort.ToSql()}) AS RowNum FROM [{GetTableName()}] WHERE 1=1 {whereSql}) AS temp WHERE RowNum BETWEEN {req.Begin} AND {req.End} ";
+        }
+
+        #endregion
+
+        protected static string GetTableName()
+        {
+            return new T().GetAttribute<TableAttribute>()?.Name;
         }
     }
 }

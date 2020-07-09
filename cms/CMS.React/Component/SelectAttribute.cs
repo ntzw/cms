@@ -9,7 +9,7 @@ namespace CMS.React.Component
         /// <summary>
         /// 是否支持清除
         /// </summary>
-        public bool AllowClear { get; set; }
+        public bool? AllowClear { get; set; }
         
         /// <summary>
         /// 设置 Select 的模式为多选或标签	multiple | tags
@@ -19,6 +19,6 @@ namespace CMS.React.Component
         /// <summary>
         /// 使单选模式可搜索
         /// </summary>
-        public bool ShowSearch { get; set; }
+        public bool? ShowSearch { get; set; }
     }
 }

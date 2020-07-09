@@ -1,43 +1,40 @@
 import { GlobalOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
-import { getLocale, setLocale } from 'umi';
-import { ClickParam } from 'antd/es/menu';
-import React from 'react';
+import { connect, Dispatch, SiteSelectItem, GlobalModelState } from 'umi';
+import React, { useEffect } from 'react';
 import classNames from 'classnames';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 
 interface SelectLangProps {
+  dispatch: Dispatch;
+  siteData: SiteSelectItem[];
+  selectedSite?: SiteSelectItem;
   className?: string;
 }
 
 const SelectLang: React.FC<SelectLangProps> = (props) => {
-  const { className } = props;
-  const selectedLang = getLocale();
+  const { className, siteData, dispatch, selectedSite } = props;
+  useEffect(() => {
+    dispatch({
+      type: 'global/fetchSites',
+    })
+  }, [])
 
-  const changeLang = ({ key }: ClickParam): void => setLocale(key);
-
-  const locales = ['zh-CN', 'zh-TW', 'en-US', 'pt-BR'];
-  const languageLabels = {
-    'zh-CN': '简体中文',
-    'zh-TW': '繁体中文',
-    'en-US': 'English',
-    'pt-BR': 'Português',
-  };
-  const languageIcons = {
-    'zh-CN': '🇨🇳',
-    'zh-TW': '🇭🇰',
-    'en-US': '🇺🇸',
-    'pt-BR': '🇧🇷',
-  };
   const langMenu = (
-    <Menu className={styles.menu} selectedKeys={[selectedLang]} onClick={changeLang}>
-      {locales.map((locale) => (
-        <Menu.Item key={locale}>
-          <span role="img" aria-label={languageLabels[locale]}>
-            {languageIcons[locale]}
-          </span>{' '}
-          {languageLabels[locale]}
+    <Menu
+      className={styles.menu}
+      selectedKeys={selectedSite ? [selectedSite.num] : []}
+      onClick={({ key }) => {
+        dispatch({
+          type: 'global/setCurrentSite',
+          payload: key,
+        })
+      }}
+    >
+      {siteData.map((site) => (
+        <Menu.Item key={site.num}>
+          {site.name}
         </Menu.Item>
       ))}
     </Menu>
@@ -51,4 +48,9 @@ const SelectLang: React.FC<SelectLangProps> = (props) => {
   );
 };
 
-export default SelectLang;
+export default connect(({ global: { siteData, selectedSite } }: { global: GlobalModelState }) => {
+  return {
+    siteData,
+    selectedSite,
+  }
+})(SelectLang);

@@ -4,6 +4,12 @@ export default {
   'menu.home': '首页',
   'menu.admin': '管理页',
   'menu.admin.adminlist': '管理员管理',
+  'menu.admin.rolelist': '角色管理',
+
+  'menu.cms': '内容管理',
+  'menu.cms.sitelist': '站点管理',
+  'menu.cms.modeltablelist': '模型管理',
+
   'menu.login': '登录',
   'menu.register': '注册',
   'menu.register.result': '注册结果',

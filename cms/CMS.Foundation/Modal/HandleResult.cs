@@ -1,4 +1,4 @@
-namespace Foundation.Result
+namespace Foundation.Modal
 {
     public class HandleResult
     {

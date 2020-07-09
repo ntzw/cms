@@ -12,6 +12,10 @@ namespace Model.Account
     [Table("Account_Administrator")]
     public class Administrator : ModalBase
     {
+        [Description("")]
+        [Cascader("所属角色", DataAction = "/Api/Account/Role/CascaderData", ChangeOnSelect = true)]
+        public string GroupNum { get; set; }
+
         /// <summary>
         /// 账户名称
         /// </summary>
@@ -32,10 +36,6 @@ namespace Model.Account
         [Password("密码", Required = true, UpdateShow = false)]
         public string Password { get; set; }
 
-        [Description("")]
-        public string PermissionsCode { get; set; }
-
-        [Description("")]
-        public string GroupNum { get; set; }
+        [Description("")] public string PermissionsCode { get; set; }
     }
 }

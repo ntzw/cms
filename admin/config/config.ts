@@ -39,7 +39,7 @@ export default defineConfig({
     },
     {
       path: '/code',
-      name:'code',
+      name: 'code',
       component: './CodeGenerate',
     },
     {
@@ -73,6 +73,36 @@ export default defineConfig({
                   name: 'adminlist',
                   icon: 'user',
                   component: './account/adminlist',
+                  //authority: ['admin'],
+                },
+                {
+                  path: 'rolelist',
+                  name: 'rolelist',
+                  icon: 'user',
+                  component: './account/rolelist',
+                  //authority: ['admin'],
+                },
+              ],
+            },
+            {
+              path: '/cms',
+              name: 'cms',
+              icon: 'crown',
+              //component: './Admin',
+              //authority: ['admin'],
+              routes: [
+                {
+                  path: 'sitelist',
+                  name: 'sitelist',
+                  icon: 'user',
+                  component: './cms/sitelist',
+                  //authority: ['admin'],
+                },
+                {
+                  path: 'modeltablelist',
+                  name: 'modeltablelist',
+                  icon: 'user',
+                  component: './cms/modeltablelist',
                   //authority: ['admin'],
                 },
               ],

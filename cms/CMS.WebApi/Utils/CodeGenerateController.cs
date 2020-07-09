@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Extension;
-using Foundation.Result;
+using Foundation.Modal;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Service.Utils;

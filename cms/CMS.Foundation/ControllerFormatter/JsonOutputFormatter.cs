@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Extension;
-using Foundation.Result;
+using Foundation.Modal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;

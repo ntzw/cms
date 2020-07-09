@@ -1,10 +1,8 @@
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CMS.React;
 using Extension;
 using Foundation.Modal;
-using Foundation.Result;
-using Helper;
 using Microsoft.AspNetCore.Mvc;
 using Model.Account;
 using Newtonsoft.Json.Linq;
@@ -44,13 +42,17 @@ namespace WebApi.Account
             if (info == null) return HandleResult.Error("无效数据");
 
             info.Init();
-            info.AccountName = model.AccountName;
-            info.TrueName = model.TrueName;
-
-            if (info.Id == 0)
-                info.Password = AdminService.Interface.PasswordToMd5(model.Password);
+            ReactForm.SetEditModelValue(info, model, info.Id > 0);
 
             return info.Id > 0 ? await AdminService.Interface.Update(info) : await AdminService.Interface.Add(info);
+        }
+        
+        public async Task<HandleResult> Delete([FromBody] JArray form)
+        {
+            if (form == null || form.Count <= 0) return HandleResult.Error("请选择要删除的数据");
+
+            var deleteModels = form.Select(temp => new Administrator {Id = temp.ToInt()}).ToList();
+            return await AdminService.Interface.Delete(deleteModels);
         }
     }
 }

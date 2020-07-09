@@ -19,7 +19,7 @@ namespace Model
         
         public string UpdateAccountNum { get; set; }
 
-        public void Init()
+        public virtual void Init()
         {
             if (this.Num.IsEmpty())
                 this.Num = RandomHelper.CreateNum();
