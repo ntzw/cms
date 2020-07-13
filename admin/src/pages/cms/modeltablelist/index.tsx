@@ -32,7 +32,8 @@ const handleDelete = (rows: ModelTable[] | undefined, action: React.MutableRefOb
 const AdminList: React.FC<ModelTableListProps> = () => {
     const [editForm, setEditForm] = useState<ModalFormState>({
         visible: false,
-        title: ''
+        title: '',
+        isUpdate: false,
     });
 
     const [modelFieldList, setModelFieldList] = useState<ModelFieldListPropsState>({
@@ -62,6 +63,7 @@ const AdminList: React.FC<ModelTableListProps> = () => {
                             setEditForm({
                                 visible: true,
                                 title: '编辑模型信息',
+                                isUpdate: true,
                                 params: {
                                     id: record.id,
                                 }
@@ -90,7 +92,11 @@ const AdminList: React.FC<ModelTableListProps> = () => {
         <ProTable<ModelTable>
             headerTitle="模型列表"
             actionRef={tableAction}
-            request={(params, sort, querySymbol) => page(params, sort, querySymbol)}
+            request={(params, sort, query) => page({
+                params,
+                sort,
+                query,
+            })}
             columns={columns}
             rowSelection={{}}
             toolBarRender={(action, { selectedRows, selectedRowKeys }) => {
@@ -100,7 +106,8 @@ const AdminList: React.FC<ModelTableListProps> = () => {
                         onClick={() => {
                             setEditForm({
                                 visible: true,
-                                title: '添加模型'
+                                title: '添加模型',
+                                isUpdate: false,
                             })
                         }}
                     >
@@ -151,18 +158,22 @@ const AdminList: React.FC<ModelTableListProps> = () => {
                 })
             }}
             onFinish={(value) => {
-                editAction.current?.setSubmitLoading(true);
-                Submit(value).then(res => {
-                    editAction.current?.setSubmitLoading(false);
-                    if (res.isSuccess) {
-                        message.success('操作成功');
-                        editAction.current?.clear();
-                        editAction.current?.close();
-                        tableAction.current?.reload();
-                    } else {
-                        message.error(res.message || '操作失败');
-                    }
-                });
+                return new Promise((resolve) => {
+                    Submit(value).then(res => {
+                        resolve();
+                        if (res.isSuccess) {
+                            message.success('操作成功');
+                            editAction.current?.clear();
+                            tableAction.current?.reload();
+                            setEditForm({
+                                ...editForm,
+                                visible: false,
+                            })
+                        } else {
+                            message.error(res.message || '操作失败');
+                        }
+                    });
+                })
             }}
         />
     </PageHeaderWrapper >

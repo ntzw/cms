@@ -52,5 +52,15 @@ namespace CMS.React
         /// 更新时禁用
         /// </summary>
         public bool UpdateDisabled { get; set; }
+
+        /// <summary>
+        /// 是否支持清除
+        /// </summary>
+        public bool AllowClear { get; set; }
+
+        /// <summary>
+        /// 提示信息
+        /// </summary>
+        public string Extra { get; set; }
     }
 }

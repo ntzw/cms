@@ -31,7 +31,8 @@ const handleDelete = (rows: Site[] | undefined, action: React.MutableRefObject<T
 const AdminList: React.FC<SiteListProps> = () => {
     const [editForm, setEditForm] = useState<ModalFormState>({
         visible: false,
-        title: ''
+        title: '',
+        isUpdate: false,
     });
 
     const tableAction = useRef<TableAction>();
@@ -64,6 +65,7 @@ const AdminList: React.FC<SiteListProps> = () => {
                             setEditForm({
                                 visible: true,
                                 title: '编辑站点信息',
+                                isUpdate: true,
                                 params: {
                                     id: record.id,
                                 }
@@ -90,7 +92,8 @@ const AdminList: React.FC<SiteListProps> = () => {
                         onClick={() => {
                             setEditForm({
                                 visible: true,
-                                title: '添加站点'
+                                title: '添加站点',
+                                isUpdate: false,
                             })
                         }}
                     >
@@ -132,21 +135,24 @@ const AdminList: React.FC<SiteListProps> = () => {
                 })
             }}
             onFinish={(value) => {
-                editAction.current?.setSubmitLoading(true);
+                return new Promise((resolve) => {
+                    if (value.host instanceof Array)
+                        value.host = value.host.join(',');
 
-                if (value.host instanceof Array)
-                    value.host = value.host.join(',');
-
-                Submit(value).then(res => {
-                    editAction.current?.setSubmitLoading(false);
-                    if (res.isSuccess) {
-                        message.success('操作成功');
-                        editAction.current?.clear();
-                        editAction.current?.close();
-                        tableAction.current?.reload();
-                    } else {
-                        message.error(res.message || '操作失败');
-                    }
+                    Submit(value).then(res => {
+                        resolve();
+                        if (res.isSuccess) {
+                            message.success('操作成功');
+                            editAction.current?.clear();
+                            tableAction.current?.reload();
+                            setEditForm({
+                                ...editForm,
+                                visible: false,
+                            })
+                        } else {
+                            message.error(res.message || '操作失败');
+                        }
+                    });
                 });
             }}
         />

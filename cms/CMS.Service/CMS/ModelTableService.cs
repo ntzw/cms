@@ -3,9 +3,13 @@
  * email：ntzw.geek@gmail.com
  */
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using CMS.React.Model;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
+using Foundation.Modal;
 using Model.CMS;
 
 namespace Service.CMS
@@ -35,6 +39,16 @@ namespace Service.CMS
         public Task<ModelTable> GetByTableName(string tableName)
         {
             return GetDapper().GetByTableName(tableName);
+        }
+
+        public async Task<List<SelectDataType>> GetSelectData()
+        {
+            var all = await GetDapper().GetAll();
+            return all.Select(temp => new SelectDataType
+            {
+                Label = temp.Explain,
+                Value = temp.Num,
+            }).ToList();
         }
     }
 }

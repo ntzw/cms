@@ -105,6 +105,13 @@ export default defineConfig({
                   component: './cms/modeltablelist',
                   //authority: ['admin'],
                 },
+                {
+                  path: 'columnlist',
+                  name: 'columnlist',
+                  icon: 'user',
+                  component: './cms/columnlist',
+                  //authority: ['admin'],
+                },
               ],
             },
             {

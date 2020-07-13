@@ -63,3 +63,8 @@ export const getRouteAuthority = (path: string, routeData: Route[]) => {
   });
   return authorities;
 };
+
+
+export const filterEnumKey = (enumObject: any): string[] => {
+  return Object.keys(enumObject).filter(temp => !Number.isNaN(Number(temp)))
+}

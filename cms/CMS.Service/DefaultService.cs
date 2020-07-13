@@ -83,5 +83,10 @@ namespace Service
                 IsSuccess = await GetDapper().Delete(modals)
             };
         }
+
+        public Task<IEnumerable<TModal>> GetAll()
+        {
+            return GetDapper().GetAll();
+        }
     }
 }

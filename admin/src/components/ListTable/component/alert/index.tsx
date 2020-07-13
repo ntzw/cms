@@ -8,23 +8,23 @@ export interface TableAlertProps<T> {
   selectedRowKeys: (number | string)[];
   selectedRows: T[];
   alertInfoRender?:
-    | ((props: {
-        intl: IntlType;
-        selectedRowKeys: (number | string)[];
-        selectedRows: T[];
-      }) => React.ReactNode)
-    | false;
+  | ((props: {
+    intl: IntlType;
+    selectedRowKeys: (number | string)[];
+    selectedRows: T[];
+  }) => React.ReactNode)
+  | false;
   onCleanSelected: () => void;
   alertOptionRender?:
-    | false
-    | ((props: { intl: IntlType; onCleanSelected: () => void }) => React.ReactNode);
+  | false
+  | ((props: { intl: IntlType; onCleanSelected: () => void }) => React.ReactNode);
 }
 
 const defaultAlertOptionRender = (props: { intl: IntlType; onCleanSelected: () => void }) => {
-  const { intl, onCleanSelected } = props;
+  const { onCleanSelected } = props;
   return [
     <a onClick={onCleanSelected} key="0">
-      {intl.getMessage('alert.clear', '清空')}
+      清除选择
     </a>,
   ];
 };

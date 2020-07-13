@@ -9,6 +9,7 @@ export default {
   'menu.cms': '内容管理',
   'menu.cms.sitelist': '站点管理',
   'menu.cms.modeltablelist': '模型管理',
+  'menu.cms.columnlist': '栏目管理',
 
   'menu.login': '登录',
   'menu.register': '注册',

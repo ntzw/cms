@@ -1,7 +1,7 @@
 import request, { AsyncHandleResult } from "@/utils/request";
-import { QuerySymbol } from "@/components/ListTable";
+import { PageParamsType } from "@/components/ListTable";
 
-export function page(params?: { [key: string]: any }, sort?: { [key: string]: any }, query?: { [key: string]: QuerySymbol }) {
+export function page({ params, sort, query }: PageParamsType) {
     return request('/Api/CMS/Model/Page', {
         method: "POST",
         data: {
@@ -28,7 +28,7 @@ export function Delete(ids: number[]): AsyncHandleResult {
     });
 }
 
-export function fieldPage(params?: { [key: string]: any }, sort?: { [key: string]: any }, query?: { [key: string]: QuerySymbol }) {
+export function fieldPage({ params, sort, query }: PageParamsType) {
     return request('/Api/CMS/Model/FieldPage', {
         method: "POST",
         data: {

@@ -12,7 +12,8 @@ import { DeleteConfirm } from '@/utils/msg';
 const RoleList: React.FC<RoleListProps> = () => {
     const [editForm, setEditForm] = useState<ModalFormState>({
         visible: false,
-        title: ''
+        title: '',
+        isUpdate: false,
     });
 
     const tableAction = useRef<TableAction>();
@@ -46,6 +47,7 @@ const RoleList: React.FC<RoleListProps> = () => {
                             setEditForm({
                                 visible: true,
                                 title: '编辑角色',
+                                isUpdate: true,
                                 params: {
                                     id: record.id,
                                 }
@@ -107,7 +109,8 @@ const RoleList: React.FC<RoleListProps> = () => {
                     onClick={() => {
                         setEditForm({
                             visible: true,
-                            title: '添加角色'
+                            title: '添加角色',
+                            isUpdate: false,
                         })
                     }}
                 >
@@ -128,21 +131,24 @@ const RoleList: React.FC<RoleListProps> = () => {
                 })
             }}
             onFinish={(value) => {
-                editAction.current?.setSubmitLoading(true);
+                return new Promise(resolve => {
+                    if (value.parentNum instanceof Array)
+                        value.parentNum = value.parentNum[value.parentNum.length - 1];
 
-                if (value.parentNum instanceof Array)
-                    value.parentNum = value.parentNum[value.parentNum.length - 1];
-
-                Submit(value).then(res => {
-                    editAction.current?.setSubmitLoading(false);
-                    if (res.isSuccess) {
-                        message.success('操作成功');
-                        tableAction.current?.reload();
-                        editAction.current?.close();
-                    } else {
-                        message.error(res.message || '操作失败');
-                    }
-                });
+                    Submit(value).then(res => {
+                        resolve();
+                        if (res.isSuccess) {
+                            message.success('操作成功');
+                            tableAction.current?.reload();
+                            setEditForm({
+                                ...editForm,
+                                visible: false,
+                            })
+                        } else {
+                            message.error(res.message || '操作失败');
+                        }
+                    });
+                })
             }}
         />
     </PageHeaderWrapper >

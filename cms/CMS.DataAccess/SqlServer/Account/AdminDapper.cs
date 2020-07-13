@@ -10,7 +10,7 @@ namespace DataAccess.SqlServer.Account
         public Task<Administrator> GetByAccountName(string accountName)
         {
             string sql = $"SELECT * FROM {GetTableName()} WHERE AccountName = @AccountName";
-            return Connection().QueryFirstAsync<Administrator>(sql, new {AccountName = accountName});
+            return Connection().QueryFirstOrDefaultAsync<Administrator>(sql, new {AccountName = accountName});
         }
     }
 }

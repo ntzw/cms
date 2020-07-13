@@ -69,6 +69,12 @@ export enum QuerySymbol {
   Like
 }
 
+export interface PageParamsType {
+  params?: { [key: string]: any };
+  sort?: { [key: string]: any };
+  query?: { [key: string]: QuerySymbol };
+}
+
 export interface ActionType {
   reload: (resetPageIndex?: boolean) => void;
   reloadAndRest: () => void;
@@ -878,7 +884,7 @@ const ProTable = <T extends {}, U extends object>(
         if (!tableKey) {
           return (selectedRowKeys as any).includes(index);
         }
-        
+
         if (typeof tableKey === 'function') {
           rowKey = tableKey(item, index) as string;
         } else {

@@ -9,7 +9,7 @@ export function getFields<T>(url: string, params?: { [key: string]: any }): Prom
     });
 }
 
-export function getAsyncData(url: string, params?: { [key: string]: any }): Promise<HandleResult<Array<any>> | undefined> {
+export function getAsyncData(url: string, params?: ({ [key: string]: any } | null)): Promise<HandleResult<Array<any>> | undefined> {
     return request(url, {
         method: "POST",
         data: {

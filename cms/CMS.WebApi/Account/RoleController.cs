@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +38,9 @@ namespace WebApi.Account
         {
             var info = model.Id > 0 ? await RoleService.Interface.GetById(model.Id) : new Role();
             if (info == null) return HandleResult.Error("无效数据");
-
+            if (string.Equals(info.Num, model.ParentNum, StringComparison.OrdinalIgnoreCase))
+                return HandleResult.Error("无效数据");
+            
             info.Init();
             info.Name = model.Name;
             info.Desc = model.Desc;

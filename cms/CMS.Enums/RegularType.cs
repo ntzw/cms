@@ -2,6 +2,10 @@ namespace CMS.Enums
 {
     public enum RegularType
     {
-        SqlField
+        SqlField,
+        /// <summary>
+        /// 手机号
+        /// </summary>
+        MobilePhone,
     }
 }

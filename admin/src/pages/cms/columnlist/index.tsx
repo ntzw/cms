@@ -1,55 +1,43 @@
 import React, { useRef, useState } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import ProTable, { ActionType as TableAction, ProColumns, QuerySymbol } from '@/components/ListTable';
-import { ColumnListProps, Column } from './data';
-import { page, Submit, Delete } from './service';
-import { Button, message, Tooltip, Badge, Dropdown, Menu } from 'antd';
+import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
+import { ColumnListProps, Column, ColumnFieldListPropsState } from './data';
+import { page, Submit } from './service';
+import { Button, message, Tooltip } from 'antd';
 import ModalForm, { ModalFormState, ModalFormAction } from '@/components/ModalForm';
-import { EditOutlined, DownOutlined } from '@ant-design/icons';
-import { DeleteConfirm } from '@/utils/msg';
+import { EditOutlined, DeleteOutlined, ControlOutlined } from '@ant-design/icons';
+import moment from 'moment';
+import { connect, GlobalModelState } from 'umi';
+import ColumnFieldList from './components/columnfieldlist';
 
-const handleDelete = (rows: Column[] | undefined, action: React.MutableRefObject<TableAction | undefined>) => {
-    if (!rows || rows.length <= 0) {
-        message.error('请选择要删除的数据');
-        return;
-    }
-
-    DeleteConfirm(() => {
-        const ids = rows.map(temp => temp.id);
-        Delete(ids).then(res => {
-            if (res.isSuccess) {
-                message.success('删除成功');
-                action.current?.reload();
-                action.current?.clearSelected();
-            } else {
-                message.error(res.message || '删除失败');
-            }
-        })
-    })
-}
-
-const AdminList: React.FC<ColumnListProps> = () => {
+const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
     const [editForm, setEditForm] = useState<ModalFormState>({
         visible: false,
-        title: ''
+        title: '',
+        isUpdate: false,
     });
+
+    const [editColumnField, setEditColumnField] = useState<ColumnFieldListPropsState>({
+        visible: false,
+    })
 
     const tableAction = useRef<TableAction>();
     const editAction = useRef<ModalFormAction>();
     const columns: ProColumns<Column>[] = [{
         dataIndex: 'name',
-        title: '站点名称',
-        querySymbol: QuerySymbol.Like,
-    }, {
-        dataIndex: 'host',
-        title: '站点域名',
-        querySymbol: QuerySymbol.Like,
-    }, {
-        dataIndex: 'isDefault',
-        title: '是否默认站点',
+        title: '名称',
         valueType: 'option',
-        render: (value) => {
-            return value ? <Badge status="success" text="是" /> : <Badge status="default" text="否" />;
+    }, {
+        dataIndex: 'modelName',
+        title: '模型名称',
+        valueType: 'option',
+    }, {
+        dataIndex: 'createDate',
+        title: '创建时间',
+        valueType: 'option',
+        sorter: true,
+        render: (text) => {
+            return typeof text === 'string' && text && moment(text).format('YYYY-MM-DD HH:mm:ss');
         }
     }, {
         dataIndex: '-',
@@ -63,10 +51,33 @@ const AdminList: React.FC<ColumnListProps> = () => {
                         onClick={() => {
                             setEditForm({
                                 visible: true,
-                                title: '编辑站点信息',
+                                title: '编辑栏目',
+                                isUpdate: true,
                                 params: {
                                     id: record.id,
                                 }
+                            })
+                        }}
+                    />
+                </Tooltip>
+                <Tooltip title="删除">
+                    <Button
+                        icon={<DeleteOutlined />}
+                        type="primary"
+                        danger
+                        onClick={() => {
+
+                        }}
+                    />
+                </Tooltip>
+                <Tooltip title="字段">
+                    <Button
+                        icon={<ControlOutlined />}
+                        type="primary"
+                        onClick={() => {
+                            setEditColumnField({
+                                visible: true,
+                                column: record,
                             })
                         }}
                     />
@@ -78,53 +89,34 @@ const AdminList: React.FC<ColumnListProps> = () => {
 
     return <PageHeaderWrapper>
         <ProTable<Column>
-            headerTitle="站点列表"
+            headerTitle="栏目列表"
             actionRef={tableAction}
-            request={(params, sort, querySymbol) => page(params, sort, querySymbol)}
+            request={(params) => page(params)}
             columns={columns}
             rowSelection={{}}
-            toolBarRender={(action, { selectedRows, selectedRowKeys }) => {
-                return [
-                    <Button
-                        type="primary"
-                        onClick={() => {
-                            setEditForm({
-                                visible: true,
-                                title: '添加站点'
-                            })
-                        }}
-                    >
-                        添加
-                    </Button>,
-                    selectedRows && selectedRows.length > 0 && (
-                        <Dropdown
-                            overlay={
-                                <Menu
-                                    onClick={async (e) => {
-                                        if (e.key === 'remove') {
-                                            handleDelete(selectedRows, tableAction);
-                                        }
-                                    }}
-                                    selectedKeys={[]}
-                                >
-                                    <Menu.Item key="remove">批量删除</Menu.Item>
-                                </Menu>
-                            }
-                        >
-                            <Button>
-                                批量操作 <DownOutlined />
-                            </Button>
-                        </Dropdown>
-                    ),
-                ]
+            pagination={false}
+            params={{
+                siteNum: currentSite?.num,
             }}
-        >
-
-        </ProTable>
+            toolBarRender={(action) => [
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        setEditForm({
+                            visible: true,
+                            isUpdate: false,
+                            title: '添加栏目'
+                        })
+                    }}
+                >
+                    添加
+                </Button>,
+            ]}
+        />
         <ModalForm<Column>
             {...editForm}
             actionRef={editAction}
-            fields="/Api/CMS/Column/FormFields"
+            fields="/api/CMS/Column/FormFields"
             onClose={() => {
                 setEditForm({
                     ...editForm,
@@ -132,21 +124,51 @@ const AdminList: React.FC<ColumnListProps> = () => {
                 })
             }}
             onFinish={(value) => {
-                editAction.current?.setSubmitLoading(true);
-                Submit(value).then(res => {
-                    editAction.current?.setSubmitLoading(false);
-                    if (res.isSuccess) {
-                        message.success('操作成功');
-                        editAction.current?.clear();
-                        editAction.current?.close();
-                        tableAction.current?.reload();
-                    } else {
-                        message.error(res.message || '操作失败');
+                return new Promise(resolve => {
+                    value.siteNum = currentSite?.num || '';
+                    if (value.parentNum instanceof Array)
+                        value.parentNum = value.parentNum[value.parentNum.length - 1];
+
+                    Submit(value).then(res => {
+                        resolve();
+                        editAction.current?.reloadFieldItem();
+                        if (res.isSuccess) {
+                            message.success('操作成功');
+                            tableAction.current?.reload();
+                            setEditForm({
+                                ...editForm,
+                                visible: false,
+                            })
+                        } else {
+                            message.error(res.message || '操作失败');
+                        }
+                    });
+                })
+            }}
+            fieldActionParams={(field) => {
+                if (field.name.toLocaleLowerCase() === 'parentnum') {
+                    return {
+                        siteNum: currentSite?.num,
                     }
-                });
+                }
+
+                return null;
+            }}
+        />
+        <ColumnFieldList
+            {...editColumnField}
+            onClose={() => {
+                setEditColumnField({
+                    ...editColumnField,
+                    visible: false,
+                })
             }}
         />
     </PageHeaderWrapper >
 }
 
-export default AdminList;
+export default connect(({ global: { selectedSite } }: { global: GlobalModelState }) => {
+    return {
+        currentSite: selectedSite
+    }
+})(ColumnList);

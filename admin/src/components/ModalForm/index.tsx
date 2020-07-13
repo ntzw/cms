@@ -3,7 +3,8 @@ import ModalForm, { ModalFormAction } from './ModalForm'
 interface ModalFormState {
     visible: boolean;
     title: string;
-    params?: { [key: string]: any }
+    isUpdate: boolean;
+    params?: { [key: string]: any };   
 }
 
 export type {

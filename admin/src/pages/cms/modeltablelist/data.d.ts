@@ -1,4 +1,5 @@
 import { ModalBase } from '@/components/ListTable';
+import { FieldDefaultType } from '../columnlist/data'
 
 export interface ModelTableListProps {
 
@@ -18,6 +19,6 @@ export interface ModelFieldListPropsState {
     visible: boolean;
 }
 
-export interface ModelField extends ModalBase {
-
+export interface ModelField extends FieldDefaultType {
+    modelNum: string;
 }

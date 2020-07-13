@@ -105,7 +105,8 @@ namespace DataAccess
             return OutDefaultPageParams(queries, out whereParams, out List<string> whereSql);
         }
 
-        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams, out List<string> whereSql)
+        protected string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams,
+            out List<string> whereSql)
         {
             whereSql = new List<string>();
             whereParams = new ExpandoObject();
@@ -113,12 +114,24 @@ namespace DataAccess
             {
                 foreach (var query in queries)
                 {
-                    whereSql.Add(query.QuerySql.ToWhereString());
-                    whereParams.Add(query.QuerySql.ParamName, query.Value);
+                    SetQueryWhereSqlAndParams(query, whereParams, whereSql);
                 }
             }
 
             return whereSql.Count > 0 ? $"AND {string.Join(" AND ", whereSql)}" : "";
+        }
+
+        /// <summary>
+        /// 设置分页查询Sql和参数
+        /// </summary>
+        /// <param name="whereParams"></param>
+        /// <param name="whereSql"></param>
+        /// <param name="query"></param>
+        protected virtual void SetQueryWhereSqlAndParams(IQuery query, IDictionary<string, object> whereParams,
+            List<string> whereSql)
+        {
+            whereSql.Add(query.QuerySql.ToWhereString());
+            whereParams.Add(query.QuerySql.ParamName, query.Value);
         }
 
         /// <summary>
@@ -147,7 +160,12 @@ namespace DataAccess
 
         protected static string GetTableName()
         {
-            return new T().GetAttribute<TableAttribute>()?.Name;
+            return GetTableName<T>();
+        }
+
+        protected static string GetTableName<TT>() where TT : class, new()
+        {
+            return new TT().GetAttribute<TableAttribute>()?.Name;
         }
     }
 }

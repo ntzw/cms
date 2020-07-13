@@ -12,7 +12,7 @@ namespace CMS.React.Component
         public string ExpandTrigger { get; set; } = "click";
         
         /// <summary>
-        /// 当此项为 true 时，点选每级菜单选项值都会发生变化，具体见上面的演示
+        /// 当此项为 true 时，点选每级菜单选项值都会发生变化
         /// </summary>
         public bool ChangeOnSelect { get; set; }
     }

@@ -1,5 +1,5 @@
 /**
- * author：created by zw on 2020-07-08 15:54:52
+ * author：created by zw on 2020-07-10 13:51:31
  * email：ntzw.geek@gmail.com
  */
 
@@ -9,12 +9,17 @@ using Dapper.Contrib.Extensions;
 
 namespace Model.CMS
 {
-	[Table("CMS_ModelField")]
-	public class ModelField : ModalBase 
+	[Table("CMS_ColumnField")]
+	public class ColumnField : ModalBase 
 	{
 		
 		[Description("")]
-		public string ModelNum { get; set; }
+		public string ColumnNum { get; set; }
+		
+		/// <summary>
+		/// 模型字段编号
+		/// </summary>
+		public string ModelFieldNum { get; set; }
 		
 		[Description("")]
 		public string Name { get; set; }

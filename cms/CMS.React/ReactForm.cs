@@ -35,7 +35,7 @@ namespace CMS.React
                 List<Rule> rules = new List<Rule>();
 
                 attr.Disabled = attr.Disabled || (attr.UpdateDisabled && isUpdate);
-                
+
                 field.TryAdd("label", attr.Title);
                 field.TryAdd("name", ToNameLower(propertyInfo.Name));
                 field.TryAdd("dataAction", attr.DataAction);
@@ -143,10 +143,10 @@ namespace CMS.React
             selectOptions.TryAdd("Placeholder", select.Placeholder);
             selectOptions.TryAdd("Disabled", select.Disabled);
 
-            if (select.AllowClear != null)
+            if (select.AllowClear)
                 selectOptions.TryAdd("AllowClear", select.AllowClear);
 
-            if (select.ShowSearch != null)
+            if (select.ShowSearch)
                 selectOptions.TryAdd("ShowSearch", select.ShowSearch);
 
             field.TryAdd("select", selectOptions);
@@ -166,14 +166,18 @@ namespace CMS.React
         private static void SetInput(ExpandoObject field, InputAttribute input)
         {
             field.TryAdd("type", ReactFormItemType.Input);
-            field.TryAdd("input", new
-            {
-                input.MaxLength,
-                input.Placeholder,
-                input.AddonAfter,
-                input.AddonBefore,
-                input.Disabled,
-            });
+
+            var options = new ExpandoObject();
+            options.TryAdd("MaxLength", input.MaxLength);
+            options.TryAdd("Placeholder", input.Placeholder);
+            options.TryAdd("AddonAfter", input.AddonAfter);
+            options.TryAdd("AddonBefore", input.AddonBefore);
+            options.TryAdd("Disabled", input.Disabled);
+
+            if (input.AllowClear)
+                options.TryAdd("AllowClear", input.AllowClear);
+
+            field.TryAdd("input", options);
         }
 
         private static string ToNameLower(string name)

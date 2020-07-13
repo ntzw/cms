@@ -708,6 +708,8 @@ const FormSearch = <T, U = {}>({
         .filter((_, index) => (collapse && type !== 'form' ? index < (rowNumber - 1 || 1) : true))
         .filter((item) => !!item)
     : [];
+  
+  if(formInstanceRef.current && domList.length <= 0) return <></>;
 
   return (
     <ConfigConsumer>
