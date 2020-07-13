@@ -18,6 +18,7 @@ const RequiredSwitch = ({ key = 'required' }: { key?: string }) => {
         name="required"
         label="是否必填"
         valuePropName="checked"
+        
     >
         <Switch checkedChildren="是" unCheckedChildren="否" />
     </Form.Item>
