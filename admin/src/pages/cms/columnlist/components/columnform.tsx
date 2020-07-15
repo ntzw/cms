@@ -8,13 +8,18 @@ import { message } from 'antd';
 interface BaseOptions {
     required?: boolean;
     regularTypes?: RegularType[];
+    extra?: string;
 }
 
 interface InputOptions extends BaseOptions {
     maxLength?: number;
     addonBefore?: string;
     addonAfter?: string;
-    extra?: string;
+}
+
+interface SelectOptions extends BaseOptions {
+    options: string[];
+    multiple: boolean;
 }
 
 enum RegularType {
@@ -32,26 +37,48 @@ const ColumnForm: React.FC<ColumnFormProps> = ({ columnNum, itemNum, actionRef }
 
                     setFormFields(fields.map((temp): FormItem => {
                         const options: BaseOptions = JSON.parse(temp.options);
-                        const { required, regularTypes, ...elseOptions } = options;
+                        const { required, regularTypes, extra, ...elseOptions } = options;
 
                         const item: FormItem = {
                             label: temp.explain,
                             name: temp.name,
                             type: temp.optionType,
+                            extra: extra,
                             rules: [],
                         };
 
                         if (required) {
-                            item.rules?.push({
-                                required: true,
-                                message: `${temp.explain} 为必填项`
-                            })
+                            switch (item.type) {
+                                case FormItemType.editor:
+                                    item.validateTrigger = 'onBlur';
+                                    item.rules?.push({
+                                        required: true,
+                                        validator: (_, value, callback) => {
+                                            if (value.isEmpty()) {
+                                                callback('请输入正文内容')
+                                            } else {
+                                                callback(undefined)
+                                            }
+                                        }
+                                    })
+                                    break;
+
+                                default:
+                                    item.rules?.push({
+                                        required: true,
+                                        message: `${temp.explain} 为必填项`
+                                    })
+                                    break;
+                            }
                         }
 
                         SetRegulars(regularTypes, item);
                         switch (item.type) {
                             case FormItemType.input:
-                                SetInputOptions(item, elseOptions);
+                                SetInputOptions(item, elseOptions as InputOptions);
+                                break;
+                            case FormItemType.select:
+                                SetSelectOptions(item, elseOptions as SelectOptions);
                                 break;
 
                             default:
@@ -86,7 +113,7 @@ const ColumnForm: React.FC<ColumnFormProps> = ({ columnNum, itemNum, actionRef }
         }
     }
 
-    return <DynaminForm {...formProps} />
+    return <DynaminForm {...formProps} layout={{ labelCol: { span: 3 } }} />
 }
 
 export default ColumnForm;
@@ -95,6 +122,21 @@ function SetInputOptions(item: FormItem, elseOptions: InputOptions) {
     item.input = {
         ...elseOptions,
     };
+}
+
+function SetSelectOptions(item: FormItem, elseOptions: SelectOptions) {
+    item.select = {
+        options: elseOptions.options.map(temp => {
+            return {
+                label: temp,
+                value: temp,
+            }
+        }),
+    };
+
+    if (elseOptions.multiple) {
+        item.select.mode = 'multiple';
+    }
 }
 
 function SetRegulars(regularTypes: RegularType[] | undefined, item: FormItem) {

@@ -5,6 +5,10 @@ import { CascaderOptionType } from "antd/lib/cascader";
 import { Store } from "antd/lib/form/interface";
 import { FormInstance } from "antd/lib/form";
 import { getFields, getAsyncData } from "./service";
+import 'braft-editor/dist/index.css'
+import BraftEditor from 'braft-editor'
+import styles from './style.less'
+
 
 export enum FormItemType {
     input,
@@ -12,7 +16,8 @@ export enum FormItemType {
     select,
     textArea,
     cascader,
-    switch
+    switch,
+    editor,
 }
 
 export function GetFormItemTypeName(type: number) {
@@ -27,6 +32,8 @@ export function GetFormItemTypeName(type: number) {
             return '多行文本框'
         case FormItemType.cascader:
             return '级联选择';
+        case FormItemType.editor:
+            return '富文本编辑器';
         default:
             return '文本框';
     }
@@ -45,6 +52,8 @@ const getFormItem = (item: FormItem) => {
             return <Select {...item.select} />
         case FormItemType.password:
             return <Input.Password {...item.password} />
+        case FormItemType.editor:
+            return <BraftEditor className={styles.myEditor} placeholder="请输入正文内容" />;
         default:
             return <Input {...item.input} />
     }
@@ -138,6 +147,24 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                     case FormItemType.cascader:
                         asyncData(item);
                         break;
+                    case FormItemType.editor:
+                        if (item.rules) {
+                            item.rules = item.rules.map(temp => {
+                                if (temp.required) {
+                                    item.validateTrigger = 'onBlur'
+                                    temp.validator = (_, value, callback) => {
+                                        if (value.isEmpty()) {
+                                            callback('请输入正文内容')
+                                        } else {
+                                            callback()
+                                        }
+                                    }
+                                }
+
+                                return temp;
+                            })
+                        }
+                        break;
                 }
             })
 
@@ -156,28 +183,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
 
                 let data: any = { ...res.data.editData };
                 loadFieldAsyncData(res.data.field).then(fields => {
-                    fields.forEach(field => {
-                        const fieldName: string = field.name;
-                        const oldValue: string | number = data[fieldName];
-                        switch (field.type) {
-                            case FormItemType.cascader:
-                                data[fieldName] = handleCascaderValue(field.cascader?.options, oldValue);
-                                break;
-                            case FormItemType.select:
-                                if (field.select) {
-                                    if (field.select.mode === 'tags') {
-                                        data[fieldName] = [];
-                                        if (field.split && typeof oldValue === 'string')
-                                            data[fieldName] = oldValue.split(field.split).filter(temp => !!temp);
-
-                                    }
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    })
-                    form.current?.setFieldsValue(data);
+                    form.current?.setFieldsValue(handleFormData(fields, data));
                     setLoading({
                         ...loading,
                         loadFields: false,
@@ -260,7 +266,9 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                         key={item.name}
                         label={item.label}
                         name={item.name}
+                        extra={<span style={{ color: 'green' }}>{item.extra}</span>}
                         valuePropName={item.valuePropName}
+                        validateTrigger={item.validateTrigger}
                         rules={item.rules?.map((temp) => {
                             if (temp?.pattern && typeof temp.pattern === 'string') {
                                 temp.pattern = new RegExp(temp.pattern);
@@ -277,3 +285,31 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
 }
 
 export default DynaminForm;
+
+function handleFormData(fields: FormItem[], oldData: any): any {
+    fields.forEach(field => {
+        const fieldName: string = field.name;
+        const oldValue: string | number = oldData[fieldName];
+        switch (field.type) {
+            case FormItemType.cascader:
+                oldData[fieldName] = handleCascaderValue(field.cascader?.options, oldValue);
+                break;
+            case FormItemType.select:
+                if (field.select) {
+                    if (field.select.mode === 'tags') {
+                        oldData[fieldName] = [];
+                        if (field.split && typeof oldValue === 'string')
+                            oldData[fieldName] = oldValue.split(field.split).filter(temp => !!temp);
+
+                    }
+                }
+                break;
+            case FormItemType.editor:
+                oldData[fieldName] = oldValue && BraftEditor.createEditorState(oldValue);
+                break;
+            default:
+                break;
+        }
+    });
+    return oldData;
+}

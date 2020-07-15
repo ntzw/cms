@@ -8,9 +8,11 @@ import { Store } from 'antd/lib/form/interface';
 export interface FormItem {
     label: string;
     name: string;
+    extra?: string;
     type?: FormItemType;
     dataAction?: string;
     valuePropName?: string;
+    validateTrigger?: string;
     split?: string;
     rules?: RuleObject[];
     input?: InputProps;
@@ -31,8 +33,8 @@ export interface DynaminFormProps<T extends Store> {
     actionRef?: React.MutableRefObject<DynaminFormAction | undefined> | ((actionRef: DynaminFormAction) => void);
     fieldActionParams?: (field: FormItem) => ({ [key: string]: any } | null);
     layout?: {
-        labelCol: FormProps['labelCol'];
-        wrapperCol: FormProps['labelCol'];
+        labelCol?: FormProps['labelCol'];
+        wrapperCol?: FormProps['labelCol'];
     }
 }
 

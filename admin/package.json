@@ -55,6 +55,7 @@
     "@ant-design/pro-table": "2.2.9",
     "antd": "4.4.1",
     "art-template": "^4.13.2",
+    "braft-editor": "^2.3.9",
     "classnames": "^2.2.6",
     "file-saver": "^2.0.2",
     "jszip": "^3.5.0",
