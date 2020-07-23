@@ -4,6 +4,7 @@ using Extension;
 using Foundation.Attribute;
 using Foundation.Attribute.AuthorizeModel;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Helper;
 using Microsoft.AspNetCore.Mvc;
 using Model.Account;

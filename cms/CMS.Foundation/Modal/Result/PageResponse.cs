@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace Foundation.Modal
+namespace Foundation.Modal.Result
 {
-    public class PageResponse
+    public class PageResponse : ResultBase
     {
         public PageResponse()
         {
@@ -20,10 +20,6 @@ namespace Foundation.Modal
         public int Current { get; set; }
 
         public int Size { get; set; }
-
-        public string Message { get; set; }
-
-        public bool IsSuccess { get; set; }
 
         public IEnumerable<dynamic> Data { get; set; }
 

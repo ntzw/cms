@@ -25,6 +25,34 @@ namespace CMS.Enums
         /// <summary>
         /// 开关
         /// </summary>
-        Switch
+        Switch,
+        /// <summary>
+        /// 编辑器
+        /// </summary>
+        Editor,
+        /// <summary>
+        /// 单选按钮
+        /// </summary>
+        Radio,
+        /// <summary>
+        /// 多选框
+        /// </summary>
+        CheckBox,
+        /// <summary>
+        /// 日期选择框
+        /// </summary>
+        DataPicker,
+        /// <summary>
+        /// 日期范围
+        /// </summary>
+        RangePicker,
+        /// <summary>
+        /// 上传
+        /// </summary>
+        Upload,
+        /// <summary>
+        /// 城市
+        /// </summary>
+        Region
     }
 }

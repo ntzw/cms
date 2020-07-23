@@ -8,7 +8,6 @@
     <ItemGroup>
       <PackageReference Include="IdentityModel" Version="4.3.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
       <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     </ItemGroup>
 

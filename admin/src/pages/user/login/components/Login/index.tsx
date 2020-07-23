@@ -90,6 +90,7 @@ const Login: LoginType = (props) => {
                 animated={false}
                 className={styles.tabs}
                 activeKey={type}
+                centered
                 onChange={(activeKey) => {
                   setType(activeKey);
                 }}

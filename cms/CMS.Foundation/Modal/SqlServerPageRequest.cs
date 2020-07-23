@@ -17,7 +17,7 @@ namespace Foundation.Modal
             Queries = new List<IQuery>();
         }
 
-        public SqlServerPageRequest(JObject form)
+        public SqlServerPageRequest(JObject form, string[] ignore = null)
         {
             Queries = new List<IQuery>();
             Sort = new SqlServerSort();
@@ -34,7 +34,7 @@ namespace Foundation.Modal
                             this.Size = keyValue.Value.ToInt();
                             break;
                         default:
-                            if (keyValue.Key.IsSqlField())
+                            if (keyValue.Key.IsSqlField() && (ignore == null || !ignore.Contains(keyValue.Key)))
                                 Queries.Add(new DefaultQuery(GetValue(keyValue.Value),
                                     new DefaultQuerySql(keyValue.Key, GetQuerySymbol(form, keyValue.Key))));
                             break;
@@ -82,8 +82,14 @@ namespace Foundation.Modal
         public bool ContainsQueryField(string field)
         {
             if (field.IsEmpty()) return false;
-            return Queries.Exists(temp =>
-                string.Equals(temp.QuerySql.FieldName, field, StringComparison.OrdinalIgnoreCase));
+            return GetQueryField(field) != null;
+        }
+
+        public IQuery GetQueryField(string filed)
+        {
+            if (filed.IsEmpty()) return null;
+            return Queries.Find(temp =>
+                string.Equals(temp.QuerySql.FieldName, filed, StringComparison.OrdinalIgnoreCase));
         }
 
         private object GetValue(JToken token)

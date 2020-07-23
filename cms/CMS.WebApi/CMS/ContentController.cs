@@ -1,37 +1,68 @@
 using System.Threading.Tasks;
 using Extension;
+using Foundation.Attribute;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using Service.Account;
 using Service.CMS;
 
 namespace WebApi.CMS
 {
     [Route("Api/CMS/[controller]/[action]")]
+    [AdminAjax]
     public class ContentController : ControllerBase
     {
         public async Task<HandleResult> GetEdit([FromBody] JObject form)
         {
-            string itemNum = form["itemNum"].ToStr();
-            string columnNum = form["columnNum"].ToStr();
-            
-            if (itemNum.IsNotEmpty() && columnNum.IsEmpty())
+            var itemNum = form["itemNum"].ToStr();
+            var columnNum = form["columnNum"].ToStr();
+
+            if (columnNum.IsEmpty() || itemNum.IsEmpty()) return HandleResult.Error("无效数据");
+
+            var column = await ColumnService.Interface.GetByNum(columnNum);
+            if (column == null) return HandleResult.Error("无效数据");
+
+            var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
+            if (model == null) return HandleResult.Error("栏目未绑定模型");
+
+            var content = await ContentService.Interface.GetByNum(model.SqlTableName, itemNum);
+            if (content == null) return HandleResult.Error("无效数据");
+
+            return new HandleResult
             {
-                //todo 根据内容编号，获取栏目编号
-            }
-            
-            if (itemNum.IsEmpty() && columnNum.IsEmpty()) return HandleResult.Error("参数有误");
-            
-            
+                IsSuccess = true,
+                Data = content
+            };
+        }
+
+        public async Task<HandleResult> GetFields([FromBody] JObject form)
+        {
+            string columnNum = form["columnNum"].ToStr();
+            if (columnNum.IsEmpty()) return HandleResult.Error("请选择栏目");
+
             return new HandleResult
             {
                 IsSuccess = true,
                 Data = new
                 {
-                    editValue = new {}, //todo 需要根据内容编号获取内容数据
                     fields = await ColumnFieldService.Interface.GetByColumnNum(columnNum)
                 }
             };
+        }
+
+        public async Task<IActionResult> Submit([FromBody] JObject form)
+        {
+            var loginAdmin = await AdminService.Interface.GetByLoginAdmin();
+            if (loginAdmin == null) return Unauthorized();
+
+            return await ContentService.Interface.Edit(form, loginAdmin.Num);
+        }
+
+        public Task<PageResponse> Page([FromBody] JObject form)
+        {
+            return ContentService.Interface.Page(form);
         }
     }
 }

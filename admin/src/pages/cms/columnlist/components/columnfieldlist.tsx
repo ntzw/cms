@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { ColumnFieldListProps, ColumnField, ModelFieldAddPropsState, ColumnFormAction } from "../data";
+import { ColumnFieldListProps, ModelFieldAddPropsState } from "../data";
 import { Drawer, Row, Col, Button, Card, message, Modal, Tooltip } from 'antd';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
 import { columnFieldPage, MoveModelField, DeleteColumnField } from '../service';
@@ -7,8 +7,9 @@ import { fieldPage } from '../../modeltablelist/service';
 import ModelFieldAdd from './modelfieldadd';
 import { PlusOutlined, SwapLeftOutlined, SwapRightOutlined, EditOutlined } from '@ant-design/icons';
 import { GetFormItemTypeName } from '@/components/DynamicForm';
-import ColumnForm from './columnform';
 import { ModelField } from '../../modeltablelist/data';
+import { AsyncContentFormAction, ColumnField } from '@/components/Content/data';
+import AsyncContentForm from '@/components/Content/AsyncContentForm';
 
 
 const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, column }) => {
@@ -26,7 +27,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
         swapRight: false,
         swapLeft: false,
     })
-    const previewFormAction = useRef<ColumnFormAction>();
+    const previewFormAction = useRef<AsyncContentFormAction>();
     const exitsTableAction = useRef<TableAction>();
     const notExitsTableAction = useRef<TableAction>();
     const exitsColumns: ProColumns<ColumnField>[] = [{
@@ -286,10 +287,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                 })
             }}
         >
-            <ColumnForm
-                actionRef={previewFormAction}
-                columnNum={previewForm.columnNum}
-            />
+            <AsyncContentForm actionRef={previewFormAction} columnNum={previewForm.columnNum} />
         </Drawer>
     </>
 }

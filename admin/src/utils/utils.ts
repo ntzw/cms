@@ -68,3 +68,7 @@ export const getRouteAuthority = (path: string, routeData: Route[]) => {
 export const filterEnumKey = (enumObject: any): string[] => {
   return Object.keys(enumObject).filter(temp => !Number.isNaN(Number(temp)))
 }
+
+export const lowerCaseFieldName = (fieldName: string): string => {
+  return fieldName[0].toLocaleLowerCase() + (fieldName.length > 1 ? fieldName.substring(1) : '')
+}

@@ -15,10 +15,10 @@ const proSettings: DefaultSettings = {
   navTheme: 'dark',
   // 拂晓蓝
   primaryColor: '#1890ff',
-  layout: 'sidemenu',
+  layout: 'topmenu',
   contentWidth: 'Fluid',
   fixedHeader: false,
-  fixSiderbar: false,
+  fixSiderbar: true,
   colorWeak: false,
   menu: {
     locale: true,
@@ -29,8 +29,7 @@ const proSettings: DefaultSettings = {
   basePath,
 };
 
-
-
 export type { DefaultSettings };
 
 export default proSettings;
+

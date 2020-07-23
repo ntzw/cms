@@ -1,5 +1,5 @@
 import { ModalBase } from '@/components/ListTable';
-import { FieldDefaultType } from '../columnlist/data'
+import { FieldDefaultType } from '@/components/Content/data'
 
 export interface ModelTableListProps {
 

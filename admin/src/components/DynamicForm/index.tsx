@@ -6,7 +6,7 @@ import { Store } from "antd/lib/form/interface";
 import { FormInstance } from "antd/lib/form";
 import { getFields, getAsyncData } from "./service";
 import 'braft-editor/dist/index.css'
-import BraftEditor from 'braft-editor'
+import BraftEditor, { EditorState } from 'braft-editor'
 import styles from './style.less'
 
 
@@ -154,7 +154,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                                     item.validateTrigger = 'onBlur'
                                     temp.validator = (_, value, callback) => {
                                         if (value.isEmpty()) {
-                                            callback('请输入正文内容')
+                                            callback(`请输入 ${item.label}`)
                                         } else {
                                             callback()
                                         }
@@ -225,6 +225,9 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
         },
         submit: () => {
             form.current?.submit();
+        },
+        setValue: (value) => {
+            form.current?.setFieldsValue(value);
         }
     }
 
@@ -286,30 +289,33 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
 
 export default DynaminForm;
 
-function handleFormData(fields: FormItem[], oldData: any): any {
+export function handleFormData(fields: FormItem[], oldData: any): any {
+    const newData = { ...oldData };
     fields.forEach(field => {
         const fieldName: string = field.name;
-        const oldValue: string | number = oldData[fieldName];
+        const oldValue: string | number = newData[fieldName];
         switch (field.type) {
             case FormItemType.cascader:
-                oldData[fieldName] = handleCascaderValue(field.cascader?.options, oldValue);
+                newData[fieldName] = handleCascaderValue(field.cascader?.options, oldValue);
                 break;
             case FormItemType.select:
                 if (field.select) {
-                    if (field.select.mode === 'tags') {
-                        oldData[fieldName] = [];
-                        if (field.split && typeof oldValue === 'string')
-                            oldData[fieldName] = oldValue.split(field.split).filter(temp => !!temp);
-
+                    switch (field.select.mode) {
+                        case 'tags':
+                        case 'multiple':
+                            newData[fieldName] = [];
+                            if (typeof oldValue === 'string')
+                                newData[fieldName] = oldValue.split(field.split || ',').filter(temp => !!temp);
+                            break;
                     }
                 }
                 break;
             case FormItemType.editor:
-                oldData[fieldName] = oldValue && BraftEditor.createEditorState(oldValue);
+                newData[fieldName] = oldValue && BraftEditor.createEditorState(oldValue);
                 break;
             default:
                 break;
         }
     });
-    return oldData;
+    return newData;
 }

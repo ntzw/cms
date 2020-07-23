@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
+using Foundation.Modal.Result;
 
 namespace Foundation.DataAccess.Interface
 {
@@ -31,8 +32,6 @@ namespace Foundation.DataAccess.Interface
 
         Task<bool> Update(List<TModal> t);
         
-        
-
         Task<PageResponse> Page(IPageRequest req);
     }
 }

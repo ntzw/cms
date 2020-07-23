@@ -69,4 +69,10 @@ export interface HandleResult<T = any> {
   data?: T;
 }
 
+export interface PageResponse<T = any> extends HandleResult<T[]> {
+  current: number;
+  size: number;
+  total: number;
+}
+
 export type AsyncHandleResult<T = any> = Promise<HandleResult<T>>;

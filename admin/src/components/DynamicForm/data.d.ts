@@ -43,6 +43,7 @@ export interface DynaminFormAction {
     clear: () => void;
     reloadFieldItem: () => void;
     submit: () => void;
+    setValue: (value: any) => void;
 }
 
 interface AsyncResult<T extends Store> {

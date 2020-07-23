@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Extension;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;

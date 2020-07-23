@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CMS.React;
 using Extension;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Microsoft.AspNetCore.Mvc;
 using Model.CMS;
 using Newtonsoft.Json.Linq;
@@ -102,7 +103,8 @@ namespace WebApi.CMS
                 if (model.Name.IsEmpty()) return HandleResult.Error("请填写名称");
             }
 
-            var info = model.Id > 0 ? await ModelFieldService.Interface.GetById(model.Id) : new ModelField();
+            var isUpdate = model.Id > 0;
+            var info = isUpdate ? await ModelFieldService.Interface.GetById(model.Id) : new ModelField();
             if (info == null) return HandleResult.Error("无效数据");
 
             info.Init();
@@ -111,16 +113,20 @@ namespace WebApi.CMS
                 info.ModelNum = model.ModelNum;
                 info.Name = model.Name;
                 info.OptionType = model.OptionType;
+
+                var oldInfo = await ModelFieldService.Interface.GetByName(model.Name, model.ModelNum);
+                if (oldInfo != null && oldInfo.Id != info.Id) return HandleResult.Error("名称已存在");
             }
-            
+
             info.Explain = model.Explain;
             info.Options = model.Options;
 
-            var res = info.Id > 0
+            var res = isUpdate
                 ? await ModelFieldService.Interface.Update(info)
                 : await ModelFieldService.Interface.Add(info);
 
-            //todo 需要添加字段
+            if (res.IsSuccess && !isUpdate)
+                await ModelFieldService.Interface.CreateField(info);
 
             return res;
         }

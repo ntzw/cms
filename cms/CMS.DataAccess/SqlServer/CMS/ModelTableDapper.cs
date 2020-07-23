@@ -25,6 +25,9 @@ namespace DataAccess.SqlServer.CMS
 								[Status] [int] NULL,
 								[SiteNum] [nvarchar](50) NULL,
 								[ColumnNum] [nvarchar](50) NULL,
+								[SeoTitle] [nvarchar](500) NULL,
+								[SeoKeyword] [nvarchar](2000) NULL,
+								[SeoDesc] [nvarchar](2000) NULL,
 							 CONSTRAINT [PK_{tableName}] PRIMARY KEY CLUSTERED 
 							(
 								[Id] ASC

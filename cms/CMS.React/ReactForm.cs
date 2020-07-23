@@ -37,7 +37,7 @@ namespace CMS.React
                 attr.Disabled = attr.Disabled || (attr.UpdateDisabled && isUpdate);
 
                 field.TryAdd("label", attr.Title);
-                field.TryAdd("name", ToNameLower(propertyInfo.Name));
+                field.TryAdd("name", propertyInfo.Name.ToFieldNameLower());
                 field.TryAdd("dataAction", attr.DataAction);
                 field.TryAdd("Split", attr.Split);
 
@@ -178,15 +178,6 @@ namespace CMS.React
                 options.TryAdd("AllowClear", input.AllowClear);
 
             field.TryAdd("input", options);
-        }
-
-        private static string ToNameLower(string name)
-        {
-            if (name.IsEmpty()) return "";
-
-            var first = name.Substring(0, 1).ToLower();
-            var el = name.Length > 1 ? name.Substring(1, name.Length - 1) : "";
-            return first + el;
         }
 
         #endregion

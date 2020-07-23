@@ -3,12 +3,14 @@ using System.Threading.Tasks;
 using Extension;
 using Foundation.Attribute;
 using Foundation.ControllerFormatter;
+using Foundation.Modal;
 using Helper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -30,6 +32,7 @@ namespace Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.TryAddSingleton<IActionResultExecutor<ResultBase>, ResultBaseExecutor>();
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();
             services.AddSession();
@@ -49,19 +52,19 @@ namespace Web
                             await AdminValidateFail(context);
                             return;
                         }
-                        
+
                         AdminCookieAttribute.SetLoginAdmin(admin);
                     }
                 };
             });
-            
+
             services.AddControllersWithViews(options =>
             {
-                options.InputFormatters.Insert(0, new JsonInputFormatter()); 
-                options.OutputFormatters.Insert(0, new JsonOutputFormatter());
+                options.InputFormatters.Insert(0, new JsonInputFormatter());
+                //options.OutputFormatters.Insert(0, new JsonOutputFormatter());
             });
         }
-        
+
         private static async Task AdminValidateFail(CookieValidatePrincipalContext context)
         {
             context.RejectPrincipal();
@@ -72,7 +75,7 @@ namespace Web
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             GlobalApplication.Inject(app);
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -11,6 +11,7 @@ using CMS.React.Model;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Model.CMS;
 
 namespace Service.CMS

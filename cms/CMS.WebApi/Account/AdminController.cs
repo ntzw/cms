@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using CMS.React;
 using Extension;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Microsoft.AspNetCore.Mvc;
 using Model.Account;
 using Newtonsoft.Json.Linq;

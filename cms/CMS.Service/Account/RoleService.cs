@@ -11,6 +11,7 @@ using CMS.React.Model;
 using DataAccess.Interface.Account;
 using DataAccess.SqlServer.Account;
 using Foundation.Modal;
+using Foundation.Modal.Result;
 using Model.Account;
 
 namespace Service.Account

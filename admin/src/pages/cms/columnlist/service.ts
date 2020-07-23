@@ -1,6 +1,7 @@
 import request, { AsyncHandleResult } from "@/utils/request";
 import { PageParamsType } from "@/components/ListTable";
-import { ContentEditType, FieldDefaultType } from "./data";
+import { ContentItem } from "./data";
+import { FieldDefaultType } from "@/components/Content/data";
 
 export function page(params?: { [key: string]: any }) {
     return request('/Api/CMS/Column/Page', {
@@ -62,11 +63,10 @@ export function MoveModelField(columnNum: string, fieldNums: string[]): AsyncHan
     });
 }
 
-export function GetColumnContentEdit(itemNum?: string, columnNum?: string): AsyncHandleResult<ContentEditType> {
+export function GetColumnContentEdit(itemNum?: string): AsyncHandleResult<{ editValue: ContentItem; }> {
     return request('/Api/CMS/Content/GetEdit', {
         method: "POST",
         data: {
-            columnNum,
             itemNum
         },
     });

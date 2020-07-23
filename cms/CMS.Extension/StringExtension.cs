@@ -332,5 +332,14 @@ namespace Extension
 
             return stringBuilder.ToString();
         }
+
+        public static string ToFieldNameLower(this string name)
+        {
+            if (name.IsEmpty()) return "";
+
+            var first = name.Substring(0, 1).ToLower();
+            var el = name.Length > 1 ? name.Substring(1, name.Length - 1) : "";
+            return first + el;
+        }
     }
 }

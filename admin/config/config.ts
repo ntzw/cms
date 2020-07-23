@@ -112,6 +112,13 @@ export default defineConfig({
                   component: './cms/columnlist',
                   //authority: ['admin'],
                 },
+                {
+                  path: 'content',
+                  name: 'content',
+                  icon: 'user',
+                  component: './cms/content',
+                  //authority: ['admin'],
+                },
               ],
             },
             {

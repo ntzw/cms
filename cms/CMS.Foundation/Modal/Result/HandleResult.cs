@@ -1,11 +1,7 @@
-namespace Foundation.Modal
+namespace Foundation.Modal.Result
 {
-    public class HandleResult
+    public class HandleResult : ResultBase
     {
-        public bool IsSuccess { get; set; }
-        
-        public string Message { get; set; }
-        
         public object Data { get; set; }
 
         public static HandleResult Success(object data = null)

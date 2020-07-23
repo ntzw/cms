@@ -20,5 +20,8 @@ namespace Model.CMS
         [Description("")]
         [Input("说明", Required = true)]
         public string Explain { get; set; }
+
+        [Computed]
+        public string SqlTableName => $"CMS_U_{TableName}";
     }
 }
