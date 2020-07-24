@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Extension;
 
@@ -7,6 +8,7 @@ namespace Foundation.Modal.RequestModal
     {
         private readonly List<string> _field = new List<string>();
         private readonly List<string> _order = new List<string>();
+
 
         public ISort Add(string field, string order)
         {
@@ -18,12 +20,23 @@ namespace Foundation.Modal.RequestModal
             return this;
         }
 
+        public void Delete(string field)
+        {
+            int index = _field.FindIndex(temp => string.Equals(temp, field, StringComparison.OrdinalIgnoreCase));
+            if (index > -1)
+            {
+                _field.RemoveAt(index);
+                _order.RemoveAt(index);
+            }
+        }
+
         public string ToSql(string prefix = "")
         {
             List<string> temp = new List<string>();
             for (int i = 0; i < _field.Count && i < _order.Count; i++)
             {
-                temp.Add($"{(prefix.IsNotEmpty() ? $"[{prefix}]." : "")}[{_field[i]}] {(_order[i].ToLower() == "desc" ? "desc" : "asc")}");
+                temp.Add(
+                    $"{(prefix.IsNotEmpty() ? $"[{prefix}]." : "")}[{_field[i]}] {(_order[i].ToLower() == "desc" ? "desc" : "asc")}");
             }
 
             return $"ORDER BY {string.Join(",", temp)}";

@@ -14,5 +14,6 @@ namespace DataAccess.Interface.CMS
     {
         Task<IEnumerable<ColumnField>> GetByModelFieldNum(string columnNum, List<string> modelFieldNum);
         Task<IEnumerable<ColumnField>> GetByColumnNum(string columnNum);
+        Task<int> Clear(string[] columnNums);
     }
 }

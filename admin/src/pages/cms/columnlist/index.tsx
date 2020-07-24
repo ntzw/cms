@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
 import { ColumnListProps, Column, ColumnFieldListPropsState } from './data';
-import { page, Submit } from './service';
-import { Button, message, Tooltip } from 'antd';
+import { page, Submit, ClearColumnField } from './service';
+import { Button, message, Tooltip, Popover, Alert, Popconfirm } from 'antd';
 import ModalForm, { ModalFormState, ModalFormAction } from '@/components/ModalForm';
-import { EditOutlined, DeleteOutlined, ControlOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, ControlOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { connect, GlobalModelState } from 'umi';
 import ColumnFieldList from './components/columnfieldlist';
@@ -20,6 +20,7 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
     const [editColumnField, setEditColumnField] = useState<ColumnFieldListPropsState>({
         visible: false,
     })
+    const [tableSelectedRows, setTableSelectedRows] = useState<Column[]>();
 
     const tableAction = useRef<TableAction>();
     const editAction = useRef<ModalFormAction>();
@@ -45,6 +46,25 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
         valueType: 'option',
         render: (_, record) => {
             return <Button.Group>
+                <Tooltip title="增加子栏目">
+                    <Button
+                        disabled={!!record.modelNum}
+                        icon={<PlusOutlined />}
+                        type="primary"
+                        onClick={() => {
+                            editAction.current?.clear();
+                            editAction.current?.setOldValue();
+                            setEditForm({
+                                visible: true,
+                                isUpdate: false,
+                                title: '添加栏目',
+                                params: {
+                                    parentNum: record.num,
+                                }
+                            })
+                        }}
+                    />
+                </Tooltip>
                 <Tooltip title="编辑">
                     <Button
                         icon={<EditOutlined />}
@@ -74,6 +94,7 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
                     <Button
                         icon={<ControlOutlined />}
                         type="primary"
+                        disabled={!record.modelNum}
                         onClick={() => {
                             setEditColumnField({
                                 visible: true,
@@ -93,25 +114,67 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
             actionRef={tableAction}
             request={(params) => page(params)}
             columns={columns}
-            rowSelection={{}}
+            rowSelection={{
+                onChange: (selectedRowKeys, selectedRows) => {
+                    setTableSelectedRows(selectedRows);
+                }
+            }}
             pagination={false}
             params={{
                 siteNum: currentSite?.num,
             }}
-            toolBarRender={(action) => [
-                <Button
-                    type="primary"
-                    onClick={() => {
-                        setEditForm({
-                            visible: true,
-                            isUpdate: false,
-                            title: '添加栏目'
-                        })
-                    }}
-                >
-                    添加
-                </Button>,
-            ]}
+            toolBarRender={(action) => {
+                let tempModalNum = '';
+                return [
+                    <Button.Group>
+                        <Button
+                            icon={<PlusOutlined />}
+                            type="primary"
+                            onClick={() => {
+                                editAction.current?.clear();
+                                editAction.current?.setOldValue();
+                                setEditForm({
+                                    visible: true,
+                                    isUpdate: false,
+                                    title: '添加栏目'
+                                })
+                            }}
+                        >
+                            添加
+                        </Button>
+                        <Popconfirm title="批量设置字段，会先清空所选栏目原有字段，请谨慎操作!" okText="确定清空并添加" cancelText="取消" onConfirm={() => {
+                            if (tableSelectedRows) {
+                                ClearColumnField(tableSelectedRows.map(temp => temp.num)).then(res => {
+                                    setEditColumnField({
+                                        visible: true,
+                                        column: tableSelectedRows,
+                                    })
+                                })
+                            }
+                        }}>
+                            <Button
+                                icon={<ControlOutlined />}
+                                type="primary"
+                                disabled={!tableSelectedRows || tableSelectedRows.length <= 0 || tableSelectedRows?.some(temp => {
+                                    if (temp.modelNum) {
+                                        if (!tempModalNum) {
+                                            tempModalNum = temp.modelNum;
+                                        } else if (temp.modelNum !== tempModalNum) {
+                                            return true;
+                                        }
+                                    } else {
+                                        return true;
+                                    }
+
+                                    return false;
+                                })}
+                            >
+                                批量添加字段
+                            </Button>
+                        </Popconfirm>
+                    </Button.Group>,
+                ]
+            }}
         />
         <ModalForm<Column>
             {...editForm}

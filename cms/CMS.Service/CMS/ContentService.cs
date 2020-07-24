@@ -67,26 +67,11 @@ namespace Service.CMS
                     case ReactFormItemType.Input:
                     case ReactFormItemType.Editor:
                     case ReactFormItemType.TextArea:
+                    case ReactFormItemType.Select:
                         editValue.TryAdd(formFieldName, value.ToStr());
                         break;
                     case ReactFormItemType.Password:
                         editValue.TryAdd(formFieldName, Md5Helper.GetMD5_32(value.ToStr()));
-                        break;
-                    case ReactFormItemType.Select:
-                        var selectOptions = ColumnFieldOptionsHelper.Parsing<SelectOptions>(columnField.Options);
-                        if (selectOptions != null)
-                        {
-                            if (selectOptions.Multiple)
-                            {
-                                if (value is JArray selectData)
-                                    editValue.TryAdd(formFieldName, string.Join(",", selectData));
-                            }
-                            else
-                            {
-                                editValue.TryAdd(formFieldName, value.ToStr());
-                            }
-                        }
-
                         break;
                     case ReactFormItemType.Cascader:
                         break;
@@ -107,6 +92,13 @@ namespace Service.CMS
                 }
             }
 
+            editFieldSql.Add("SeoTitle");
+            editFieldSql.Add("SeoKeyword");
+            editFieldSql.Add("SeoDesc");
+
+            editValue.TryAdd("SeoTitle", form["seoTitle"].ToStr());
+            editValue.TryAdd("SeoKeyword", form["seoKeyword"].ToStr());
+            editValue.TryAdd("SeoDesc", form["seoDesc"].ToStr());
 
             string sql = "";
             if (id > 0)

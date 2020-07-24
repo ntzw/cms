@@ -12,6 +12,10 @@ interface ModalFormProps<T extends Store> extends DynaminFormProps<T> {
     onClose?: () => void;
 }
 
+export interface ModalFormAction extends DynaminFormAction {
+
+}
+
 const ModalForm = <T extends Store>(props: ModalFormProps<T>) => {
     const {
         visible,
@@ -38,18 +42,20 @@ const ModalForm = <T extends Store>(props: ModalFormProps<T>) => {
                     ...loading,
                     submit: true,
                 })
-                onFinish(value).then(() => {
-                    setLoading({
-                        ...loading,
-                        submit: false,
+                if (onFinish) {
+                    onFinish(value).then(() => {
+                        setLoading({
+                            ...loading,
+                            submit: false,
+                        })
+                        resolve();
                     })
-                    resolve();
-                })
+                }
             })
         }
     }
 
-    const userAction: DynaminFormAction = {
+    const userAction: ModalFormAction = {
         reload: () => {
             editAction.current?.reload();
         },
@@ -61,6 +67,18 @@ const ModalForm = <T extends Store>(props: ModalFormProps<T>) => {
         },
         submit: () => {
             editAction.current?.submit();
+        },
+        setValue: (value) => {
+            editAction.current?.setValue(value);
+        },
+        getValue: () => {
+            return editAction.current?.getValue();
+        },
+        setLoading: (status) => {
+            editAction.current?.setLoading(status);
+        },
+        setOldValue: () => {
+            editAction.current?.setOldValue();
         }
     }
 
@@ -77,10 +95,6 @@ const ModalForm = <T extends Store>(props: ModalFormProps<T>) => {
         maskClosable={false}
         confirmLoading={loading.submit}
         onCancel={() => {
-            if (!isUpdate) {
-                editAction.current?.clear();
-            }
-
             if (typeof onClose === 'function') {
                 onClose();
             }

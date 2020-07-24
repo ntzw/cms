@@ -16,31 +16,65 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
 }) => {
 
     const formAction = useRef<ContentFormAction>();
+    const [isLoadData, setIsLoadData] = useState(false);
     const [editValue, setEditValue] = useState<ColumnContentItem>();
+    const [loading, setLoading] = useState({
+        submit: false,
+    })
 
     useEffect(() => {
         formAction.current?.clear();
-        if (itemNum) {
-            GetEditValue(itemNum, columnNum).then(res => {
-                if (res.isSuccess) {
-                    setEditValue(res.data);
-                    formAction.current?.setValue(res.data);
-                }
-            });
-        }
+        setIsLoadData(true);
     }, [itemNum])
-
-
 
     return <Drawer
         className={styles.contentEditDrawer}
         title={`${(itemNum ? '编辑' : '添加')}内容`}
         visible={visible}
-        width="80%"
+        width="90%"
+        placement="left"
         onClose={() => {
             onClose();
         }}
         maskClosable={false}
+        afterVisibleChange={() => {
+            if (isLoadData && itemNum) {
+                formAction.current?.loading(true);
+                GetEditValue(itemNum, columnNum).then(res => {
+                    if (res.isSuccess) {
+                        setEditValue(res.data);
+                        formAction.current?.setValue(res.data);
+                    }
+
+                    formAction.current?.loading(false);
+                    setIsLoadData(false);
+                });
+            }
+        }}
+        footer={<div style={{ textAlign: 'center' }}>
+            <Button
+                loading={loading.submit}
+                type="primary"
+                onClick={() => {
+                    formAction.current?.submit();
+                }}
+            >提交</Button>
+            <Button
+                loading={loading.submit}
+                danger
+                style={{ marginLeft: 10 }}
+                onClick={() => {
+                    formAction.current?.clear();
+                }}
+            >重置</Button>
+            <Button
+                loading={loading.submit}
+                style={{ marginLeft: 10 }}
+                onClick={() => {
+                    onClose();
+                }}
+            >取消</Button>
+        </div>}
     >
         <ContentForm
             columnNum={columnNum}
@@ -48,12 +82,19 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
             actionRef={formAction}
             onFinish={(value) => {
                 return new Promise(resolve => {
+                    setLoading({
+                        ...loading,
+                        submit: true,
+                    })
+
                     const newValue = {
                         ...editValue,
                         ...value,
                         num: itemNum,
                         columnNum,
                     }
+
+
                     submit(newValue).then(res => {
                         if (res.isSuccess) {
                             message.success('数据提交成功');
@@ -63,31 +104,15 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                         }
 
                         resolve();
+
+                        setLoading({
+                            ...loading,
+                            submit: false,
+                        })
                     })
                 })
             }}
         />
-        <div style={{ width: 215, margin: '0 auto' }}>
-            <Button
-                type="primary"
-                onClick={() => {
-                    formAction.current?.submit();
-                }}
-            >提交</Button>
-            <Button
-                danger
-                style={{ marginLeft: 10 }}
-                onClick={() => {
-                    formAction.current?.clear();
-                }}
-            >重置</Button>
-            <Button
-                style={{ marginLeft: 10 }}
-                onClick={() => {
-                    onClose();
-                }}
-            >取消</Button>
-        </div>
     </Drawer>
 }
 

@@ -5,5 +5,7 @@ namespace Foundation.Modal
         string ToSql(string prefix = "");
         
         ISort Add(string field, string order);
+
+        void Delete(string field);
     }
 }

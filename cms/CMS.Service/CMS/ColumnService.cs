@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using CMS.React.Model;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
+using Extension;
 using Foundation.Modal;
 using Foundation.Modal.Result;
 using Model.CMS;
@@ -85,7 +86,8 @@ namespace Service.CMS
                 item.TryAdd("ParentNum", column.ParentNum);
                 item.TryAdd("CreateDate", column.CreateDate);
                 item.TryAdd("ModelNum", column.ModelNum);
-                item.TryAdd("ModelName", models.ContainsKey(column.ModelNum) ? models[column.ModelNum] : "");
+                item.TryAdd("ModelName",
+                    column.ModelNum.IsNotEmpty() && models.ContainsKey(column.ModelNum) ? models[column.ModelNum] : "");
 
                 var children = await GetTreeTableData(columns, models, column.Num);
                 if (children != null && children.Any())

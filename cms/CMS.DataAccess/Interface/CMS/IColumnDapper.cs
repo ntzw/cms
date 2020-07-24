@@ -15,5 +15,6 @@ namespace DataAccess.Interface.CMS
         Task<IEnumerable<Column>> GetByParentNum(string parentNum);
         Task<IEnumerable<dynamic>> GetCascaderDataByParentNum(string parentNum);
         Task<IEnumerable<Column>> GetBySiteNum(string siteNum);
+        
     }
 }

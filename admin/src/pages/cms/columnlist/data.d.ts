@@ -20,7 +20,7 @@ export interface ColumnFieldListProps extends ColumnFieldListPropsState {
 
 export interface ColumnFieldListPropsState {
     visible: boolean;
-    column?: Column;
+    column?: Column | Column[];
 }
 
 export interface ModelFieldAddProps extends ModelFieldAddPropsState {

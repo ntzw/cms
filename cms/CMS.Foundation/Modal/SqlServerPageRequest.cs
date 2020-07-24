@@ -17,7 +17,7 @@ namespace Foundation.Modal
             Queries = new List<IQuery>();
         }
 
-        public SqlServerPageRequest(JObject form, string[] ignore = null)
+        public SqlServerPageRequest(JObject form, Dictionary<string, string> defaultSort = null, string[] ignore = null)
         {
             Queries = new List<IQuery>();
             Sort = new SqlServerSort();
@@ -42,6 +42,14 @@ namespace Foundation.Modal
                 }
             }
 
+            if (defaultSort != null)
+            {
+                foreach (var keyValue in defaultSort)
+                {
+                    Sort.Add(keyValue.Key, keyValue.Value);
+                }
+            }
+
             if (form.ContainsKey("sort") && form["sort"] is JObject sort && sort.HasValues)
             {
                 foreach (var jToken in sort)
@@ -50,7 +58,7 @@ namespace Foundation.Modal
                         Sort.Add(jToken.Key, jToken.Value.ToStr());
                 }
             }
-            else
+            else if (defaultSort == null)
             {
                 Sort.Add("Id", "DESC");
             }

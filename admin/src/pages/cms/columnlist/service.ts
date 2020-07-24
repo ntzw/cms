@@ -37,6 +37,23 @@ export function columnFieldPage(data: PageParamsType) {
     });
 }
 
+export function SortColumnField(num: string, sort: number): AsyncHandleResult {
+    return request('/Api/CMS/ColumnField/Sort', {
+        method: "POST",
+        data: {
+            num,
+            sort,
+        },
+    });
+}
+
+export function ClearColumnField(nums: string[]): AsyncHandleResult {
+    return request('/Api/CMS/ColumnField/Clear', {
+        method: "POST",
+        data: nums,
+    });
+}
+
 export function DeleteColumnField(ids: string[]): AsyncHandleResult {
     return request('/Api/CMS/ColumnField/Delete', {
         method: "POST",

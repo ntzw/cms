@@ -1,7 +1,7 @@
-/**
- * author：created by zw on 2020-06-20 14:28:17
- * email：ntzw.geek@gmail.com
- */
+//
+// author：created by zw on 2020-06-20 14:28:17
+// email：ntzw.geek@gmail.com
+//
 
 using System.ComponentModel;
 using CMS.React.Component;
@@ -23,9 +23,27 @@ namespace Model.CMS
         /// <summary>
         /// 模型编号
         /// </summary>
-        [Select("所属模型", DataAction = "/Api/CMS/Model/SelectData", Required = true, AllowClear = true)]
+        [Select("所属模型", DataAction = "/Api/CMS/Model/SelectData", AllowClear = true)]
         public string ModelNum { get; set; }
 
         [Description("")] public string SiteNum { get; set; }
+
+        /// <summary>
+        /// Seo标题
+        /// </summary>
+        [Input("Seo标题")]
+        public string SeoTitle { get; set; }
+
+        /// <summary>
+        /// Seo关键词
+        /// </summary>
+        [Input("Seo关键词")]
+        public string SeoKeyword { get; set; }
+
+        /// <summary>
+        /// Seo描述
+        /// </summary>
+        [Input("Seo描述")]
+        public string SeoDesc { get; set; }
     }
 }

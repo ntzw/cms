@@ -15,16 +15,21 @@ namespace DataAccess.SqlServer.CMS
     {
         public Task<IEnumerable<ColumnField>> GetByModelFieldNum(string columnNum, List<string> modelFieldNum)
         {
-            string sql =
-                $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum AND ModelFieldNum IN @ModelFieldNum ";
+            string sql = $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum AND ModelFieldNum IN @ModelFieldNum ";
             return Connection()
                 .QueryAsync<ColumnField>(sql, new {ColumnNum = columnNum, ModelFieldNum = modelFieldNum});
         }
 
         public Task<IEnumerable<ColumnField>> GetByColumnNum(string columnNum)
         {
-            string sql = $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum ";
+            string sql = $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum ORDER BY Sort DESC";
             return Connection().QueryAsync<ColumnField>(sql, new {ColumnNum = columnNum});
+        }
+
+        public Task<int> Clear(string[] columnNums)
+        {
+            string sql = $"DELETE FROM {GetTableName()} WHERE ColumnNum IN @ColumnNum";
+            return Connection().ExecuteAsync(sql, new {ColumnNum = columnNums});
         }
     }
 }

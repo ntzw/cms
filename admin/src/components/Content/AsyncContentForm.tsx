@@ -4,7 +4,7 @@ import { GetColumnContentFields } from './service';
 import { message } from 'antd';
 import ContentForm from './ContentForm';
 
-const AsyncContentForm: React.FC<AsyncContentFormProps> = ({ columnNum, itemNum, actionRef }) => {
+const AsyncContentForm: React.FC<AsyncContentFormProps> = ({ columnNum, itemNum, actionRef, isSeo }) => {
     const [formFields, setFormFields] = useState<ColumnField[]>([]);
 
     const action: AsyncContentFormAction = {
@@ -17,6 +17,9 @@ const AsyncContentForm: React.FC<AsyncContentFormProps> = ({ columnNum, itemNum,
                     message.error(res.message || '获取表单数据失败');
                 }
             })
+        },
+        submit: () => {
+
         }
     }
 
@@ -36,6 +39,12 @@ const AsyncContentForm: React.FC<AsyncContentFormProps> = ({ columnNum, itemNum,
         columnFields: formFields,
         columnNum,
         itemNum,
+        isSeo,
+        onFinish: (value) => {
+            return new Promise(resolve => {
+
+            })
+        }
     }
 
     return <ContentForm {...formProps} />

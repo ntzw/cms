@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
+using Foundation.Modal.Result;
 using Model.CMS;
 
 namespace Service.CMS
@@ -32,6 +33,12 @@ namespace Service.CMS
         public Task<IEnumerable<ColumnField>> GetByColumnNum(string columnNum)
         {
             return GetDapper().GetByColumnNum(columnNum);
+        }
+
+        public async Task<HandleResult> Clear(string[] columnNums)
+        {
+            var count = await GetDapper().Clear(columnNums);
+            return count > 0 ? HandleResult.Success() : HandleResult.Error("");
         }
     }
 }

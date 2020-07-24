@@ -26,8 +26,14 @@ namespace WebApi.CMS
 
         public async Task<HandleResult> FormFields([FromBody] JObject form)
         {
+            string parentNum = form["parentNum"].ToStr();
             int id = form["id"].ToInt();
-            var data = id > 0 ? await ColumnService.Interface.GetById(id) : new Column();
+            var data = id > 0
+                ? await ColumnService.Interface.GetById(id)
+                : new Column
+                {
+                    ParentNum = parentNum,
+                };
             if (data == null) return HandleResult.Error("无效数据");
 
             return new HandleResult
@@ -45,7 +51,8 @@ namespace WebApi.CMS
         {
             var info = model.Id > 0 ? await ColumnService.Interface.GetById(model.Id) : new Column();
             if (info == null) return HandleResult.Error("无效数据");
-            if (string.Equals(info.Num, model.ParentNum, StringComparison.OrdinalIgnoreCase))
+            if (model.ParentNum.IsNotEmpty() &&
+                string.Equals(info.Num, model.ParentNum, StringComparison.OrdinalIgnoreCase))
                 return HandleResult.Error("无效数据");
 
             info.Init();

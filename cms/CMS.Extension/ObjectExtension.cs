@@ -20,10 +20,11 @@ namespace Extension
         /// 重写ToString()的方法，该方法首先判断object是否为空，如果对象为空则返回string.Empty，否则返回该对象的字符串表现形式
         /// </summary>
         /// <param name="obj">需要转换的对象</param>
+        /// <param name="isTrim">是否去除空格</param>
         /// <returns>字符串</returns>
-        public static string ToStr(this object obj)
+        public static string ToStr(this object obj, bool isTrim = false)
         {
-            return obj == null || obj is DBNull ? String.Empty : obj.ToString();
+            return obj == null || obj is DBNull ? String.Empty : isTrim ? obj.ToString()?.Trim() : obj.ToString();
         }
 
         /// <summary>

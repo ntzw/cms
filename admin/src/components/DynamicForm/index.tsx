@@ -6,7 +6,7 @@ import { Store } from "antd/lib/form/interface";
 import { FormInstance } from "antd/lib/form";
 import { getFields, getAsyncData } from "./service";
 import 'braft-editor/dist/index.css'
-import BraftEditor, { EditorState } from 'braft-editor'
+import BraftEditor from 'braft-editor'
 import styles from './style.less'
 
 
@@ -103,7 +103,6 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
 
     const [loading, setLoading] = useState({
         loadFields: false,
-        submit: false,
     });
 
     const [form] = useState(createRef<FormInstance>());
@@ -199,6 +198,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
     }
 
     const loadAsyncField = () => {
+        userAction.clear();
         if (fields instanceof Array) {
             setFormItemData(fields);
         } else if (typeof fields === 'string' && fields) {
@@ -209,7 +209,6 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
     useEffect(() => {
         loadAsyncField();
     }, [fields, JSON.stringify(params || {})]);
-
 
     const userAction: DynaminFormAction = {
         reload: () => {
@@ -228,6 +227,18 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
         },
         setValue: (value) => {
             form.current?.setFieldsValue(value);
+        },
+        getValue: () => {
+            return form.current?.getFieldsValue();
+        },
+        setLoading: (status) => {
+            setLoading({
+                ...loading,
+                loadFields: status
+            })
+        },
+        setOldValue: () => {
+            userAction.setValue(handleFormData(formItemData, editData));
         }
     }
 
@@ -241,49 +252,38 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
         spinning={loading.loadFields}
         tip="表单生成中，请稍等...."
     >
-        <Spin
-            spinning={loading.submit}
-            tip="表单数据提交中，请稍等....">
-            {formItemData.length > 0 ? <Form
-                {...layout}
-                name="basic"
-                ref={form}
-                onFinish={(value) => {
-                    setLoading({
-                        ...loading,
-                        submit: true,
-                    })
+        {formItemData.length > 0 ? <Form
+            {...layout}
+            name="basic"
+            ref={form}
+            onFinish={(value) => {
+                if (onFinish) {
                     onFinish({
                         ...editData,
                         ...value
-                    } as T).then(() => {
-                        setLoading({
-                            ...loading,
-                            submit: false,
-                        })
-                    })
-                }}
-            >
-                {formItemData.map(item => {
-                    return <Form.Item
-                        key={item.name}
-                        label={item.label}
-                        name={item.name}
-                        extra={<span style={{ color: 'green' }}>{item.extra}</span>}
-                        valuePropName={item.valuePropName}
-                        validateTrigger={item.validateTrigger}
-                        rules={item.rules?.map((temp) => {
-                            if (temp?.pattern && typeof temp.pattern === 'string') {
-                                temp.pattern = new RegExp(temp.pattern);
-                            }
-                            return temp;
-                        })}
-                    >
-                        {getFormItem(item)}
-                    </Form.Item>
-                })}
-            </Form> : <Empty description="未设置表单字段" />}
-        </Spin>
+                    } as T)
+                }
+            }}
+        >
+            {formItemData.map(item => {
+                return <Form.Item
+                    key={item.name}
+                    label={item.label}
+                    name={item.name}
+                    extra={item.extra ? <span style={{ color: 'green' }}>{item.extra}</span> : null}
+                    valuePropName={item.valuePropName}
+                    validateTrigger={item.validateTrigger}
+                    rules={item.rules?.map((temp) => {
+                        if (temp?.pattern && typeof temp.pattern === 'string') {
+                            temp.pattern = new RegExp(temp.pattern);
+                        }
+                        return temp;
+                    })}
+                >
+                    {getFormItem(item)}
+                </Form.Item>
+            })}
+        </Form> : <Empty description="未设置表单字段" />}
     </Spin>
 }
 

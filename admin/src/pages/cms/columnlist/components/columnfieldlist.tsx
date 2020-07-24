@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { ColumnFieldListProps, ModelFieldAddPropsState } from "../data";
-import { Drawer, Row, Col, Button, Card, message, Modal, Tooltip } from 'antd';
+import { Drawer, Row, Col, Button, Card, message, Modal, Tooltip, InputNumber } from 'antd';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
-import { columnFieldPage, MoveModelField, DeleteColumnField } from '../service';
+import { columnFieldPage, MoveModelField, DeleteColumnField, SortColumnField } from '../service';
 import { fieldPage } from '../../modeltablelist/service';
 import ModelFieldAdd from './modelfieldadd';
 import { PlusOutlined, SwapLeftOutlined, SwapRightOutlined, EditOutlined } from '@ant-design/icons';
@@ -11,7 +11,7 @@ import { ModelField } from '../../modeltablelist/data';
 import { AsyncContentFormAction, ColumnField } from '@/components/Content/data';
 import AsyncContentForm from '@/components/Content/AsyncContentForm';
 
-
+let changeSortTime: any;
 const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, column }) => {
     const [modelFieldAdd, setModelFieldAdd] = useState<ModelFieldAddPropsState>({
         visible: false,
@@ -31,6 +31,24 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
     const exitsTableAction = useRef<TableAction>();
     const notExitsTableAction = useRef<TableAction>();
     const exitsColumns: ProColumns<ColumnField>[] = [{
+        dataIndex: 'sort',
+        title: '排序',
+        valueType: 'option',
+        sorter: true,
+        render: (value: any, record) => {
+            const tempValue = typeof value === 'number' ? value : Number((value + '').replace('-', '') || 0)
+            return <InputNumber
+                size="small"
+                defaultValue={tempValue}
+                onChange={(value) => {
+                    clearTimeout(changeSortTime);
+                    changeSortTime = setTimeout(() => {
+                        SortColumnField(record.num, Number(value));
+                    }, 500);
+                }}
+            />
+        }
+    }, {
         dataIndex: 'name',
         title: '名称',
         valueType: 'option',
@@ -49,22 +67,24 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
         dataIndex: '_',
         title: '操作',
         valueType: 'option',
-        render: (value, record) => {
-            return <Button.Group>
-                <Tooltip title="编辑">
-                    <Button
-                        icon={<EditOutlined />}
-                        onClick={() => {
+        render: (value, record, index) => {
+            return <>
+                <Button.Group>
+                    <Tooltip title="编辑">
+                        <Button
+                            icon={<EditOutlined />}
+                            onClick={() => {
 
-                            setModelFieldAdd({
-                                visible: true,
-                                editId: record.id,
-                                editType: 'column'
-                            })
-                        }}
-                    />
-                </Tooltip>
-            </Button.Group>
+                                setModelFieldAdd({
+                                    visible: true,
+                                    editId: record.id,
+                                    editType: 'column'
+                                })
+                            }}
+                        />
+                    </Tooltip>
+                </Button.Group>
+            </>
         }
     }];
 
@@ -109,14 +129,18 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
         onClose();
     }
 
-    useEffect(() => {
+    const handleReload = () => {
         exitsTableAction.current?.reload();
         notExitsTableAction.current?.reload();
+    }
+
+    useEffect(() => {
+        handleReload();
     }, [column])
 
     return <>
         <Drawer
-            title={`栏目 ${column?.name} 字段管理`}
+            title={Array.isArray(column) ? '批量设置字段' : `栏目 ${column?.name} 字段管理`}
             width="98%"
             placement="left"
             visible={visible}
@@ -134,7 +158,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                             }}
                             actionRef={exitsTableAction}
                             request={(params, sort, query) => {
-                                params['columnNum'] = column?.num;
+                                params['columnNum'] = Array.isArray(column) ? column[0]?.num : column?.num;
                                 return columnFieldPage({
                                     params,
                                     sort,
@@ -147,8 +171,9 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                 <Button onClick={() => {
                                     setPreviewForm({
                                         visible: true,
-                                        columnNum: column?.num || '',
+                                        columnNum: Array.isArray(column) ? column[0]?.num : column?.num || '',
                                     })
+                                    previewFormAction.current?.reload();
                                 }} >预览</Button>,
                                 selectedRows && selectedRows.length > 0 &&
                                 <Button
@@ -199,8 +224,8 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                             }}
                             actionRef={notExitsTableAction}
                             request={(params, sort, query) => {
-                                params['ModelNum'] = column?.modelNum;
-                                params['notColumnNum'] = column?.num;
+                                params['ModelNum'] = Array.isArray(column) ? column[0]?.modelNum : column?.modelNum;
+                                params['notColumnNum'] = Array.isArray(column) ? column[0]?.num : column?.num;
                                 return fieldPage({
                                     params,
                                     sort,
@@ -222,7 +247,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                                 swapLeft: true,
                                             })
                                             const fieldNum = selectedRows.map(temp => temp.num);
-                                            MoveModelField(column.num, fieldNum).then(res => {
+                                            MoveModelField(Array.isArray(column) ? column.map(temp => temp.num).join(',') : column.num, fieldNum).then(res => {
                                                 setLoading({
                                                     ...loading,
                                                     swapLeft: false,
@@ -248,7 +273,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                     onClick={() => {
                                         setModelFieldAdd({
                                             visible: true,
-                                            modelNum: column?.modelNum,
+                                            modelNum: Array.isArray(column) ? column[0]?.modelNum : column?.modelNum,
                                             editType: 'model'
                                         })
                                     }}
@@ -287,7 +312,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                 })
             }}
         >
-            <AsyncContentForm actionRef={previewFormAction} columnNum={previewForm.columnNum} />
+            <AsyncContentForm actionRef={previewFormAction} columnNum={previewForm.columnNum} isSeo={false} />
         </Drawer>
     </>
 }

@@ -26,7 +26,7 @@ export interface FormItem {
 export interface DynaminFormProps<T extends Store> {
     fields: FormItem[] | string;
     params?: { [key: string]: any };
-    onFinish: (value: T) => Promise<any>;
+    onFinish?: (value: T) => Promise<any>;
     /**
   * 初始化的参数，可以操作 Form
   */
@@ -44,6 +44,9 @@ export interface DynaminFormAction {
     reloadFieldItem: () => void;
     submit: () => void;
     setValue: (value: any) => void;
+    getValue: () => any;
+    setLoading: (loading: boolean) => void;
+    setOldValue: () => void;
 }
 
 interface AsyncResult<T extends Store> {

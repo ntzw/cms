@@ -3,6 +3,7 @@ import { ContentFormProps, ContentFormAction, ColumnField } from './data';
 import DynaminForm, { FormItemType, handleFormData } from '@/components/DynamicForm';
 import { DynaminFormProps, FormItem, DynaminFormAction } from '@/components/DynamicForm/data';
 import { lowerCaseFieldName } from '@/utils/utils';
+import { Row, Col, Card, Spin } from 'antd';
 
 interface BaseOptions {
     required?: boolean;
@@ -25,20 +26,32 @@ enum RegularType {
     MobilePhone = 1,
 }
 
-const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef, columnFields, onFinish }) => {
+const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef, columnFields, onFinish, isSeo = true }) => {
     const [formFields, setFormFields] = useState<FormItem[]>([]);
+    const [loading, setLoading] = useState({
+        submit: false,
+        load: false,
+    })
 
     const action: ContentFormAction = {
         clear: () => {
             formAction.current?.clear();
+            seoFormAction.current?.clear();
         },
         submit: () => {
             formAction.current?.submit();
         },
         setValue: (value) => {
             const newData = handleFormData(parsingColumnFields(columnFields), value);
-            console.info(newData)
             formAction.current?.setValue(newData);
+            seoFormAction.current?.setValue(newData);
+        },
+        loading: (status) => {
+            console.info('setLoading', status)
+            setLoading({
+                ...loading,
+                load: status
+            })
         }
     }
 
@@ -55,31 +68,66 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
     }, [columnFields])
 
     const formAction = useRef<DynaminFormAction>();
+    const seoFormAction = useRef<DynaminFormAction>();
     const formProps: DynaminFormProps<any> = {
         fields: formFields,
         actionRef: formAction,
         onFinish: (value) => {
-            const tempValue = { ...value };
-
-            columnFields.forEach(field => {
-                const fieldName = lowerCaseFieldName(field.name);
-                const fieldValue = tempValue[fieldName];
-
-                console.info(fieldValue)
-                switch (field.optionType) {
-                    case FormItemType.editor:
-                        if (typeof fieldValue !== 'string' && fieldValue.toHTML) {
-                            tempValue[fieldName] = fieldValue.toHTML();
-                        }
-                        break;
-                }
-            });
-
-            return onFinish(tempValue);
+            return new Promise(resolve => {
+                setLoading({
+                    ...loading,
+                    submit: true,
+                })
+                const seoValue = seoFormAction.current?.getValue();
+                onFinish(handleSubmitFormData(columnFields, { ...value, ...seoValue })).then(res => {
+                    setLoading({
+                        ...loading,
+                        submit: false,
+                    })
+                })
+            })
         }
     }
 
-    return <DynaminForm {...formProps} layout={{ labelCol: { span: 3 } }} />
+    const seoFormProps: DynaminFormProps<any> = {
+        actionRef: seoFormAction,
+        fields: [{
+            label: '标题',
+            name: 'seoTitle'
+        }, {
+            label: '关键词',
+            name: 'seoKeyword',
+            type: FormItemType.textArea,
+            textarea: {
+                maxLength: 500
+            }
+        }, {
+            label: '描述',
+            name: 'seoDesc',
+            type: FormItemType.textArea,
+            textarea: {
+                maxLength: 500
+            }
+        }],
+    }
+
+    return <Spin tip="表单数据加载中，请稍后" spinning={loading.load}>
+        <Spin
+            spinning={loading.submit}
+            tip="数据提交中，请稍后..."
+        >
+            <Row>
+                <Col span={isSeo ? 15 : 24}>
+                    <DynaminForm {...formProps} layout={{ labelCol: { span: 4 }, wrapperCol: { span: 18 } }} />
+                </Col>
+                {isSeo ? <Col span={9}>
+                    <Card title="SEO信息">
+                        <DynaminForm {...seoFormProps} layout={{ labelCol: { span: 5 }, wrapperCol: { span: 18 } }} />
+                    </Card>
+                </Col> : null}
+            </Row>
+        </Spin>
+    </Spin>
 }
 
 export default ContentForm;
@@ -174,4 +222,30 @@ function SetRegulars(regularTypes: RegularType[] | undefined, item: FormItem) {
             }
         });
     }
+}
+
+export function handleSubmitFormData(columnFields: ColumnField[], value: any) {
+    columnFields.forEach(field => {
+        const fieldName = lowerCaseFieldName(field.name);
+        const fieldValue = value[fieldName];
+        const options = JSON.parse(field.options);
+
+        switch (field.optionType) {
+            case FormItemType.editor:
+                if (typeof fieldValue !== 'string' && fieldValue.toHTML) {
+                    value[fieldName] = fieldValue.toHTML();
+                }
+                break;
+            case FormItemType.select:
+                {
+                    const selectOptions = options as SelectOptions;
+                    if (selectOptions.multiple && fieldValue instanceof Array) {
+                        value[fieldName] = fieldValue.join(',');
+                    }
+                }
+                break;
+        }
+    });
+
+    return value;
 }
