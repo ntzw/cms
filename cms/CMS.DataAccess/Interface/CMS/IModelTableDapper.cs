@@ -12,6 +12,9 @@ namespace DataAccess.Interface.CMS
     public interface IModelTableDapper : IDefaultDataAccess<ModelTable>
     {
         Task<int> CreateTable(string tableName);
+
+        Task<int> CreateCategoryTable(string tableName);
+
         Task<ModelTable> GetByTableName(string tableName);
     }
 }

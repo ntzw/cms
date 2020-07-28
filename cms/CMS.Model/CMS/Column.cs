@@ -12,11 +12,20 @@ namespace Model.CMS
     [Table("CMS_Column")]
     public class Column : ModalBase
     {
-        [Description("")]
+        /// <summary>
+        /// 站点编号
+        /// </summary>
+        public string SiteNum { get; set; }
+
+        /// <summary>
+        /// 所属栏目
+        /// </summary>
         [Cascader("所属栏目", DataAction = "/Api/CMS/Column/CascaderData", ChangeOnSelect = true)]
         public string ParentNum { get; set; }
 
-        [Description("")]
+        /// <summary>
+        /// 名称
+        /// </summary>
         [Input("名称", Required = true, AllowClear = true)]
         public string Name { get; set; }
 
@@ -26,7 +35,11 @@ namespace Model.CMS
         [Select("所属模型", DataAction = "/Api/CMS/Model/SelectData", AllowClear = true)]
         public string ModelNum { get; set; }
 
-        [Description("")] public string SiteNum { get; set; }
+        /// <summary>
+        /// 是否启用分类
+        /// </summary>
+        [Switch("是否启用分类")]
+        public bool IsCategory { get; set; }
 
         /// <summary>
         /// Seo标题

@@ -50,16 +50,13 @@ namespace Service.CMS
 
             var id = oldData?["Id"].ToInt() ?? 0;
 
-            var editFieldSql = new List<string>();
-            var editValue = new ExpandoObject();
+            var contentEdit = new ContentEditSqlHelper(model.TableName);
             var fields = await ColumnFieldService.Interface.GetByColumnNum(columnNum);
             foreach (var columnField in fields)
             {
                 var formFieldName = columnField.Name.ToFieldNameLower();
                 if (!form.ContainsKey(formFieldName))
                     continue;
-
-                editFieldSql.Add(columnField.Name);
 
                 var value = form[formFieldName];
                 switch (columnField.OptionType)
@@ -68,10 +65,10 @@ namespace Service.CMS
                     case ReactFormItemType.Editor:
                     case ReactFormItemType.TextArea:
                     case ReactFormItemType.Select:
-                        editValue.TryAdd(formFieldName, value.ToStr());
+                        contentEdit.AddFieldAndValue(columnField.Name, value.ToStr());
                         break;
                     case ReactFormItemType.Password:
-                        editValue.TryAdd(formFieldName, Md5Helper.GetMD5_32(value.ToStr()));
+                        contentEdit.AddFieldAndValue(columnField.Name, Md5Helper.GetMD5_32(value.ToStr()));
                         break;
                     case ReactFormItemType.Cascader:
                         break;
@@ -92,55 +89,38 @@ namespace Service.CMS
                 }
             }
 
-            editFieldSql.Add("SeoTitle");
-            editFieldSql.Add("SeoKeyword");
-            editFieldSql.Add("SeoDesc");
-
-            editValue.TryAdd("SeoTitle", form["seoTitle"].ToStr());
-            editValue.TryAdd("SeoKeyword", form["seoKeyword"].ToStr());
-            editValue.TryAdd("SeoDesc", form["seoDesc"].ToStr());
+            contentEdit.AddFieldAndValue("SeoTitle", form["seoTitle"].ToStr());
+            contentEdit.AddFieldAndValue("SeoKeyword", form["seoKeyword"].ToStr());
+            contentEdit.AddFieldAndValue("SeoDesc", form["seoDesc"].ToStr());
+            contentEdit.AddFieldAndValue("CategoryNum", form["categoryNum"].ToStr());
 
             string sql = "";
             if (id > 0)
             {
-                editFieldSql.Add("UpdateDate");
-                editFieldSql.Add("UpdateAccountNum");
-
-                editValue.TryAdd("UpdateDate", DateTime.Now);
-                editValue.TryAdd("UpdateAccountNum", accountNum);
-                editValue.TryAdd("Id", id);
-
-                sql =
-                    $"UPDATE [{model.SqlTableName}] SET {string.Join(",", editFieldSql.Select(temp => $"[{temp}] = @{temp}"))} WHERE Id = @Id";
+                contentEdit.AddFieldAndValue("UpdateAccountNum", accountNum);
+                contentEdit.AddFieldAndValue("UpdateDate", DateTime.Now);
+                sql = contentEdit.GetUpdateSql(id);
             }
             else
             {
-                editFieldSql.Add("Num");
-                editFieldSql.Add("CreateDate");
-                editFieldSql.Add("UpdateDate");
-                editFieldSql.Add("CreateAccountNum");
-                editFieldSql.Add("UpdateAccountNum");
-                editFieldSql.Add("IsDel");
-                editFieldSql.Add("Status");
-                editFieldSql.Add("SiteNum");
-                editFieldSql.Add("ColumnNum");
-
-                editValue.TryAdd("Num", RandomHelper.CreateNum());
-                editValue.TryAdd("CreateDate", DateTime.Now);
-                editValue.TryAdd("UpdateDate", DateTime.Now);
-                editValue.TryAdd("CreateAccountNum", accountNum);
-                editValue.TryAdd("UpdateAccountNum", accountNum);
-                editValue.TryAdd("IsDel", false);
-                editValue.TryAdd("Status", 0);
-                editValue.TryAdd("SiteNum", column.SiteNum);
-                editValue.TryAdd("ColumnNum", columnNum);
-
-                sql =
-                    $"INSERT INTO [{model.SqlTableName}] ([{string.Join("],[", editFieldSql)}]) VALUES ({string.Join(",", editFieldSql.Select(temp => $"@{temp}"))}) ";
+                contentEdit.AddFieldAndValue("Num", RandomHelper.CreateNum());
+                contentEdit.AddFieldAndValue("CreateDate", DateTime.Now);
+                contentEdit.AddFieldAndValue("UpdateDate", DateTime.Now);
+                contentEdit.AddFieldAndValue("CreateAccountNum", accountNum);
+                contentEdit.AddFieldAndValue("UpdateAccountNum", accountNum);
+                contentEdit.AddFieldAndValue("IsDel", false);
+                contentEdit.AddFieldAndValue("Status", 0);
+                contentEdit.AddFieldAndValue("SiteNum", column.SiteNum);
+                contentEdit.AddFieldAndValue("ColumnNum", columnNum);
+                sql = contentEdit.GetAddSql();
             }
 
-            var res = await _dapper.Execute(sql, editValue);
+            var res = await _dapper.Execute(sql, contentEdit.GetValue());
             return res > 0 ? HandleResult.Success() : HandleResult.Error("操作失败");
+        }
+
+        private static void SetEditFieldValue(List<string> editFieldSql, ExpandoObject editValue)
+        {
         }
 
         public async Task<PageResponse> Page(JObject form)

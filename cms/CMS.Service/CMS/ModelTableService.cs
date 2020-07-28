@@ -33,9 +33,9 @@ namespace Service.CMS
             {
                 string tableName = $"CMS_U_{info.TableName}";
                 await GetDapper().CreateTable(tableName);
+                await GetDapper().CreateCategoryTable($"{tableName}_Category");
             });
         }
-
         public Task<ModelTable> GetByTableName(string tableName)
         {
             return GetDapper().GetByTableName(tableName);
