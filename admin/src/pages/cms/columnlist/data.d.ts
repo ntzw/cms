@@ -11,6 +11,7 @@ export interface Column extends ModalBase {
     siteNum: string;
     parentNum: string | string[];
     modelNum: string;
+    isCategory: boolean;
     children: Column[];
 }
 

@@ -1,14 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { connect, Loading, GlobalModelState } from 'umi'
-import { ContentManagementProps, ColumnContentItem, ContentModelState, ColumnItem, ContentEditState } from "./data";
+import { ContentManagementProps, ColumnContentItem, ContentModelState, ColumnItem, ContentEditState, CategoryManagementState } from "./data";
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { Card, Row, Col, Menu, Empty, Button, Tooltip } from 'antd';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
 import { page } from './service';
 import moment from 'moment';
-import { PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, BarsOutlined } from '@ant-design/icons';
 import ContentEditDrawer from './components/ContentEditDrawer';
 import { lowerCaseFieldName } from '@/utils/utils';
+import CategoryManagement from './components/CategoryManagement';
+import { ContentFormAction } from '@/components/Content/data';
 
 const { SubMenu } = Menu;
 
@@ -27,9 +29,11 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
     loadingColumnData,
     loadingTableColumns,
     currentColumnNum,
+    currentColumn,
     currentTableFields,
     currentSite
 }) => {
+    const contentAction = useRef<ContentFormAction>();
     const tableAction = useRef<TableAction>();
     const [contentTableColumns, setContentTableColumns] = useState<ProColumns<ColumnContentItem>[]>([]);
     const [columnOpenKeys, setColumnOpenKeys] = useState<string[]>([]);
@@ -37,6 +41,9 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
     const [contentEdit, setContentEdit] = useState<ContentEditState>({
         visible: false,
     })
+    const [categoryManage, setCategoryManage] = useState<CategoryManagementState>({
+        visible: false,
+    });
 
     useEffect(() => {
         setRootSubmenuKeys(columnData.map(temp => temp.num));
@@ -127,7 +134,7 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
                 <Col flex={1}>
                     <Card bordered={false} loading={loadingTableColumns}>
                         {currentColumnNum && currentTableFields && currentTableFields.length > 0 ? <ProTable<ColumnContentItem>
-                            headerTitle="内容列表"
+                            headerTitle={`${currentColumn?.name} 内容列表`}
                             actionRef={tableAction}
                             request={(params, sort, query) => {
                                 params['columnNum'] = currentColumnNum;
@@ -139,7 +146,9 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
                             }}
                             columns={contentTableColumns}
                             rowSelection={{}}
-                            pagination={false}
+                            pagination={{
+                                size: "default"
+                            }}
                             params={{
 
                             }}
@@ -152,7 +161,15 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
                                             visible: true,
                                         })
                                     }}
-                                >新增</Button>
+                                >新增</Button>,
+                                currentColumn?.isCategory && <Button
+                                    icon={<BarsOutlined />}
+                                    onClick={() => {
+                                        setCategoryManage({
+                                            visible: true,
+                                        })
+                                    }}
+                                >类别管理</Button>
                             ]}
                         /> : <Empty description="未选择栏目或栏目未设置字段" />}
                     </Card>
@@ -161,8 +178,7 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
         </Card>
         <ContentEditDrawer
             {...contentEdit}
-            columnNum={currentColumnNum || ''}
-            columnFields={currentTableFields || []}
+            actionRef={contentAction}
             onClose={(isSuccess) => {
                 setContentEdit({
                     ...contentEdit,
@@ -174,14 +190,25 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
                 }
             }}
         />
+        <CategoryManagement
+            {...categoryManage}
+            onClose={() => {
+                contentAction.current?.reoladFieldItem();
+                setCategoryManage({
+                    ...categoryManage,
+                    visible: false,
+                })
+            }}
+        />
     </PageHeaderWrapper>
 }
 
-export default connect(({ content: { columns, columnTableFields, currentColumnNum }, loading, global }: { global: GlobalModelState, content: ContentModelState, loading: Loading }) => {
+export default connect(({ content: { columns, columnTableFields, currentColumnNum, currentColumn }, loading, global }: { global: GlobalModelState, content: ContentModelState, loading: Loading }) => {
 
     return {
         columnData: columns,
         currentColumnNum,
+        currentColumn,
         currentSite: global.selectedSite,
         currentTableFields: columnTableFields && currentColumnNum ? columnTableFields[currentColumnNum] : [],
         loadingColumnData: loading.effects['content/fetchColumns'],

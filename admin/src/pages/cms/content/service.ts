@@ -32,3 +32,31 @@ export function GetEditValue(itemNum: string, columnNum: string): AsyncHandleRes
         },
     });
 }
+
+export function categoryPage(columnNum: string) {
+    return request('/Api/CMS/Category/Page', {
+        method: "POST",
+        data: {
+            columnNum,
+        },
+    });
+}
+
+export function SubmitCategory(values: any): AsyncHandleResult {
+    return request('/Api/CMS/Category/Submit', {
+        method: "POST",
+        data: {
+            ...values,
+        },
+    });
+}
+
+export function DeleteCategory(ids: number[], columnNum: string): AsyncHandleResult {
+    return request('/Api/CMS/Category/Delete', {
+        method: "POST",
+        data: {
+            ids: ids.join(','),
+            columnNum
+        },
+    });
+}

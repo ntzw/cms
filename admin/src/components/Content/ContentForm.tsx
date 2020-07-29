@@ -26,8 +26,26 @@ enum RegularType {
     MobilePhone = 1,
 }
 
-const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef, columnFields, onFinish, isSeo = true }) => {
+const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef, columnFields, onFinish, isSeo = true, isCategory = false }) => {
     const [formFields, setFormFields] = useState<FormItem[]>([]);
+    const [seoFormFields] = useState([{
+        label: '标题',
+        name: 'seoTitle'
+    }, {
+        label: '关键词',
+        name: 'seoKeyword',
+        type: FormItemType.textArea,
+        textarea: {
+            maxLength: 500
+        }
+    }, {
+        label: '描述',
+        name: 'seoDesc',
+        type: FormItemType.textArea,
+        textarea: {
+            maxLength: 500
+        }
+    }])
     const [loading, setLoading] = useState({
         submit: false,
         load: false,
@@ -42,12 +60,22 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
             formAction.current?.submit();
         },
         setValue: (value) => {
-            const newData = handleFormData(parsingColumnFields(columnFields), value);
-            formAction.current?.setValue(newData);
-            seoFormAction.current?.setValue(newData);
+            let data = handleFormData(formFields, value);
+            seoFormAction.current?.setValue({
+                seoDesc: data.seoDesc,
+                seoKeyword: data.seoKeyword,
+                seoTitle: data.seoTitle,
+            });
+
+
+            formAction.current?.setValue(data);
+
+        },
+        reoladFieldItem: () => {
+            if (formFields.length > 0)
+                formAction.current?.reloadFieldItem();
         },
         loading: (status) => {
-            console.info('setLoading', status)
             setLoading({
                 ...loading,
                 load: status
@@ -63,9 +91,22 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
 
     useEffect(() => {
         if (columnFields) {
-            setFormFields(parsingColumnFields(columnFields))
+            let fields = parsingColumnFields(columnFields)
+            if (isCategory) {
+                fields.splice(0, 0, {
+                    label: '所属类别',
+                    name: 'categoryNum',
+                    type: FormItemType.cascader,
+                    dataAction: '/Api/CMS/Category/CascaderData',
+                    cascader: {
+                        options: []
+                    }
+                })
+            }
+
+            setFormFields(fields);
         }
-    }, [columnFields])
+    }, [columnFields]);
 
     const formAction = useRef<DynaminFormAction>();
     const seoFormAction = useRef<DynaminFormAction>();
@@ -73,13 +114,23 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
         fields: formFields,
         actionRef: formAction,
         onFinish: (value) => {
+            const seoValue = seoFormAction.current?.getValue();
             return new Promise(resolve => {
                 setLoading({
                     ...loading,
                     submit: true,
                 })
-                const seoValue = seoFormAction.current?.getValue();
-                onFinish(handleSubmitFormData(columnFields, { ...value, ...seoValue })).then(res => {
+
+                const data = {
+                    ...value,
+                    ...seoValue
+                };
+
+                if (Array.isArray(data.categoryNum)) {
+                    data.categoryNum = data.categoryNum[data.categoryNum.length - 1];
+                }
+
+                onFinish(handleSubmitFormData(columnFields, data)).then(res => {
                     setLoading({
                         ...loading,
                         submit: false,
@@ -91,24 +142,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
 
     const seoFormProps: DynaminFormProps<any> = {
         actionRef: seoFormAction,
-        fields: [{
-            label: '标题',
-            name: 'seoTitle'
-        }, {
-            label: '关键词',
-            name: 'seoKeyword',
-            type: FormItemType.textArea,
-            textarea: {
-                maxLength: 500
-            }
-        }, {
-            label: '描述',
-            name: 'seoDesc',
-            type: FormItemType.textArea,
-            textarea: {
-                maxLength: 500
-            }
-        }],
+        fields: seoFormFields,
     }
 
     return <Spin tip="表单数据加载中，请稍后" spinning={loading.load}>
@@ -118,13 +152,30 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
         >
             <Row>
                 <Col span={isSeo ? 15 : 24}>
-                    <DynaminForm {...formProps} layout={{ labelCol: { span: 4 }, wrapperCol: { span: 18 } }} />
+                    <DynaminForm
+                        {...formProps}
+                        name="contentform"
+                        layout={{ labelCol: { span: 4 }, wrapperCol: { span: 18 } }}
+                        fieldActionParams={(field) => {
+                            switch (field.name.toLocaleLowerCase()) {
+                                case 'categorynum':
+                                    return {
+                                        columnNum,
+                                    }
+                                default:
+                                    return {}
+                            }
+                        }}
+                    />
                 </Col>
-                {isSeo ? <Col span={9}>
+                {isSeo && <Col span={9}>
                     <Card title="SEO信息">
-                        <DynaminForm {...seoFormProps} layout={{ labelCol: { span: 5 }, wrapperCol: { span: 18 } }} />
+                        <DynaminForm
+                            {...seoFormProps}
+                            name="setForm"
+                            layout={{ labelCol: { span: 5 }, wrapperCol: { span: 18 } }} />
                     </Card>
-                </Col> : null}
+                </Col>}
             </Row>
         </Spin>
     </Spin>
@@ -151,13 +202,14 @@ export function parsingColumnFields(fields: ColumnField[]) {
                     item.validateTrigger = 'onBlur';
                     item.rules?.push({
                         required: true,
-                        validator: (_, value, callback) => {
-                            if (value.isEmpty()) {
-                                callback('请输入正文内容');
-                            }
-                            else {
-                                callback(undefined);
-                            }
+                        validator: (_, value) => {
+                            return new Promise((resolve, reject) => {
+                                if (value.isEmpty()) {
+                                    reject('请输入正文内容');
+                                } else {
+                                    resolve();
+                                }
+                            })
                         }
                     });
                     break;

@@ -4,6 +4,7 @@ import { ModalBase } from '@/components/ListTable';
 interface ContentFormBaseProps {
     columnNum: string;
     itemNum?: string;
+    isCategory?: boolean;
     isSeo?: boolean;
 }
 
@@ -34,6 +35,7 @@ export interface ContentFormAction {
     setValue: (value: any) => void;
     clear: () => void;
     loading: (status: boolean) => void;
+    reoladFieldItem: () => void;
 }
 
 export interface AsyncContentFormAction {

@@ -11,6 +11,7 @@ using Foundation.ColumnFieldOptions;
 using Foundation.Modal;
 using Foundation.Modal.Result;
 using Helper;
+using Model.CMS;
 using Newtonsoft.Json.Linq;
 
 namespace Service.CMS
@@ -50,56 +51,18 @@ namespace Service.CMS
 
             var id = oldData?["Id"].ToInt() ?? 0;
 
-            var contentEdit = new ContentEditSqlHelper(model.TableName);
-            var fields = await ColumnFieldService.Interface.GetByColumnNum(columnNum);
-            foreach (var columnField in fields)
-            {
-                var formFieldName = columnField.Name.ToFieldNameLower();
-                if (!form.ContainsKey(formFieldName))
-                    continue;
-
-                var value = form[formFieldName];
-                switch (columnField.OptionType)
-                {
-                    case ReactFormItemType.Input:
-                    case ReactFormItemType.Editor:
-                    case ReactFormItemType.TextArea:
-                    case ReactFormItemType.Select:
-                        contentEdit.AddFieldAndValue(columnField.Name, value.ToStr());
-                        break;
-                    case ReactFormItemType.Password:
-                        contentEdit.AddFieldAndValue(columnField.Name, Md5Helper.GetMD5_32(value.ToStr()));
-                        break;
-                    case ReactFormItemType.Cascader:
-                        break;
-                    case ReactFormItemType.Switch:
-                        break;
-                    case ReactFormItemType.Radio:
-                        break;
-                    case ReactFormItemType.CheckBox:
-                        break;
-                    case ReactFormItemType.DataPicker:
-                        break;
-                    case ReactFormItemType.RangePicker:
-                        break;
-                    case ReactFormItemType.Upload:
-                        break;
-                    case ReactFormItemType.Region:
-                        break;
-                }
-            }
-
+            var contentEdit = new DynamicTableSqlHelper(model.SqlTableName);
+            contentEdit.SetJObjectFormData(await ColumnFieldService.Interface.GetByColumnNum(columnNum), form);
             contentEdit.AddFieldAndValue("SeoTitle", form["seoTitle"].ToStr());
             contentEdit.AddFieldAndValue("SeoKeyword", form["seoKeyword"].ToStr());
             contentEdit.AddFieldAndValue("SeoDesc", form["seoDesc"].ToStr());
             contentEdit.AddFieldAndValue("CategoryNum", form["categoryNum"].ToStr());
 
-            string sql = "";
+
             if (id > 0)
             {
                 contentEdit.AddFieldAndValue("UpdateAccountNum", accountNum);
                 contentEdit.AddFieldAndValue("UpdateDate", DateTime.Now);
-                sql = contentEdit.GetUpdateSql(id);
             }
             else
             {
@@ -112,15 +75,11 @@ namespace Service.CMS
                 contentEdit.AddFieldAndValue("Status", 0);
                 contentEdit.AddFieldAndValue("SiteNum", column.SiteNum);
                 contentEdit.AddFieldAndValue("ColumnNum", columnNum);
-                sql = contentEdit.GetAddSql();
             }
 
+            string sql = id > 0 ? contentEdit.GetUpdateSql(id) : contentEdit.GetAddSql();
             var res = await _dapper.Execute(sql, contentEdit.GetValue());
             return res > 0 ? HandleResult.Success() : HandleResult.Error("操作失败");
-        }
-
-        private static void SetEditFieldValue(List<string> editFieldSql, ExpandoObject editValue)
-        {
         }
 
         public async Task<PageResponse> Page(JObject form)

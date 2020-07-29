@@ -3,6 +3,7 @@
  * email：ntzw.geek@gmail.com
  */
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -86,6 +87,7 @@ namespace Service.CMS
                 item.TryAdd("ParentNum", column.ParentNum);
                 item.TryAdd("CreateDate", column.CreateDate);
                 item.TryAdd("ModelNum", column.ModelNum);
+                item.TryAdd("IsCategory", column.IsCategory);
                 item.TryAdd("ModelName",
                     column.ModelNum.IsNotEmpty() && models.ContainsKey(column.ModelNum) ? models[column.ModelNum] : "");
 
@@ -97,6 +99,28 @@ namespace Service.CMS
             }
 
             return data;
+        }
+
+
+        readonly ConcurrentDictionary<string, ModelTable> _modelTables = new ConcurrentDictionary<string, ModelTable>();
+
+        /// <summary>
+        /// 获取栏目模型
+        /// </summary>
+        /// <param name="columnNum"></param>
+        /// <returns></returns>
+        public async Task<ModelTable> GetModelByNum(string columnNum)
+        {
+            if (!_modelTables.ContainsKey(columnNum))
+            {
+                var column = await GetByNum(columnNum);
+                if (column == null || column.ModelNum.IsEmpty()) return null;
+
+                var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
+                _modelTables[columnNum] = model;
+            }
+
+            return _modelTables[columnNum];
         }
     }
 }

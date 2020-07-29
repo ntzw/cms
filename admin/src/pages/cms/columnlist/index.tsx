@@ -36,7 +36,6 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
         dataIndex: 'createDate',
         title: '创建时间',
         valueType: 'option',
-        sorter: true,
         render: (text) => {
             return typeof text === 'string' && text && moment(text).format('YYYY-MM-DD HH:mm:ss');
         }

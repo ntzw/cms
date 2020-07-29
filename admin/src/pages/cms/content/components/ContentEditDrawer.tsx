@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ContentEditProps, ColumnContentItem } from "../data";
+import { ContentEditProps, ColumnContentItem, ContentModelState } from "../data";
 import { Drawer, Button, message } from 'antd';
 import ContentForm from '@/components/Content/ContentForm';
 import { connect } from 'umi';
@@ -9,10 +9,12 @@ import { submit, GetEditValue } from '../service';
 
 const ContentEditDrawer: React.FC<ContentEditProps> = ({
     visible,
-    columnNum,
+    currentColumn,
+    currentColumnNum,
     itemNum,
     columnFields,
-    onClose
+    onClose,
+    actionRef
 }) => {
 
     const formAction = useRef<ContentFormAction>();
@@ -27,6 +29,30 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
         setIsLoadData(true);
     }, [itemNum])
 
+    const action: ContentFormAction = {
+        clear: () => {
+            formAction.current?.clear();
+        },
+        submit: () => {
+            formAction.current?.submit();
+        },
+        setValue: (value) => {
+            formAction.current?.setValue(value);
+        },
+        reoladFieldItem: () => {
+            formAction.current?.reoladFieldItem();
+        },
+        loading: (status) => {
+            formAction.current?.loading(status);
+        }
+    }
+
+    if (actionRef && typeof actionRef === 'function') {
+        actionRef(action);
+    } else if (actionRef && typeof actionRef !== 'function') {
+        actionRef.current = action;
+    }
+
     return <Drawer
         className={styles.contentEditDrawer}
         title={`${(itemNum ? '编辑' : '添加')}内容`}
@@ -38,16 +64,18 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
         }}
         maskClosable={false}
         afterVisibleChange={() => {
-            if (isLoadData && itemNum) {
+            if (isLoadData && itemNum && currentColumnNum) {
                 formAction.current?.loading(true);
-                GetEditValue(itemNum, columnNum).then(res => {
+                GetEditValue(itemNum, currentColumnNum).then(res => {
                     if (res.isSuccess) {
                         setEditValue(res.data);
                         formAction.current?.setValue(res.data);
                     }
 
-                    formAction.current?.loading(false);
-                    setIsLoadData(false);
+                    setTimeout(() => {
+                        formAction.current?.loading(false);
+                        setIsLoadData(false);
+                    }, 800);
                 });
             }
         }}
@@ -77,7 +105,8 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
         </div>}
     >
         <ContentForm
-            columnNum={columnNum}
+            columnNum={currentColumnNum || ''}
+            isCategory={currentColumn?.isCategory}
             columnFields={columnFields}
             actionRef={formAction}
             onFinish={(value) => {
@@ -91,9 +120,8 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                         ...editValue,
                         ...value,
                         num: itemNum,
-                        columnNum,
+                        columnNum: currentColumnNum,
                     }
-
 
                     submit(newValue).then(res => {
                         if (res.isSuccess) {
@@ -116,4 +144,10 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
     </Drawer>
 }
 
-export default connect()(ContentEditDrawer);
+export default connect(({ content: { currentColumn, currentColumnNum, columnTableFields } }: { content: ContentModelState }) => {
+    return {
+        currentColumn,
+        currentColumnNum,
+        columnFields: columnTableFields && currentColumnNum ? columnTableFields[currentColumnNum] : [],
+    }
+})(ContentEditDrawer);

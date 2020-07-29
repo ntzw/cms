@@ -23,5 +23,8 @@ namespace Model.CMS
 
         [Computed]
         public string SqlTableName => $"CMS_U_{TableName}";
+
+        [Computed]
+        public string SqlCategoryTableName => $"{SqlTableName}_Category";
     }
 }

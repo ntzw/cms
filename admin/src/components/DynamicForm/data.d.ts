@@ -26,6 +26,7 @@ export interface FormItem {
 export interface DynaminFormProps<T extends Store> {
     fields: FormItem[] | string;
     params?: { [key: string]: any };
+    name?: string;
     onFinish?: (value: T) => Promise<any>;
     /**
   * 初始化的参数，可以操作 Form

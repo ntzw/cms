@@ -92,6 +92,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
         params,
         fieldActionParams,
         actionRef,
+        name,
         layout = {
             labelCol: { span: 6 },
             wrapperCol: { span: 16 },
@@ -151,12 +152,14 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                             item.rules = item.rules.map(temp => {
                                 if (temp.required) {
                                     item.validateTrigger = 'onBlur'
-                                    temp.validator = (_, value, callback) => {
-                                        if (value.isEmpty()) {
-                                            callback(`请输入 ${item.label}`)
-                                        } else {
-                                            callback()
-                                        }
+                                    temp.validator = (_, value) => {
+                                        return new Promise((resolve, reject) => {
+                                            if (value.isEmpty()) {
+                                                reject(`请输入 ${item.label}`)
+                                            } else {
+                                                resolve()
+                                            }
+                                        })
                                     }
                                 }
 
@@ -201,6 +204,12 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
         userAction.clear();
         if (fields instanceof Array) {
             setFormItemData(fields);
+            loadFieldAsyncData(fields).then(fields => {
+                setLoading({
+                    ...loading,
+                    loadFields: false,
+                })
+            });
         } else if (typeof fields === 'string' && fields) {
             loadFields(fields, params);
         }
@@ -217,7 +226,12 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
             }
         },
         reloadFieldItem: () => {
-            loadFieldAsyncData(formItemData);
+            loadFieldAsyncData(formItemData).then(fields => {
+                setLoading({
+                    ...loading,
+                    loadFields: false,
+                })
+            });
         },
         clear: () => {
             form.current?.resetFields();
@@ -254,7 +268,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
     >
         {formItemData.length > 0 ? <Form
             {...layout}
-            name="basic"
+            name={name || Date.now().toString()}
             ref={form}
             onFinish={(value) => {
                 if (onFinish) {
