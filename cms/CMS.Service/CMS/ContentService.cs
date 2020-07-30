@@ -45,9 +45,15 @@ namespace Service.CMS
             var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (model == null) return HandleResult.Error("栏目未绑定模型");
 
-            var oldData =
-                (itemNum.IsEmpty() ? null : await _dapper.GetByItem(model.SqlTableName, itemNum)) as
-                IDictionary<string, object>;
+            IDictionary<string, object> oldData = null;
+            if (column.IsSingle)
+            {
+                oldData = await _dapper.GetFirstByColumnNum(model.SqlTableName, column.Num) as IDictionary<string, object>;
+            }
+            else if (itemNum.IsNotEmpty())
+            {
+                oldData = await _dapper.GetByItem(model.SqlTableName, itemNum) as IDictionary<string, object>;
+            }
 
             var id = oldData?["Id"].ToInt() ?? 0;
 
@@ -96,6 +102,11 @@ namespace Service.CMS
             if (model == null) return PageResponse.Error("栏目未绑定模型");
 
             return await _dapper.Page(model.SqlTableName, req);
+        }
+
+        public Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum)
+        {
+            return _dapper.GetFirstByColumnNum(tableName, columnNum);
         }
     }
 }

@@ -88,6 +88,7 @@ namespace Service.CMS
                 item.TryAdd("CreateDate", column.CreateDate);
                 item.TryAdd("ModelNum", column.ModelNum);
                 item.TryAdd("IsCategory", column.IsCategory);
+                item.TryAdd("IsSingle", column.IsSingle);
                 item.TryAdd("ModelName",
                     column.ModelNum.IsNotEmpty() && models.ContainsKey(column.ModelNum) ? models[column.ModelNum] : "");
 

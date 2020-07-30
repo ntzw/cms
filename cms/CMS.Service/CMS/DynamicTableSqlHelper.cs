@@ -35,6 +35,11 @@ namespace Service.CMS
             }
         }
 
+        /// <summary>
+        /// 添加栏目表单数据
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <param name="form"></param>
         public void SetJObjectFormData(IEnumerable<ColumnField> fields, JObject form)
         {
             foreach (var columnField in fields)
@@ -50,6 +55,7 @@ namespace Service.CMS
                     case ReactFormItemType.Editor:
                     case ReactFormItemType.TextArea:
                     case ReactFormItemType.Select:
+                    case ReactFormItemType.Upload:
                         AddFieldAndValue(columnField.Name, value.ToStr());
                         break;
                     case ReactFormItemType.Password:
@@ -66,8 +72,6 @@ namespace Service.CMS
                     case ReactFormItemType.DataPicker:
                         break;
                     case ReactFormItemType.RangePicker:
-                        break;
-                    case ReactFormItemType.Upload:
                         break;
                     case ReactFormItemType.Region:
                         break;

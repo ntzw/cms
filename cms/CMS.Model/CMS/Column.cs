@@ -42,6 +42,12 @@ namespace Model.CMS
         public bool IsCategory { get; set; }
 
         /// <summary>
+        /// 是否单篇
+        /// </summary>
+        [Switch("是否单篇")]
+        public bool IsSingle { get; set; }
+
+        /// <summary>
         /// Seo标题
         /// </summary>
         [Input("Seo标题")]

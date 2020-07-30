@@ -22,6 +22,13 @@ interface SelectOptions extends BaseOptions {
     multiple: boolean;
 }
 
+interface UploadOptions extends BaseOptions {
+    uploadType: "image" | "file";
+    uploadMax: number;
+    action: string;
+    accept: string[];
+}
+
 enum RegularType {
     MobilePhone = 1,
 }
@@ -151,7 +158,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
             tip="数据提交中，请稍后..."
         >
             <Row>
-                <Col span={isSeo ? 15 : 24}>
+                <Col flex="1 1 400px">
                     <DynaminForm
                         {...formProps}
                         name="contentform"
@@ -168,8 +175,8 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
                         }}
                     />
                 </Col>
-                {isSeo && <Col span={9}>
-                    <Card title="SEO信息">
+                {isSeo && <Col flex="380px">
+                    <Card title="SEO信息" bodyStyle={{ padding: 10, paddingTop: 24 }}>
                         <DynaminForm
                             {...seoFormProps}
                             name="setForm"
@@ -231,6 +238,9 @@ export function parsingColumnFields(fields: ColumnField[]) {
             case FormItemType.select:
                 SetSelectOptions(item, elseOptions as SelectOptions);
                 break;
+            case FormItemType.upload:
+                SetUploadOptions(item, elseOptions as UploadOptions);
+                break;
 
             default:
                 break;
@@ -238,6 +248,15 @@ export function parsingColumnFields(fields: ColumnField[]) {
 
         return item;
     })
+}
+
+function SetUploadOptions(item: FormItem, elseOptions: UploadOptions) {
+    item.upload = {
+        type: elseOptions.uploadType,
+        max: elseOptions.uploadMax,
+        action: elseOptions.action,
+        accept: elseOptions.accept?.join(','),
+    }
 }
 
 function SetInputOptions(item: FormItem, elseOptions: InputOptions) {

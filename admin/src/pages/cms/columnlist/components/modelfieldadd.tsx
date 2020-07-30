@@ -1,11 +1,12 @@
 import React, { useState, useEffect, createRef } from 'react';
-import { ModelFieldAddProps, FieldDefaultType } from "../data";
-import { Modal, Form, Input, Select, Switch, InputNumber, message, Spin } from "antd";
+import { ModelFieldAddProps } from "../data";
+import { Modal, Form, Input, Select, Switch, InputNumber, message, Spin, Radio } from "antd";
 import { filterEnumKey } from '@/utils/utils';
 import { SubmitModelField, GetColumnFieldEditValue, GetModelFieldEditValue, SubmitColumnFieldEdit } from '../service';
 import { FormItemType, GetFormItemTypeName } from '@/components/DynamicForm';
 import { HandleResult } from '@/utils/request';
 import { FormInstance } from 'antd/lib/form';
+import { FieldDefaultType } from '@/components/Content/data';
 
 const layout = {
     labelCol: { span: 6 },
@@ -16,7 +17,7 @@ const RequiredSwitch = ({ key = 'required' }: { key?: string }) => {
     return <Form.Item
         key={key}
         name="required"
-        label="是否必填"
+        label="是否必须"
         valuePropName="checked"
     >
         <Switch checkedChildren="是" unCheckedChildren="否" />
@@ -98,7 +99,95 @@ const SelectOption = () => {
     </>
 }
 
-const FormFieldOptions: React.FC<{ optionType: FormItemType, form: React.RefObject<FormInstance> }> = ({ optionType, form }) => {
+const imageAccepts = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
+const fileAccepts = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+const UploadOption: React.FC<{
+    oldValue?: FieldDefaultType;
+    form: React.RefObject<FormInstance>;
+}> = ({
+    oldValue,
+    form
+}) => {
+        const [currentUploadType, setCurrentUploadType] = useState('image');
+        const [accepts, setAccepts] = useState<string[]>([]);
+
+        useEffect(() => {
+            if (oldValue) {
+                const options = JSON.parse(oldValue.options || '{}');
+                if (options.uploadType) {
+                    setCurrentUploadType(options.uploadType);
+                }
+            }
+        }, [oldValue]);
+
+        useEffect(() => {
+            switch (currentUploadType) {
+                case 'image':
+                    setAccepts(imageAccepts);
+                    break;
+                case 'file':
+                    setAccepts([...fileAccepts, ...imageAccepts]);
+                    break;
+            }
+        }, [currentUploadType])
+
+        return <>
+            <Form.Item
+                key="uploadType"
+                name="uploadType"
+                label="上传类型"
+            >
+                <Radio.Group
+                    onChange={(e) => {
+                        const tempType = e.target.value;
+                        setCurrentUploadType(tempType);
+
+                        const options = JSON.parse(oldValue?.options || '{}');
+                        if (options.uploadType !== tempType) {
+                            form.current?.setFieldsValue({
+                                accept: tempType === 'image' ? imageAccepts : fileAccepts
+                            })
+                        } else {
+                            form.current?.setFieldsValue({
+                                accept: options.accept || []
+                            })
+                        }
+                    }}
+                >
+                    <Radio value="image">图片</Radio>
+                    <Radio value="file">文件</Radio>
+                </Radio.Group>
+            </Form.Item>
+            <Form.Item
+                key="uploadMax"
+                name="uploadMax"
+                label="允许上传数量"
+            >
+                <InputNumber min={0} max={20} />
+            </Form.Item>
+            <Form.Item
+                key="accept"
+                name="accept"
+                label="允许文件类型"
+                rules={[{ required: true, message: '请至少选择一个文件类型' }]}
+            >
+                <Select
+                    mode="multiple"
+                    allowClear
+                    options={accepts.map(temp => ({
+                        label: temp,
+                        value: temp,
+                    }))}
+                />
+            </Form.Item>
+        </>
+    }
+
+const FormFieldOptions: React.FC<{
+    optionType: FormItemType;
+    form: React.RefObject<FormInstance>;
+    oldValue?: FieldDefaultType;
+}> = ({ optionType, form, oldValue }) => {
     switch (optionType) {
         case FormItemType.password:
             return <PasswordOption />;
@@ -107,6 +196,8 @@ const FormFieldOptions: React.FC<{ optionType: FormItemType, form: React.RefObje
             return <InputOption />;
         case FormItemType.select:
             return <SelectOption />;
+        case FormItemType.upload:
+            return <UploadOption form={form} oldValue={oldValue} />
         default:
             return <></>;
     }
@@ -124,6 +215,7 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
     const [form] = useState(createRef<FormInstance>());
     const [currentOptionType, setCurrentOptionType] = useState('');
     const [isUpdate, setIsUpdate] = useState(false);
+    const [oldValue, setOldValue] = useState<FieldDefaultType>();
     const [loading, setLoading] = useState({
         submit: false,
         loadFields: false,
@@ -131,6 +223,8 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
 
     const getValueCallback = (res: HandleResult<FieldDefaultType>) => {
         if (res.isSuccess && res.data) {
+            setOldValue(res.data);
+
             const { name, explain, optionType, options } = res.data;
 
             const tempOptions = JSON.parse(options);
@@ -151,7 +245,7 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
 
     useEffect(() => {
         form.current?.resetFields();
-        if (editId && editType) {
+        if (visible && editId && editType) {
             setLoading({
                 ...loading,
                 loadFields: true,
@@ -168,7 +262,7 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
         }
 
         setIsUpdate(!!editId && editId > 0);
-    }, [editId, editType])
+    }, [visible])
 
     return <Modal
         title="添加字段"
@@ -191,7 +285,10 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
                 ref={form}
                 name="ModelFieldAdd"
                 initialValues={{
-                    maxLength: 500
+                    maxLength: 500,
+                    uploadType: 'image',
+                    uploadMax: 1,
+                    accept: imageAccepts,
                 }}
                 onFinish={(value) => {
                     setLoading({
@@ -250,7 +347,11 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
                 </Form.Item>
                 <RequiredSwitch />
                 <ExtraInput />
-                <FormFieldOptions optionType={Number(currentOptionType)} form={form} />
+                <FormFieldOptions
+                    optionType={Number(currentOptionType)}
+                    form={form}
+                    oldValue={oldValue}
+                />
             </Form>
         </Spin>
     </Modal>

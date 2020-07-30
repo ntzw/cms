@@ -29,7 +29,13 @@ namespace DataAccess.SqlServer.CMS
 
             return new PageResponse(
                 await MainConnection.Interface.GetConnection().QueryAsync<dynamic>(dataSql, whereParams),
-                await MainConnection.Interface.GetConnection().QueryFirstAsync<long>(countSql, whereParams));
+                await MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync<long>(countSql, whereParams));
+        }
+
+        public Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum)
+        {
+            string sql = $"SELECT TOP 1 * FROM {tableName} WHERE ColumnNum = @ColumnNum ";
+            return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {ColumnNum = columnNum});
         }
     }
 }

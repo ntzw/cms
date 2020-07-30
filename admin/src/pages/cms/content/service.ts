@@ -3,7 +3,7 @@ import request, { AsyncHandleResult } from "@/utils/request";
 import { ColumnContentItem } from "./data";
 
 
-export function page({ params, sort, query }: PageParamsType) {
+export function ContentPage({ params, sort, query }: PageParamsType) {
     return request('/Api/CMS/Content/Page', {
         method: "POST",
         data: {
@@ -14,7 +14,7 @@ export function page({ params, sort, query }: PageParamsType) {
     });
 }
 
-export function submit(params: { columnNum: string; itemNum: string;[key: string]: any; }): AsyncHandleResult {
+export function ContentSubmit(params: { columnNum: string; itemNum: string;[key: string]: any; }): AsyncHandleResult {
     return request('/Api/CMS/Content/Submit', {
         method: "POST",
         data: {

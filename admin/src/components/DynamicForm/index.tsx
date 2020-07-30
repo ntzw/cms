@@ -6,8 +6,11 @@ import { Store } from "antd/lib/form/interface";
 import { FormInstance } from "antd/lib/form";
 import { getFields, getAsyncData } from "./service";
 import 'braft-editor/dist/index.css'
-import BraftEditor from 'braft-editor'
+import BraftEditor, { MediaType } from 'braft-editor'
 import styles from './style.less'
+import UploadCustom from "../FormCustom/UploadCustom";
+import defaultSetting from '../../../config/defaultSettings';
+import { HandleResult } from "@/utils/request";
 
 
 export enum FormItemType {
@@ -18,6 +21,12 @@ export enum FormItemType {
     cascader,
     switch,
     editor,
+    radio,
+    checkBox,
+    dataPicker,
+    rangePicker,
+    upload,
+    region,
 }
 
 export function GetFormItemTypeName(type: number) {
@@ -34,9 +43,65 @@ export function GetFormItemTypeName(type: number) {
             return '级联选择';
         case FormItemType.editor:
             return '富文本编辑器';
+        case FormItemType.radio:
+            return '单选按钮';
+        case FormItemType.checkBox:
+            return '多选按钮';
+        case FormItemType.dataPicker:
+            return '日期选择框';
+        case FormItemType.rangePicker:
+            return '日期范围选择框';
+        case FormItemType.upload:
+            return '上传组件';
+        case FormItemType.region:
+            return '城市组件';
         default:
             return '文本框';
     }
+}
+
+const editUploadFn: MediaType['uploadFn'] = param => {
+    const serverURL = `${defaultSetting.basePath}/Api/Utils/Upload/BraftEditor`;
+    const xhr = new XMLHttpRequest()
+    const fd = new FormData()
+    const successFn = () => {
+        // 假设服务端直接返回文件上传后的地址
+        // 上传成功后调用param.success并传入上传后的文件地址
+        const res = JSON.parse(xhr.responseText) as HandleResult<string>;
+        param.success({
+            url: res.data || '',
+            meta: {
+                id: param.file.name,
+                title: param.file.name,
+                alt: param.file.name,
+                loop: false, // 指定音视频是否循环播放
+                autoPlay: false, // 指定音视频是否自动播放
+                controls: true, // 指定音视频是否显示控制栏
+                poster: '', // 指定视频播放器的封面
+            },
+        })
+    }
+
+    const progressFn = (event: any) => {
+        // 上传进度发生变化时调用param.progress
+        param.progress(event.loaded / event.total * 100)
+    }
+
+    const errorFn = () => {
+        // 上传发生错误时调用param.error
+        param.error({
+            msg: 'unable to upload.',
+        })
+    }
+
+    xhr.upload.addEventListener('progress', progressFn, false)
+    xhr.addEventListener('load', successFn, false)
+    xhr.addEventListener('error', errorFn, false)
+    xhr.addEventListener('abort', errorFn, false)
+
+    fd.append('file', param.file)
+    xhr.open('POST', serverURL, true)
+    xhr.send(fd)
 }
 
 const getFormItem = (item: FormItem) => {
@@ -52,8 +117,27 @@ const getFormItem = (item: FormItem) => {
             return <Select {...item.select} />
         case FormItemType.password:
             return <Input.Password {...item.password} />
+        case FormItemType.upload:
+            if (item.upload) {
+                const { value, onChange, type, action, ...rest } = item.upload;
+                let tempAction = action || (type === 'image' ? '/Api/Utils/Upload/Image' : '/Api/Utils/Upload/File');
+                return <UploadCustom type={type || 'file'} action={tempAction} {...rest} />
+            }
+            return <></>;
         case FormItemType.editor:
-            return <BraftEditor className={styles.myEditor} placeholder="请输入正文内容" />;
+            return <BraftEditor
+                className={styles.myEditor}
+                placeholder="请输入正文内容"
+                media={{
+                    externals: {
+                        image: false,
+                        video: false,
+                        audio: false,
+                        embed: false,
+                    },
+                    uploadFn: editUploadFn,
+                }}
+            />;
         default:
             return <Input {...item.input} />
     }
@@ -151,7 +235,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                         if (item.rules) {
                             item.rules = item.rules.map(temp => {
                                 if (temp.required) {
-                                    item.validateTrigger = 'onBlur'
+                                    item.validateTrigger = 'onBlur';
                                     temp.validator = (_, value) => {
                                         return new Promise((resolve, reject) => {
                                             if (value.isEmpty()) {

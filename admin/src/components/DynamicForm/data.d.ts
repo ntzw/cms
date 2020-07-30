@@ -4,6 +4,7 @@ import { SelectProps } from 'antd/lib/select';
 import { CascaderProps, CascaderOptionType } from 'antd/lib/cascader';
 import { SwitchProps } from 'antd/lib/switch';
 import { Store } from 'antd/lib/form/interface';
+import { UploadCustomProps } from '../FormCustom/data';
 
 export interface FormItem {
     label: string;
@@ -21,6 +22,7 @@ export interface FormItem {
     select?: SelectProps<any>;
     cascader?: CascaderProps;
     switch?: SwitchProps;
+    upload?: UploadCustomProps;
 }
 
 export interface DynaminFormProps<T extends Store> {

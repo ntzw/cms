@@ -5,7 +5,7 @@ import ContentForm from '@/components/Content/ContentForm';
 import { connect } from 'umi';
 import styles from '../style.less'
 import { ContentFormAction } from '@/components/Content/data';
-import { submit, GetEditValue } from '../service';
+import { ContentSubmit, GetEditValue } from '../service';
 
 const ContentEditDrawer: React.FC<ContentEditProps> = ({
     visible,
@@ -123,7 +123,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                         columnNum: currentColumnNum,
                     }
 
-                    submit(newValue).then(res => {
+                    ContentSubmit(newValue).then(res => {
                         if (res.isSuccess) {
                             message.success('数据提交成功');
                             onClose(res.isSuccess);

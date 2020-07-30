@@ -19,7 +19,7 @@ namespace WebApi.CMS
             var itemNum = form["itemNum"].ToStr();
             var columnNum = form["columnNum"].ToStr();
 
-            if (columnNum.IsEmpty() || itemNum.IsEmpty()) return HandleResult.Error("无效数据");
+            if (columnNum.IsEmpty()) return HandleResult.Error("无效数据");
 
             var column = await ColumnService.Interface.GetByNum(columnNum);
             if (column == null) return HandleResult.Error("无效数据");
@@ -27,13 +27,22 @@ namespace WebApi.CMS
             var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (model == null) return HandleResult.Error("栏目未绑定模型");
 
-            var content = await ContentService.Interface.GetByNum(model.SqlTableName, itemNum);
-            if (content == null) return HandleResult.Error("无效数据");
+            dynamic editValue = null;
+            if (column.IsSingle)
+            {
+                editValue = await ContentService.Interface.GetFirstByColumnNum(model.SqlTableName, column.Num);
+            }
+            else
+            {
+                if (itemNum.IsEmpty()) return HandleResult.Error("无效数据");
+
+                editValue = await ContentService.Interface.GetByNum(model.SqlTableName, itemNum);
+            }
 
             return new HandleResult
             {
                 IsSuccess = true,
-                Data = content
+                Data = editValue
             };
         }
 

@@ -10,6 +10,9 @@ namespace DataAccess.Interface.CMS
         Task<dynamic> GetByItem(string tableName, string itemNum);
 
         Task<int> Execute(string sql, object data);
+        
         Task<PageResponse> Page(string tableName, IPageRequest req);
+        
+        Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum);
     }
 }

@@ -71,3 +71,10 @@ export interface ContentCategory extends ModalBase {
     parentNum: string | string[];
     name: string;
 }
+
+export interface ContentManageProps {
+    currentColumnNum?: string;
+    currentColumn?: ColumnItem;
+    currentTableFields?: ColumnField[];
+    currentSite?: SiteSelectItem;
+}

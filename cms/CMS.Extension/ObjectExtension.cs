@@ -239,8 +239,8 @@ namespace Extension
                 return defaultVal;
 
 
-            return str.ToString().ToLower() == "true" || str.ToString().ToLower() == "1" ||
-                   str.ToString().ToLower() == "y" || str.ToString() == "是";
+            return str.ToString()?.ToLower() == "true" || str.ToString()?.ToLower() == "1" ||
+                   str.ToString()?.ToLower() == "y" || str.ToString() == "是";
         }
 
         /// <summary>
