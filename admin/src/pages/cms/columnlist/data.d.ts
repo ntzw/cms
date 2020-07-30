@@ -1,5 +1,5 @@
 import { ModalBase } from '@/components/ListTable';
-import { SiteSelectItem } from 'umi'
+import { SiteSelectItem, Dispatch } from 'umi'
 
 
 export interface ColumnListProps {
@@ -18,6 +18,7 @@ export interface Column extends ModalBase {
 
 export interface ColumnFieldListProps extends ColumnFieldListPropsState {
     onClose: () => void;
+    dispatch: Dispatch;
 }
 
 export interface ColumnFieldListPropsState {

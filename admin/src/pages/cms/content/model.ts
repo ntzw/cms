@@ -11,6 +11,7 @@ export interface ContentModelType {
     effects: {
         fetchColumns: Effect;
         fetchColumnTableColumns: Effect;
+        reloadColumnFields: Effect;
     };
     reducers: {
         saveColumns: Reducer<ContentModelState>;
@@ -45,14 +46,20 @@ const ContentModel: ContentModelType = {
 
             const oldTableColumns = yield select(({ content }: { content: ContentModelState }) => content.columnTableFields);
             if (!oldTableColumns || !oldTableColumns[payload]) {
-                const res: HandleResult<{ fields: ColumnField[]; }> = yield call(GetColumnContentFields, payload);
-                if (res.isSuccess && res.data?.fields && res.data.fields.length > 0) {
-                    yield put({
-                        type: 'saveColumnTableFields',
-                        columnNum: payload,
-                        fields: res.data?.fields || []
-                    })
-                }
+                yield put({
+                    type: 'reloadColumnFields',
+                    payload,
+                })
+            }
+        },
+        *reloadColumnFields({ payload }, { call, select, put }) {
+            const res: HandleResult<{ fields: ColumnField[]; }> = yield call(GetColumnContentFields, payload);
+            if (res.isSuccess && res.data?.fields && res.data.fields.length > 0) {
+                yield put({
+                    type: 'saveColumnTableFields',
+                    columnNum: payload,
+                    fields: res.data?.fields || []
+                })
             }
         }
     },

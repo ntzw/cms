@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
+import { connect } from 'umi'
 import { ColumnFieldListProps, ModelFieldAddPropsState } from "../data";
 import { Drawer, Row, Col, Button, Card, message, Modal, Tooltip, InputNumber } from 'antd';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
@@ -12,7 +13,7 @@ import { AsyncContentFormAction, ColumnField } from '@/components/Content/data';
 import AsyncContentForm from '@/components/Content/AsyncContentForm';
 
 let changeSortTime: any;
-const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, column }) => {
+const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, column, dispatch }) => {
     const [modelFieldAdd, setModelFieldAdd] = useState<ModelFieldAddPropsState>({
         visible: false,
         editType: 'model',
@@ -134,9 +135,18 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
         notExitsTableAction.current?.reload();
     }
 
+    const handleReloadContentFields = () => {
+        if (!Array.isArray(column) && column) {
+            dispatch({
+                type: 'content/reloadColumnFields',
+                payload: column.num,
+            })
+        }
+    }
+
     useEffect(() => {
         handleReload();
-    }, [column])
+    }, [column]);
 
     return <>
         <Drawer
@@ -202,6 +212,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                                         exitsTableAction.current?.clearSelected();
                                                         notExitsTableAction.current?.reload();
                                                         previewFormAction.current?.reload();
+                                                        handleReloadContentFields();
                                                     } else {
                                                         message.error(res.message || '移出失败');
                                                     }
@@ -258,6 +269,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                                     notExitsTableAction.current?.reload();
                                                     notExitsTableAction.current?.clearSelected();
                                                     previewFormAction.current?.reload();
+
                                                 } else {
                                                     message.error(res.message || '移入失败');
                                                 }
@@ -299,6 +311,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                     ...modelFieldAdd,
                     visible: false,
                 })
+                handleReloadContentFields();
             }}
         />
         <Drawer
@@ -317,4 +330,4 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
     </>
 }
 
-export default ColumnFieldList;
+export default connect()(ColumnFieldList);
