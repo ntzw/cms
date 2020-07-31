@@ -36,6 +36,18 @@ namespace Model.CMS
         public string ModelNum { get; set; }
 
         /// <summary>
+        /// 列表页模板
+        /// </summary>
+        [Select("列表页模板", DataAction = "/Api/CMS/Site/TemplatePath", AllowClear = true)]
+        public string ListTemplatePath { get; set; }
+
+        /// <summary>
+        /// 详情页模板
+        /// </summary>
+        [Select("详情页模板", DataAction = "/Api/CMS/Site/TemplatePath", AllowClear = true)]
+        public string InfoTemplatePath { get; set; }
+
+        /// <summary>
         /// 是否启用分类
         /// </summary>
         [Switch("是否启用分类")]

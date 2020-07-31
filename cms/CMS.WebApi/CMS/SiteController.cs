@@ -1,9 +1,12 @@
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React;
+using CMS.React.Model;
 using Extension;
 using Foundation.Modal;
 using Foundation.Modal.Result;
+using Helper;
 using Microsoft.AspNetCore.Mvc;
 using Model.Account;
 using Model.CMS;
@@ -47,8 +50,17 @@ namespace WebApi.CMS
             ReactForm.SetEditModelValue(info, model, info.Id > 0);
 
             var res = info.Id > 0 ? await SiteService.Interface.Update(info) : await SiteService.Interface.Add(info);
-            if (info.IsDefault && res.IsSuccess)
-                await SiteService.Interface.RemoveOtherDefault(info.Id);
+
+            if (res.IsSuccess)
+            {
+                if (info.IsDefault)
+                    await SiteService.Interface.RemoveOtherDefault(info.Id);
+
+                string siteFolderPath = Path.GetFullPath($"./Views/{info.SiteFolder}");
+                if (!Directory.Exists(siteFolderPath))
+                    Directory.CreateDirectory(siteFolderPath);
+            }
+
 
             return res;
         }
@@ -64,6 +76,32 @@ namespace WebApi.CMS
         public Task<HandleResult> SelectData()
         {
             return SiteService.Interface.GetSelectData();
+        }
+        
+        public async Task<HandleResult> TemplatePath([FromBody] JObject form)
+        {
+            string siteNum = form["siteNum"].ToStr();
+            if (siteNum.IsEmpty()) return HandleResult.Error("无效参数");
+
+            var site = await SiteService.Interface.GetByNum(siteNum);
+            if (site == null) return HandleResult.Error("无效参数");
+
+            var siteFolderPath = Path.GetFullPath($"./Views/Content/{site.SiteFolder}/");
+            if (!Directory.Exists(siteFolderPath)) return HandleResult.Error("无效参数");
+
+            return new HandleResult
+            {
+                IsSuccess = true,
+                Data = FileHelper.GetFolderAllChilden(siteFolderPath)?.Select(path =>
+                {
+                    var temp = path.Replace(siteFolderPath, "");
+                    return new SelectDataType
+                    {
+                        Label = temp,
+                        Value = temp
+                    };
+                })
+            };
         }
     }
 }

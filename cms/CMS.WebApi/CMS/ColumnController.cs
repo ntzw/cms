@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React;
+using CMS.React.Model;
 using Extension;
 using Foundation.Modal;
 using Foundation.Modal.Result;
+using Helper;
 using Microsoft.AspNetCore.Mvc;
 using Model.CMS;
 using Newtonsoft.Json.Linq;
@@ -73,6 +76,8 @@ namespace WebApi.CMS
             if (form == null || form.Count <= 0) return HandleResult.Error("请选择要删除的数据");
 
             var deleteModels = form.Select(temp => new Column {Id = temp.ToInt()}).ToList();
+            
+            //todo 需要延期删除无用的数据，栏目内容、栏目字段
             return await ColumnService.Interface.Delete(deleteModels);
         }
 

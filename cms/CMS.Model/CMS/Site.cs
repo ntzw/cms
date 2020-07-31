@@ -4,6 +4,7 @@
  */
 
 using System.ComponentModel;
+using CMS.Enums;
 using CMS.React.Component;
 using Dapper.Contrib.Extensions;
 
@@ -15,16 +16,28 @@ namespace Model.CMS
     [Table("CMS_Site")]
     public class Site : ModalBase
     {
-        [Description("")] 
-        [Input("站点名称", Required = true)] 
+        /// <summary>
+        /// 站点名称
+        /// </summary>
+        [Input("站点名称", Required = true)]
         public string Name { get; set; }
 
-        [Description("")]
+        /// <summary>
+        /// 站点域名
+        /// </summary>
         [Select("站点域名", Mode = "tags")]
         public string Host { get; set; }
 
-        [Description("")]
+        /// <summary>
+        /// 是否默认站点
+        /// </summary>
         [Switch("是否默认站点")]
         public bool IsDefault { get; set; }
+
+        /// <summary>
+        /// 站点文件夹
+        /// </summary>
+        [Input("站点文件夹", Required = true, RegularTypes = new[] {RegularType.FolderName})]
+        public string SiteFolder { get; set; }
     }
 }

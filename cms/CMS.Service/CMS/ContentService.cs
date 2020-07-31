@@ -1,24 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
 using System.Threading.Tasks;
-using CMS.Enums;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Extension;
-using Foundation.ColumnFieldOptions;
 using Foundation.Modal;
+using Foundation.Modal.RequestModal;
 using Foundation.Modal.Result;
 using Helper;
-using Model.CMS;
 using Newtonsoft.Json.Linq;
 
 namespace Service.CMS
 {
     public class ContentService
     {
-        private IContentDapper _dapper = new ContentDapper();
+        private readonly IContentDapper _dapper = new ContentDapper();
 
         private ContentService()
         {
@@ -48,7 +44,8 @@ namespace Service.CMS
             IDictionary<string, object> oldData = null;
             if (column.IsSingle)
             {
-                oldData = await _dapper.GetFirstByColumnNum(model.SqlTableName, column.Num) as IDictionary<string, object>;
+                oldData =
+                    await _dapper.GetFirstByColumnNum(model.SqlTableName, column.Num) as IDictionary<string, object>;
             }
             else if (itemNum.IsNotEmpty())
             {
@@ -88,6 +85,8 @@ namespace Service.CMS
             return res > 0 ? HandleResult.Success() : HandleResult.Error("操作失败");
         }
 
+        #region 分页查询
+
         public async Task<PageResponse> Page(JObject form)
         {
             var req = new SqlServerPageRequest(form);
@@ -101,12 +100,37 @@ namespace Service.CMS
             var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (model == null) return PageResponse.Error("栏目未绑定模型");
 
-            return await _dapper.Page(model.SqlTableName, req);
+            return await Page(model.SqlTableName, req);
         }
+
+        public async Task<PageResponse> Page(string tableName, IPageRequest req)
+        {
+            if (!req.ContainsQueryField("columnNum")) return PageResponse.Error("无效数据");
+
+            return await _dapper.Page(tableName, req);
+        }
+
+        #endregion
 
         public Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum)
         {
             return _dapper.GetFirstByColumnNum(tableName, columnNum);
+        }
+
+        public async Task<HandleResult> UpdateClickCount(string tableName, int id, int count)
+        {
+            var exCount = await _dapper.UpdateClickCount(tableName, id, count);
+            return exCount > 0 ? HandleResult.Success() : HandleResult.Error("");
+        }
+
+        public Task<dynamic> GetNext(string tableName, int id)
+        {
+            return _dapper.GetNext(tableName, id);
+        }
+        
+        public Task<dynamic> GetPrev(string tableName, int id)
+        {
+            return _dapper.GetPrev(tableName, id);
         }
     }
 }

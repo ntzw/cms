@@ -18,5 +18,17 @@ namespace DataAccess.SqlServer.CMS
             string sql = $"UPDATE [{GetTableName()}] SET [IsDefault] = 0 WHERE Id <> @Id ";
             return Connection().ExecuteAsync(sql, new {Id = excludeId});
         }
+
+        public Task<Site> GetByHost(string host)
+        {
+            string sql = $"SELECT * FROM {GetTableName()} WHERE ',' + Host + ',' LIKE @Host ";
+            return Connection().QueryFirstOrDefaultAsync<Site>(sql, new {Host = $"%{host}%"});
+        }
+
+        public Task<Site> GetByDefault()
+        {
+            string sql = $"SELECT * FROM {GetTableName()} WHERE IsDefault = 1";
+            return Connection().QueryFirstOrDefaultAsync<Site>(sql);
+        }
     }
 }

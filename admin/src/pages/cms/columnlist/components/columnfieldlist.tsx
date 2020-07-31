@@ -75,7 +75,6 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                         <Button
                             icon={<EditOutlined />}
                             onClick={() => {
-
                                 setModelFieldAdd({
                                     visible: true,
                                     editId: record.id,
@@ -325,7 +324,11 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                 })
             }}
         >
-            <AsyncContentForm actionRef={previewFormAction} columnNum={previewForm.columnNum} isSeo={false} />
+            <AsyncContentForm
+                actionRef={previewFormAction}
+                columnNum={previewForm.columnNum}
+                isSeo={false}
+            />
         </Drawer>
     </>
 }

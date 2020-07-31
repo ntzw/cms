@@ -4,9 +4,9 @@ namespace Foundation.Modal.RequestModal
 {
     public interface IPageRequest
     {
-        long Current { get; set; }
+        int Current { get; set; }
 
-        long Size { get; set; }
+        int Size { get; set; }
 
         List<IQuery> Queries { get; set; }
         

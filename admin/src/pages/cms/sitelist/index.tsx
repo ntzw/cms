@@ -143,7 +143,6 @@ const AdminList: React.FC<SiteListProps> = () => {
                         resolve();
                         if (res.isSuccess) {
                             message.success('操作成功');
-                            editAction.current?.clear();
                             tableAction.current?.reload();
                             setEditForm({
                                 ...editForm,

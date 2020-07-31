@@ -75,9 +75,9 @@ namespace Foundation.Modal
             return symbol;
         }
 
-        public long Current { get; set; } = 1;
+        public int Current { get; set; } = 1;
 
-        public long Size { get; set; } = 10;
+        public int Size { get; set; } = 10;
 
         public List<IQuery> Queries { get; set; }
 

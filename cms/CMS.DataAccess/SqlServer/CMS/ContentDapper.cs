@@ -37,5 +37,23 @@ namespace DataAccess.SqlServer.CMS
             string sql = $"SELECT TOP 1 * FROM {tableName} WHERE ColumnNum = @ColumnNum ";
             return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {ColumnNum = columnNum});
         }
+
+        public Task<int> UpdateClickCount(string tableName, int id, int count)
+        {
+            string sql = $"UPDATE [{tableName}] SET [ClickCount] = @ClickCount WHERE Id = @Id";
+            return MainConnection.Interface.GetConnection().ExecuteAsync(sql, new {Id = id, ClickCount = count});
+        }
+
+        public Task<dynamic> GetNext(string tableName, int id)
+        {
+            string sql = $"SELECT * FROM {tableName} WHERE Id = (SELECT MAX(Id) FROM {tableName} WHERE Id < @Id)";
+            return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {Id = id});
+        }
+        
+        public Task<dynamic> GetPrev(string tableName, int id)
+        {
+            string sql = $"SELECT * FROM {tableName} WHERE Id = (SELECT MIN(Id) FROM {tableName} WHERE Id > @Id)";
+            return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {Id = id});
+        }
     }
 }

@@ -12,5 +12,7 @@ namespace DataAccess.Interface.CMS
     public interface ISiteDapper : IDefaultDataAccess<Site>
     {
         Task<int> RemoveOtherDefault(int excludeId);
+        Task<Site> GetByHost(string host);
+        Task<Site> GetByDefault();
     }
 }

@@ -2,13 +2,27 @@ import React, { useRef, useState } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
 import { ColumnListProps, Column, ColumnFieldListPropsState } from './data';
-import { page, Submit, ClearColumnField } from './service';
-import { Button, message, Tooltip, Popover, Alert, Popconfirm } from 'antd';
+import { page, Submit, ClearColumnField, Delete } from './service';
+import { Button, message, Tooltip, Popover, Alert, Popconfirm, Modal, Typography } from 'antd';
 import ModalForm, { ModalFormState, ModalFormAction } from '@/components/ModalForm';
 import { EditOutlined, DeleteOutlined, ControlOutlined, PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { connect, GlobalModelState } from 'umi';
 import ColumnFieldList from './components/columnfieldlist';
+import { DeleteConfirm } from '@/utils/msg';
+
+const { Text } = Typography
+
+const DeleteColumns = (ids: number[], tableAction: React.MutableRefObject<TableAction | undefined>) => {
+    Delete(ids).then(res => {
+        if (res.isSuccess) {
+            message.success('删除成功');
+            tableAction.current?.reload();
+        } else {
+            message.error(res.message || '删除失败');
+        }
+    })
+}
 
 const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
     const [editForm, setEditForm] = useState<ModalFormState>({
@@ -39,6 +53,10 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
         render: (text) => {
             return typeof text === 'string' && text && moment(text).format('YYYY-MM-DD HH:mm:ss');
         }
+    }, {
+        dataIndex: 'num',
+        title: '编号',
+        valueType: 'option',
     }, {
         dataIndex: '-',
         title: '操作',
@@ -85,7 +103,7 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
                         type="primary"
                         danger
                         onClick={() => {
-
+                            DeleteColumns([record.id], tableAction);
                         }}
                     />
                 </Tooltip>
@@ -105,7 +123,6 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
             </Button.Group>
         }
     }];
-
 
     return <PageHeaderWrapper>
         <ProTable<Column>
@@ -140,6 +157,29 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
                             }}
                         >
                             添加
+                        </Button>
+                        <Button
+                            disabled={!tableSelectedRows || tableSelectedRows.length <= 0}
+                            danger
+                            type="primary"
+                            icon={<DeleteOutlined />}
+                            onClick={() => {
+                                DeleteConfirm(() => {
+                                    Modal.confirm({
+                                        title: '删除提醒',
+                                        content: <Text strong><Text style={{ color: 'red' }}>删除栏目，会清空栏目下所有内容</Text>，确定删除吗？</Text>,
+                                        okText: '确定删除',
+                                        cancelText: '取消',
+                                        onOk: () => {
+                                            if (tableSelectedRows) {
+                                                DeleteColumns(tableSelectedRows.map(temp => temp.id), tableAction);
+                                            }
+                                        }
+                                    })
+                                })
+                            }}
+                        >
+                            删除
                         </Button>
                         <Popconfirm title="批量设置字段，会先清空所选栏目原有字段，请谨慎操作!" okText="确定清空并添加" cancelText="取消" onConfirm={() => {
                             if (tableSelectedRows) {
@@ -208,12 +248,14 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
                 })
             }}
             fieldActionParams={(field) => {
-                if (field.name.toLocaleLowerCase() === 'parentnum') {
-                    return {
-                        siteNum: currentSite?.num,
-                    }
+                switch (field.name.toLocaleLowerCase()) {
+                    case 'parentnum':
+                    case 'listtemplatepath':
+                    case 'infotemplatepath':
+                        return {
+                            siteNum: currentSite?.num,
+                        }
                 }
-
                 return null;
             }}
         />

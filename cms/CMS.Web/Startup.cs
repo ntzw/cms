@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Service.Account;
+using Service.CMS;
 
 namespace Web
 {
@@ -61,7 +62,6 @@ namespace Web
             services.AddControllersWithViews(options =>
             {
                 options.InputFormatters.Insert(0, new JsonInputFormatter());
-                //options.OutputFormatters.Insert(0, new JsonOutputFormatter());
             });
         }
 
@@ -94,11 +94,21 @@ namespace Web
             app.UseSession();
             app.UseAuthorization();
 
+            app.Use(async (content, next) =>
+            {
+                var host = content.Request.Host.Value;
+
+                var site = await SiteService.Interface.GetByHost(host) ?? await SiteService.Interface.GetByDefault();
+                SessionHelper.Set("CurrentSite", site);
+
+                await next();
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Content}/{action=Index}/{id?}");
             });
         }
     }

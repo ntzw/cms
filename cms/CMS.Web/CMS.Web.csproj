@@ -7,6 +7,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\CMS.Helper\CMS.Helper.csproj" />
+      <ProjectReference Include="..\CMS.TagHelpers\CMS.TagHelpers.csproj" />
       <ProjectReference Include="..\CMS.WebApi\CMS.WebApi.csproj" />
       <ProjectReference Include="..\CMS.WebView\CMS.WebView.csproj" />
     </ItemGroup>
@@ -74,6 +75,10 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <Content Update="Views\Error\404.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -81,6 +86,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Views\Content" />
       <Folder Include="wwwroot\images" />
     </ItemGroup>
 

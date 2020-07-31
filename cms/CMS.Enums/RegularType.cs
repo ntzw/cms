@@ -7,5 +7,9 @@ namespace CMS.Enums
         /// 手机号
         /// </summary>
         MobilePhone,
+        /// <summary>
+        /// 文件夹名称
+        /// </summary>
+        FolderName
     }
 }

@@ -49,5 +49,15 @@ namespace Service.CMS
                 }).ToList()
             };
         }
+
+        public Task<Site> GetByHost(string host)
+        {
+            return GetDapper().GetByHost(host);
+        }
+
+        public Task<Site> GetByDefault()
+        {
+            return GetDapper().GetByDefault();
+        }
     }
 }
