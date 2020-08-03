@@ -32,7 +32,6 @@ const ContentListTable: React.FC<{
         });
         const [loadColumns, setLoadColumns] = useState(false);
         const contentAction = useRef<ContentFormAction>();
-        const [submitResult, setSubmitResult] = useState(false);
 
         useEffect(() => {
             if (currentTableFields && currentTableFields.length > 0) {
@@ -128,12 +127,9 @@ const ContentListTable: React.FC<{
                 afterVisibleChange={(visible) => {
                     if (!visible) {
                         tableAction.current?.reload();
-                    } else {
-                        setSubmitResult(false);
                     }
                 }}
                 onClose={(isSuccess) => {
-                    setSubmitResult(isSuccess || false);
                     setContentEdit({
                         ...contentEdit,
                         visible: false
