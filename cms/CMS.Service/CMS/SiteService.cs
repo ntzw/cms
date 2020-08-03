@@ -10,6 +10,7 @@ using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Foundation.Modal;
 using Foundation.Modal.Result;
+using Helper;
 using Model.CMS;
 
 namespace Service.CMS
@@ -27,6 +28,11 @@ namespace Service.CMS
         private static SiteService _interface;
         public static SiteService Interface => _interface ??= new SiteService();
 
+        public Site GetCurrentSite()
+        {
+            return SessionHelper.Get<Site>("CurrentSite");
+        }
+        
         public async Task<HandleResult> RemoveOtherDefault(int excludeId)
         {
             return new HandleResult

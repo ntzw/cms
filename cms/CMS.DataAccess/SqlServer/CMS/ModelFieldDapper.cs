@@ -46,6 +46,7 @@ namespace DataAccess.SqlServer.CMS
                     break;
                 case ReactFormItemType.TextArea:
                 case ReactFormItemType.Editor:
+                case ReactFormItemType.Tags:
                     sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [nvarchar] (MAX) NULL";
                     break;
                 case ReactFormItemType.Radio:
@@ -67,15 +68,17 @@ namespace DataAccess.SqlServer.CMS
                 case ReactFormItemType.Switch:
                     sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [bit] NULL";
                     break;
+                default:
+                    throw new Exception("不存在字段类型");
             }
-            
+
             return sql.IsNotEmpty() ? Connection().ExecuteAsync(sql) : Task.FromResult(0);
         }
 
         public Task<ModelField> GetByName(string fieldName, string modelNum)
         {
             string sql = $"SELECT * FROM {GetTableName()} WHERE Name = @Name AND ModelNum = @ModelNum";
-            return Connection().QueryFirstOrDefaultAsync<ModelField>(sql, new { Name = fieldName,ModelNum = modelNum  });
+            return Connection().QueryFirstOrDefaultAsync<ModelField>(sql, new {Name = fieldName, ModelNum = modelNum});
         }
     }
 }

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
 using System.Threading.Tasks;
+using CMS.React.Model;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Extension;
@@ -8,6 +11,7 @@ using Foundation.Modal;
 using Foundation.Modal.RequestModal;
 using Foundation.Modal.Result;
 using Helper;
+using Model.CMS;
 using Newtonsoft.Json.Linq;
 
 namespace Service.CMS
@@ -117,6 +121,14 @@ namespace Service.CMS
             return _dapper.GetFirstByColumnNum(tableName, columnNum);
         }
 
+        public async Task<dynamic> GetFirstByColumnNum(string columnNum)
+        {
+            var model = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (model == null) return null;
+
+            return await GetFirstByColumnNum(model.SqlTableName, columnNum);
+        }
+
         public async Task<HandleResult> UpdateClickCount(string tableName, int id, int count)
         {
             var exCount = await _dapper.UpdateClickCount(tableName, id, count);
@@ -127,10 +139,77 @@ namespace Service.CMS
         {
             return _dapper.GetNext(tableName, id);
         }
-        
+
         public Task<dynamic> GetPrev(string tableName, int id)
         {
             return _dapper.GetPrev(tableName, id);
+        }
+
+        public async Task<IEnumerable<dynamic>> GetByColumnNum(string columnNum)
+        {
+            var model = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (model == null) return null;
+
+            return await _dapper.GetByColumnNum(model.SqlTableName, columnNum);
+        }
+
+        public async Task<List<Dictionary<string, object>>> GetDictionaryDataByColumnNum(string columnNum)
+        {
+            var data = await GetByColumnNum(columnNum);
+            return data?.Select(temp => new Dictionary<string, object>(temp, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        public async Task<HandleResult> GetCascaderData(string columnNum, string labelFieldName,
+            string currentFieldName)
+        {
+            var model = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (model == null) return HandleResult.Error("栏目未绑定模型");
+
+            var resData = new List<CascaderDataType>();
+            var data = (await _dapper.GetByColumnNum(model.SqlTableName, columnNum)).ToList();
+            if (data.Count > 0)
+            {
+                List<Dictionary<string, object>> newData = data
+                    .Select(temp => new Dictionary<string, object>(temp, StringComparer.OrdinalIgnoreCase)).ToList();
+
+                var firstItem = newData[0];
+
+                if (!firstItem.ContainsKey(labelFieldName) ||
+                    !firstItem.ContainsKey(currentFieldName))
+                    return HandleResult.Error("无效字段");
+
+                resData = GetCascaderData(newData, "", currentFieldName, labelFieldName);
+            }
+
+            return new HandleResult
+            {
+                IsSuccess = true,
+                Data = resData
+            };
+        }
+
+        private List<CascaderDataType> GetCascaderData(List<Dictionary<string, object>> contents, string parentNum,
+            string currentFieldName, string labelFieldName)
+        {
+            var child = contents.FindAll(temp => string.Equals(temp[currentFieldName] ?? "", parentNum ?? ""));
+            if (child.Count <= 0) return null;
+
+            List<CascaderDataType> data = new List<CascaderDataType>();
+            foreach (var item in child)
+            {
+                contents.Remove(item);
+
+                string num = item["Num"].ToStr();
+                data.Add(new CascaderDataType
+                {
+                    Label = item[labelFieldName].ToStr(),
+                    Value = num,
+                    Children = GetCascaderData(contents, num, currentFieldName, labelFieldName)
+                });
+            }
+
+            return data;
         }
     }
 }

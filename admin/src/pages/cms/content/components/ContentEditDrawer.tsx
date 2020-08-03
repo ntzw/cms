@@ -6,6 +6,7 @@ import { connect } from 'umi';
 import styles from '../style.less'
 import { ContentFormAction } from '@/components/Content/data';
 import { ContentSubmit, GetEditValue } from '../service';
+import { SaveOutlined, EnterOutlined } from '@ant-design/icons';
 
 const ContentEditDrawer: React.FC<ContentEditProps> = ({
     visible,
@@ -14,7 +15,8 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
     itemNum,
     columnFields,
     onClose,
-    actionRef
+    actionRef,
+    afterVisibleChange
 }) => {
 
     const formAction = useRef<ContentFormAction>();
@@ -23,6 +25,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
     const [loading, setLoading] = useState({
         submit: false,
     })
+    const [isClose, setIsClose] = useState(false);
 
     useEffect(() => {
         formAction.current?.clear();
@@ -63,7 +66,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
             onClose();
         }}
         maskClosable={false}
-        afterVisibleChange={() => {
+        afterVisibleChange={(visible) => {
             if (isLoadData && itemNum && currentColumnNum) {
                 formAction.current?.loading(true);
                 GetEditValue(itemNum, currentColumnNum).then(res => {
@@ -78,15 +81,31 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                     }, 800);
                 });
             }
+
+            if (afterVisibleChange)
+                afterVisibleChange(visible);
         }}
         footer={<div style={{ textAlign: 'center' }}>
-            <Button
-                loading={loading.submit}
-                type="primary"
-                onClick={() => {
-                    formAction.current?.submit();
-                }}
-            >提交</Button>
+            <Button.Group>
+                <Button
+                    loading={loading.submit}
+                    icon={<EnterOutlined />}
+                    type="primary"
+                    onClick={() => {
+                        setIsClose(true);
+                        formAction.current?.submit();
+                    }}
+                >提交并关闭</Button>
+                <Button
+                    loading={loading.submit}
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    onClick={() => {
+                        setIsClose(false);
+                        formAction.current?.submit();
+                    }}
+                >提交</Button>
+            </Button.Group>
             <Button
                 loading={loading.submit}
                 danger
@@ -107,6 +126,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
         <ContentForm
             columnNum={currentColumnNum || ''}
             isCategory={currentColumn?.isCategory}
+            isSeo={currentColumn?.isSeo}
             columnFields={columnFields}
             actionRef={formAction}
             onFinish={(value) => {
@@ -126,13 +146,14 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                     ContentSubmit(newValue).then(res => {
                         if (res.isSuccess) {
                             message.success('数据提交成功');
-                            onClose(res.isSuccess);
+                            if (isClose)
+                                onClose(res.isSuccess);
                         } else {
                             message.error(res.message || '数据提交失败');
                         }
 
                         resolve();
-
+                        formAction.current?.reoladFieldItem();
                         setLoading({
                             ...loading,
                             submit: false,

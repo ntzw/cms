@@ -37,7 +37,7 @@ namespace Web.Controllers
         {
             if (num.IsEmpty()) return NotFound();
 
-            var site = SessionHelper.Get<Site>("CurrentSite");
+            var site = SiteService.Interface.GetCurrentSite();
             if (site == null) return NotFound();
 
             var column = await ColumnService.Interface.GetByNum(num);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -45,10 +46,8 @@ namespace Service.CMS
             foreach (var columnField in fields)
             {
                 var formFieldName = columnField.Name.ToFieldNameLower();
-                if (!form.ContainsKey(formFieldName))
-                    continue;
-
-                var value = form[formFieldName];
+                var value = form.ContainsKey(formFieldName) ? form[formFieldName] : "";
+                
                 switch (columnField.OptionType)
                 {
                     case ReactFormItemType.Input:
@@ -56,12 +55,12 @@ namespace Service.CMS
                     case ReactFormItemType.TextArea:
                     case ReactFormItemType.Select:
                     case ReactFormItemType.Upload:
+                    case ReactFormItemType.Tags:
+                    case ReactFormItemType.Cascader:
                         AddFieldAndValue(columnField.Name, value.ToStr());
                         break;
                     case ReactFormItemType.Password:
                         AddFieldAndValue(columnField.Name, Md5Helper.GetMD5_32(value.ToStr()));
-                        break;
-                    case ReactFormItemType.Cascader:
                         break;
                     case ReactFormItemType.Switch:
                         break;
@@ -75,6 +74,8 @@ namespace Service.CMS
                         break;
                     case ReactFormItemType.Region:
                         break;
+                    default:
+                        throw new Exception("无处理分类逻辑");
                 }
             }
         }

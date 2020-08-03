@@ -12,6 +12,7 @@ export interface FormItem {
     extra?: string;
     type?: FormItemType;
     dataAction?: string;
+    dataParams?: { [key: string]: any }
     valuePropName?: string;
     validateTrigger?: string;
     split?: string;
@@ -20,6 +21,7 @@ export interface FormItem {
     password?: PasswordProps;
     textarea?: TextAreaProps;
     select?: SelectProps<any>;
+    tags?: SelectProps<any>;
     cascader?: CascaderProps;
     switch?: SwitchProps;
     upload?: UploadCustomProps;

@@ -53,6 +53,10 @@ namespace CMS.Enums
         /// <summary>
         /// 城市
         /// </summary>
-        Region
+        Region,
+        /// <summary>
+        /// 标签
+        /// </summary>
+        Tags
     }
 }

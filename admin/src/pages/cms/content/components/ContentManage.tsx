@@ -10,6 +10,7 @@ import { EditOutlined, PlusOutlined, BarsOutlined } from '@ant-design/icons';
 import ContentEditDrawer from './ContentEditDrawer';
 import CategoryManagement from './CategoryManagement';
 import ContentForm from '@/components/Content/ContentForm';
+import { Column } from '../../columnlist/data';
 
 
 const ContentListTable: React.FC<{
@@ -31,6 +32,7 @@ const ContentListTable: React.FC<{
         });
         const [loadColumns, setLoadColumns] = useState(false);
         const contentAction = useRef<ContentFormAction>();
+        const [submitResult, setSubmitResult] = useState(false);
 
         useEffect(() => {
             if (currentTableFields && currentTableFields.length > 0) {
@@ -123,15 +125,19 @@ const ContentListTable: React.FC<{
             <ContentEditDrawer
                 {...contentEdit}
                 actionRef={contentAction}
+                afterVisibleChange={(visible) => {
+                    if (!visible) {
+                        tableAction.current?.reload();
+                    } else {
+                        setSubmitResult(false);
+                    }
+                }}
                 onClose={(isSuccess) => {
+                    setSubmitResult(isSuccess || false);
                     setContentEdit({
                         ...contentEdit,
                         visible: false
                     })
-
-                    if (isSuccess) {
-                        tableAction.current?.reload();
-                    }
                 }}
             />
             <CategoryManagement
@@ -150,9 +156,11 @@ const ContentListTable: React.FC<{
 const ContentSinageEdit: React.FC<{
     currentTableFields?: ColumnField[];
     currentColumnNum?: string;
+    currentColumn?: Column;
 }> = ({
     currentTableFields,
-    currentColumnNum
+    currentColumnNum,
+    currentColumn
 }) => {
         const formAction = useRef<ContentFormAction>();
         const [submiting, setSubmiting] = useState(false);
@@ -177,6 +185,8 @@ const ContentSinageEdit: React.FC<{
                     actionRef={formAction}
                     columnFields={currentTableFields || []}
                     columnNum={currentColumnNum || ''}
+                    isSeo={currentColumn?.isSeo}
+                    isCategory={currentColumn?.isCategory}
                     onFinish={(value) => {
                         setSubmiting(true);
                         return new Promise(resolve => {
@@ -194,6 +204,7 @@ const ContentSinageEdit: React.FC<{
                                 }
 
                                 resolve();
+                                formAction.current?.reoladFieldItem();
                                 setSubmiting(false);
                             })
                         })
@@ -230,6 +241,7 @@ const ContentManage: React.FC<ContentManageProps> = ({
         <ContentSinageEdit
             currentColumnNum={currentColumnNum}
             currentTableFields={currentTableFields}
+            currentColumn={currentColumn}
         /> :
         <ContentListTable
             currentColumn={currentColumn}

@@ -159,5 +159,10 @@ namespace Service.CMS
 
             return count > 0 ? HandleResult.Success() : HandleResult.Error("");
         }
+
+        public Task<IEnumerable<Category>> GetByColumnNum(string tableName, string columnNum)
+        {
+            return _dapper.GetByColumnNum(columnNum, tableName);
+        }
     }
 }

@@ -96,7 +96,10 @@ function getColumnByNum(columns: ColumnItem[], num: string): ColumnItem | undefi
     for (let i = 0; i < columns.length; i++) {
         const element = columns[i];
         if (element.num === num) return element;
-        if (element.children instanceof Array && element.children.length > 0) return getColumnByNum(element.children, num);
+        if (element.children instanceof Array && element.children.length > 0) {
+            var temp = getColumnByNum(element.children, num);
+            if (temp) return temp;
+        }
     }
 
     return undefined;

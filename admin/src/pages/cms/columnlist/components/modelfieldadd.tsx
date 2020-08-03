@@ -7,6 +7,7 @@ import { FormItemType, GetFormItemTypeName } from '@/components/DynamicForm';
 import { HandleResult } from '@/utils/request';
 import { FormInstance } from 'antd/lib/form';
 import { FieldDefaultType } from '@/components/Content/data';
+import { SelectProps } from 'antd/lib/select';
 
 const layout = {
     labelCol: { span: 6 },
@@ -44,6 +45,7 @@ const PasswordOption = () => {
     </Form.Item>
 }
 
+
 const InputOption = () => {
     return <>
         <Form.Item
@@ -79,25 +81,82 @@ const InputOption = () => {
     </>
 }
 
-const SelectOption = () => {
-    return <>
-        <Form.Item
-            key="options"
-            name="options"
-            label="选项内容"
-        >
-            <Select mode="tags" placeholder="输入选项内容后回车，支持多个选项" />
-        </Form.Item>
-        <Form.Item
-            key="multiple"
-            name="multiple"
-            label="是否允许多选"
-            valuePropName="checked"
-        >
-            <Switch checkedChildren="是" unCheckedChildren="否" />
-        </Form.Item>
-    </>
-}
+export const SelectDataSource: SelectProps<any>['options'] = [{
+    label: '自定义',
+    value: 'custom',
+}, {
+    label: '当前栏目',
+    value: 'currentColumn'
+}];
+const SelectOption: React.FC<{
+    oldValue?: FieldDefaultType;
+    form: React.RefObject<FormInstance>;
+}> = ({
+    oldValue,
+    form
+}) => {
+        const [currentDataSource, setCurrentDataSource] = useState(SelectDataSource[0].value);
+        useEffect(() => {
+            if (oldValue) {
+                const options = JSON.parse(oldValue.options || '{}');
+                if (options.labelFieldName) {
+                    setCurrentDataSource(options.labelFieldName);
+                }
+            }
+        }, [oldValue]);
+
+        const renderDataSourceOptions = () => {
+            switch (currentDataSource) {
+                case SelectDataSource[0].value:
+                    return <>
+                        <Form.Item
+                            key="options"
+                            name="options"
+                            label="选项内容"
+                        >
+                            <Select mode="tags" placeholder="输入选项内容后回车，支持多个选项" />
+                        </Form.Item>
+                        <Form.Item
+                            key="multiple"
+                            name="multiple"
+                            label="是否允许多选"
+                            valuePropName="checked"
+                        >
+                            <Switch checkedChildren="是" unCheckedChildren="否" />
+                        </Form.Item>
+                    </>
+                case SelectDataSource[1].value:
+                    return <>
+                        <Form.Item
+                            key="labelFieldName"
+                            name="labelFieldName"
+                            label="显示字段名称"
+                            rules={[{ required: true, message: '请填写显示字段名称' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </>
+                default:
+                    return <></>
+            }
+        }
+
+        return <>
+            <Form.Item
+                key="dataSource"
+                name="dataSource"
+                label="数据源"
+            >
+                <Select
+                    options={SelectDataSource}
+                    onChange={(value) => {
+                        setCurrentDataSource(value);
+                    }}
+                />
+            </Form.Item>
+            {renderDataSourceOptions()}
+        </>
+    }
 
 const imageAccepts = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
 const fileAccepts = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
@@ -183,6 +242,96 @@ const UploadOption: React.FC<{
         </>
     }
 
+const SwitchOptions = () => {
+    return <>
+        <Form.Item
+            key="checkedChildren"
+            name="checkedChildren"
+            label="选中时的内容"
+        >
+            <Input />
+        </Form.Item>
+        <Form.Item
+            key="unCheckedChildren"
+            name="unCheckedChildren"
+            label="非选中时的内容"
+        >
+            <Input />
+        </Form.Item>
+    </>
+}
+
+export const CascaderDataSource: SelectProps<any>['options'] = [{
+    label: '城市',
+    value: 'region'
+}, {
+    label: '当前栏目',
+    value: 'currentColumn'
+}];
+
+const CascaderOptions: React.FC<{
+    oldValue?: FieldDefaultType;
+    form: React.RefObject<FormInstance>;
+}> = ({
+    oldValue,
+    form
+}) => {
+
+        const [currentDataSource, setCurrentDataSource] = useState(CascaderDataSource[0].value);
+        useEffect(() => {
+            if (oldValue) {
+                const options = JSON.parse(oldValue.options || '{}');
+                if (options.dataSource) {
+                    setCurrentDataSource(options.dataSource);
+                }
+            }
+        }, [oldValue]);
+
+        const renderDataSourceOptions = () => {
+            switch (currentDataSource) {
+                case CascaderDataSource[0].value:
+                    return <></>
+                case CascaderDataSource[1].value:
+                    return <>
+                        <Form.Item
+                            key="labelFieldName"
+                            name="labelFieldName"
+                            label="显示字段名称"
+                            rules={[{ required: true, message: '请填写显示字段名称' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                    </>
+                default:
+                    return <></>
+            }
+        }
+
+        return <>
+            <Form.Item
+                key="changeOnSelect"
+                name="changeOnSelect"
+                label="是否每层可选"
+                valuePropName="checked"
+            >
+                <Switch checkedChildren="是" unCheckedChildren="否" />
+            </Form.Item>
+            <Form.Item
+                key="dataSource"
+                name="dataSource"
+                label="数据源"
+            >
+                <Select
+                    options={CascaderDataSource}
+                    onChange={(value) => {
+                        setCurrentDataSource(value);
+                    }}
+                />
+            </Form.Item>
+            {renderDataSourceOptions()}
+        </>
+    }
+
 const FormFieldOptions: React.FC<{
     optionType: FormItemType;
     form: React.RefObject<FormInstance>;
@@ -195,9 +344,13 @@ const FormFieldOptions: React.FC<{
         case FormItemType.textArea:
             return <InputOption />;
         case FormItemType.select:
-            return <SelectOption />;
+            return <SelectOption form={form} oldValue={oldValue} />;
         case FormItemType.upload:
-            return <UploadOption form={form} oldValue={oldValue} />
+            return <UploadOption form={form} oldValue={oldValue} />;
+        case FormItemType.switch:
+            return <SwitchOptions />;
+        case FormItemType.cascader:
+            return <CascaderOptions form={form} oldValue={oldValue} />
         default:
             return <></>;
     }
@@ -289,6 +442,8 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
                     uploadType: 'image',
                     uploadMax: 1,
                     accept: imageAccepts,
+                    checkedChildren: '是',
+                    unCheckedChildren: '否',
                 }}
                 onFinish={(value) => {
                     setLoading({
@@ -330,7 +485,7 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
                     name="name"
                     label="名称"
                     extra={<span style={{ color: 'green' }}>名称一经添加将不允许修改，请谨慎填写！</span>}
-                    rules={[{ required: true, message: "请填写名称" }, { pattern: /^([a-zA-Z]{3,})$/, message: "名称仅支持英文字母，并且至少三个字符" }]}>
+                    rules={[{ required: true, message: "请填写名称" }, { pattern: /^([a-zA-Z]{1})([a-zA-Z0-9]{2,})$/, message: "名称首字母必须是英文，且仅支持英文字母和数字，并且至少三个字符" }]}>
                     <Input maxLength={50} disabled={isUpdate} />
                 </Form.Item>
                 <Form.Item extra={<span style={{ color: 'green' }}>操作类型一经添加将不允许修改，请谨慎选择！</span>} name="optionType" label="操作类型" rules={[{ required: true }]}>

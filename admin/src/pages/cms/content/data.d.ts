@@ -47,6 +47,7 @@ export interface ContentEditProps extends ContentEditState {
     currentColumn?: ColumnItem;
     actionRef?: ContentFormProps['actionRef'];
     onClose: (isSuccess?: boolean) => void;
+    afterVisibleChange?: (visible: boolean) => void;
 }
 
 export interface ContentEditState {

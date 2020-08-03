@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
@@ -20,5 +21,7 @@ namespace DataAccess.Interface.CMS
         Task<dynamic> GetNext(string tableName, int id);
 
         Task<dynamic> GetPrev(string tableName, int id);
+        
+        Task<IEnumerable<dynamic>> GetByColumnNum(string tableName, string columnNum);
     }
 }

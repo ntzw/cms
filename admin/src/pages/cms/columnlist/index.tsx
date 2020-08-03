@@ -14,14 +14,27 @@ import { DeleteConfirm } from '@/utils/msg';
 const { Text } = Typography
 
 const DeleteColumns = (ids: number[], tableAction: React.MutableRefObject<TableAction | undefined>) => {
-    Delete(ids).then(res => {
-        if (res.isSuccess) {
-            message.success('删除成功');
-            tableAction.current?.reload();
-        } else {
-            message.error(res.message || '删除失败');
-        }
-    })
+    if (ids) {
+        DeleteConfirm(() => {
+            Modal.confirm({
+                title: '删除提醒',
+                content: <Text strong><Text style={{ color: 'red' }}>删除栏目，会清空栏目下所有内容</Text>，确定删除吗？</Text>,
+                okText: '确定删除',
+                cancelText: '取消',
+                onOk: () => {
+                    Delete(ids).then(res => {
+                        if (res.isSuccess) {
+                            message.success('删除成功');
+                            tableAction.current?.reload();
+                        } else {
+                            message.error(res.message || '删除失败');
+                        }
+                    })
+
+                }
+            })
+        })
+    }
 }
 
 const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
@@ -164,19 +177,9 @@ const ColumnList: React.FC<ColumnListProps> = ({ currentSite }) => {
                             type="primary"
                             icon={<DeleteOutlined />}
                             onClick={() => {
-                                DeleteConfirm(() => {
-                                    Modal.confirm({
-                                        title: '删除提醒',
-                                        content: <Text strong><Text style={{ color: 'red' }}>删除栏目，会清空栏目下所有内容</Text>，确定删除吗？</Text>,
-                                        okText: '确定删除',
-                                        cancelText: '取消',
-                                        onOk: () => {
-                                            if (tableSelectedRows) {
-                                                DeleteColumns(tableSelectedRows.map(temp => temp.id), tableAction);
-                                            }
-                                        }
-                                    })
-                                })
+                                if (tableSelectedRows) {
+                                    DeleteColumns(tableSelectedRows.map(temp => temp.id), tableAction)
+                                }
                             }}
                         >
                             删除

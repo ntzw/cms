@@ -39,5 +39,23 @@ namespace Model.CMS
         /// </summary>
         [Input("站点文件夹", Required = true, RegularTypes = new[] {RegularType.FolderName})]
         public string SiteFolder { get; set; }
+        
+        /// <summary>
+        /// Seo标题
+        /// </summary>
+        [Input("Seo标题")]
+        public string SeoTitle { get; set; }
+        
+        /// <summary>
+        /// Seo关键词
+        /// </summary>
+        [Input("Seo关键词")]
+        public string SeoKeywords { get; set; }
+        
+        /// <summary>
+        /// Seo描述
+        /// </summary>
+        [Input("Seo描述")]
+        public string SeoDescription { get; set; }
     }
 }

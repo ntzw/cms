@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UploadCustomProps } from './data';
 import { Upload, Modal, Button } from 'antd';
-import { UploadFile } from 'antd/lib/upload/interface';
+import { UploadFile, UploadChangeParam } from 'antd/lib/upload/interface';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { HandleResult } from '@/utils/request';
 import defaultConfig from '../../../config/defaultSettings';
@@ -45,61 +45,20 @@ const UploadFileDOM: React.FC<UploadImageProps> = ({
 
     useEffect(() => {
         if (value) {
-            const fieldData = value.split(',').filter(temp => !!temp);
-            setFileList(fieldData.map((temp, index): UploadFile<any> => {
-                return {
-                    uid: fileList.find(uploadFile => {
-                        return uploadFile.url?.replace(defaultConfig.basePath, '') === temp;
-                    })?.uid || index.toString(),
-                    status: 'done',
-                    url: defaultConfig.basePath + temp,
-                    name: getUrlFileName(temp),
-                    size: 0,
-                    type: ''
-                }
-            }));
+            SetUploadValue(value, setFileList, fileList);
         }
     }, [value])
 
     useEffect(() => {
-        setValue(fileList);
+        SetValue(fileList, onChange);
     }, [fileList])
-
-    const setValue = (list: UploadFile<any>[]) => {
-        const changeValue = (list.filter(temp => temp.status === 'done' && temp.url).map(temp => temp.url?.replace(defaultConfig.basePath, '')) as string[] || []).join(',');
-        onChange && onChange(changeValue);
-    }
 
     return <div>
         <Upload
             action={action}
             accept={accept}
             fileList={fileList}
-            onChange={({ file, fileList }) => {
-                if (file.status === 'done') {
-                    const res = file.response as HandleResult<string>;
-                    if (res.isSuccess) {
-                        if (max === 1) {
-                            setFileList([file]);
-                            return;
-                        }
-
-                        fileList.forEach(item => {
-                            if (item.uid == file.uid) {
-                                item.url = res.data;
-                            }
-                        });
-                    } else {
-                        fileList.forEach(item => {
-                            if (item.uid == file.uid) {
-                                item.status = 'error';
-                                item.response = res.message;
-                            }
-                        });
-                    }
-                }
-                setFileList(fileList);
-            }}
+            onChange={UploadOnChange(max, setFileList)}
         >
             {fileList.length >= max ? null : uploadButton}
         </Upload>
@@ -126,30 +85,13 @@ const UploadImageDOM: React.FC<UploadImageProps> = ({
 
     useEffect(() => {
         if (value) {
-            const fieldData = value.split(',').filter(temp => !!temp);
-            setFileList(fieldData.map((temp, index): UploadFile<any> => {
-                return {
-                    uid: fileList.find(uploadFile => {
-                        return uploadFile.url?.replace(defaultConfig.basePath, '') === temp;
-                    })?.uid || index.toString(),
-                    status: 'done',
-                    url: defaultConfig.basePath + temp,
-                    name: getUrlFileName(temp),
-                    size: 0,
-                    type: ''
-                }
-            }));
+            SetUploadValue(value, setFileList, fileList);
         }
     }, [value])
 
     useEffect(() => {
-        setValue(fileList);
-    }, [fileList])
-
-    const setValue = (list: UploadFile<any>[]) => {
-        const changeValue = (list.filter(temp => temp.status === 'done' && temp.url).map(temp => temp.url?.replace(defaultConfig.basePath, '')) as string[] || []).join(',');
-        onChange && onChange(changeValue);
-    }
+        SetValue(fileList, onChange);
+    }, [fileList]);
 
     return <div>
         <Upload
@@ -166,31 +108,7 @@ const UploadImageDOM: React.FC<UploadImageProps> = ({
                 setPreviewVisible(true);
                 setPreviewTitle(file.name || getUrlFileName(file.url || '') || '')
             }}
-            onChange={({ file, fileList }) => {
-                if (file.status === 'done') {
-                    const res = file.response as HandleResult<string>;
-                    if (res.isSuccess) {
-                        if (max === 1) {
-                            setFileList([file]);
-                            return;
-                        }
-
-                        fileList.forEach(item => {
-                            if (item.uid == file.uid) {
-                                item.url = res.data;
-                            }
-                        });
-                    } else {
-                        fileList.forEach(item => {
-                            if (item.uid == file.uid) {
-                                item.status = 'error';
-                                item.response = res.message;
-                            }
-                        });
-                    }
-                }
-                setFileList(fileList);
-            }}
+            onChange={UploadOnChange(max, setFileList)}
         >
             {fileList.length >= max ? null : uploadButton}
         </Upload>
@@ -226,3 +144,54 @@ const UploadCustom: React.FC<UploadCustomProps> = ({
 }
 
 export default UploadCustom;
+
+function SetValue(list: UploadFile<any>[], onChange?: (value: string) => void) {
+    const changeValue = (list.filter(temp => temp.status === 'done' && temp.url).map(temp => temp.url?.replace(defaultConfig.basePath, '')) as string[] || []).join(',');
+    onChange && onChange(changeValue);
+}
+
+function SetUploadValue(value: string, setFileList: React.Dispatch<React.SetStateAction<UploadFile<any>[]>>, fileList: UploadFile<any>[]) {
+    const fieldData = value.split(',').filter(temp => !!temp);
+    setFileList(fieldData.map((temp, index): UploadFile<any> => {
+        return {
+            uid: fileList.find(uploadFile => {
+                return uploadFile.url?.replace(defaultConfig.basePath, '') === temp;
+            })?.uid || index.toString(),
+            status: 'done',
+            url: defaultConfig.basePath + temp,
+            name: getUrlFileName(temp),
+            size: 0,
+            type: ''
+        };
+    }));
+}
+
+function UploadOnChange(max: number, setFileList: React.Dispatch<React.SetStateAction<UploadFile<any>[]>>) {
+    return ({ file, fileList }: UploadChangeParam<UploadFile<any>>) => {
+        if (file.status === 'done') {
+            const res = file.response as HandleResult<string>;
+            if (res.isSuccess) {
+                file.url = res.data;
+                if (max === 1) {
+                    setFileList([file]);
+                    return;
+                }
+
+                fileList.forEach(item => {
+                    if (item.uid == file.uid) {
+                        item.url = file.url;
+                    }
+                });
+            } else {
+                fileList.forEach(item => {
+                    if (item.uid == file.uid) {
+                        item.status = 'error';
+                        item.response = res.message;
+                    }
+                });
+            }
+        }
+        setFileList(fileList);
+    };
+}
+

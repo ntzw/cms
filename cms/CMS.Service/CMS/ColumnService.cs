@@ -3,6 +3,7 @@
  * email：ntzw.geek@gmail.com
  */
 
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -89,6 +90,7 @@ namespace Service.CMS
                 item.TryAdd("ModelNum", column.ModelNum);
                 item.TryAdd("IsCategory", column.IsCategory);
                 item.TryAdd("IsSingle", column.IsSingle);
+                item.TryAdd("IsSeo", column.IsSeo);
                 item.TryAdd("ModelName",
                     column.ModelNum.IsNotEmpty() && models.ContainsKey(column.ModelNum) ? models[column.ModelNum] : "");
 
@@ -122,6 +124,21 @@ namespace Service.CMS
             }
 
             return _modelTables[columnNum];
+        }
+
+        /// <summary>
+        /// 获取站点所有栏目
+        /// </summary>
+        /// <param name="siteNum"></param>
+        /// <returns></returns>
+        public Task<IEnumerable<Column>> GetBySite(string siteNum)
+        {
+            return GetDapper().GetBySiteNum(siteNum);
+        }
+
+        public Task<IEnumerable<Column>> GetByParent(string parentNum)
+        {
+            return GetDapper().GetByParentNum(parentNum);
         }
     }
 }

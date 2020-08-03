@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ContentFormProps, ContentFormAction, ColumnField } from './data';
-import DynaminForm, { FormItemType, handleFormData } from '@/components/DynamicForm';
+import DynaminForm, { FormItemType, handleFormData, DefaultSplit } from '@/components/DynamicForm';
 import { DynaminFormProps, FormItem, DynaminFormAction } from '@/components/DynamicForm/data';
 import { lowerCaseFieldName } from '@/utils/utils';
 import { Row, Col, Card, Spin } from 'antd';
@@ -20,6 +20,15 @@ interface InputOptions extends BaseOptions {
 interface SelectOptions extends BaseOptions {
     options: string[];
     multiple: boolean;
+    dataSource: string;
+    labelFieldName: string;
+    valueFieldName: string;
+}
+
+interface CascaderOptions extends BaseOptions {
+    dataSource: string;
+    labelFieldName: string;
+    changeOnSelect: boolean;
 }
 
 interface UploadOptions extends BaseOptions {
@@ -27,6 +36,11 @@ interface UploadOptions extends BaseOptions {
     uploadMax: number;
     action: string;
     accept: string[];
+}
+
+interface SwitchOptions extends BaseOptions {
+    checkedChildren: string;
+    unCheckedChildren: string;
 }
 
 enum RegularType {
@@ -68,13 +82,11 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
         },
         setValue: (value) => {
             let data = handleFormData(formFields, value);
-            seoFormAction.current?.setValue({
+            seoFormAction?.current?.setValue({
                 seoDesc: data.seoDesc,
                 seoKeyword: data.seoKeyword,
                 seoTitle: data.seoTitle,
             });
-
-
             formAction.current?.setValue(data);
 
         },
@@ -98,7 +110,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
 
     useEffect(() => {
         if (columnFields) {
-            let fields = parsingColumnFields(columnFields)
+            let fields = parsingColumnFields(columnFields, columnNum)
             if (isCategory) {
                 fields.splice(0, 0, {
                     label: '所属类别',
@@ -190,7 +202,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
 
 export default ContentForm;
 
-export function parsingColumnFields(fields: ColumnField[]) {
+export function parsingColumnFields(fields: ColumnField[], columnNum: string) {
     return fields.map((temp): FormItem => {
         const options: BaseOptions = JSON.parse(temp.options);
         const { required, regularTypes, extra, ...elseOptions } = options;
@@ -211,7 +223,7 @@ export function parsingColumnFields(fields: ColumnField[]) {
                         required: true,
                         validator: (_, value) => {
                             return new Promise((resolve, reject) => {
-                                if (value.isEmpty()) {
+                                if (!value) {
                                     reject('请输入正文内容');
                                 } else {
                                     resolve();
@@ -236,18 +248,47 @@ export function parsingColumnFields(fields: ColumnField[]) {
                 SetInputOptions(item, elseOptions as InputOptions);
                 break;
             case FormItemType.select:
-                SetSelectOptions(item, elseOptions as SelectOptions);
+                SetSelectOptions(item, elseOptions as SelectOptions, columnNum);
                 break;
             case FormItemType.upload:
                 SetUploadOptions(item, elseOptions as UploadOptions);
                 break;
-
-            default:
+            case FormItemType.switch:
+                SetSwitchOptions(item, elseOptions as SwitchOptions)
+                break;
+            case FormItemType.cascader:
+                SetCascaderOptions(item, elseOptions as CascaderOptions, columnNum);
                 break;
         }
 
         return item;
     })
+}
+
+function SetCascaderOptions(item: FormItem, elseOptions: CascaderOptions, columnNum: string) {
+    const { dataSource, labelFieldName, changeOnSelect } = elseOptions;
+    switch (dataSource) {
+        case 'currentColumn':
+            item.dataAction = '/Api/CMS/Content/CascaderData';
+            item.dataParams = {
+                columnNum,
+                labelFieldName,
+                currentFieldName: item.name,
+            }
+            break;
+    }
+
+    item.cascader = {
+        changeOnSelect: changeOnSelect,
+        options: [],
+    }
+}
+
+function SetSwitchOptions(item: FormItem, switchOptions: SwitchOptions) {
+    item.switch = {
+        checkedChildren: switchOptions.checkedChildren,
+        unCheckedChildren: switchOptions.unCheckedChildren,
+    }
 }
 
 function SetUploadOptions(item: FormItem, elseOptions: UploadOptions) {
@@ -265,15 +306,31 @@ function SetInputOptions(item: FormItem, elseOptions: InputOptions) {
     };
 }
 
-function SetSelectOptions(item: FormItem, elseOptions: SelectOptions) {
-    item.select = {
-        options: elseOptions.options.map(temp => {
-            return {
-                label: temp,
-                value: temp,
+function SetSelectOptions(item: FormItem, elseOptions: SelectOptions, columnNum: string) {
+    const { dataSource, options, labelFieldName, valueFieldName } = elseOptions;
+
+    item.select = {};
+    switch (dataSource) {
+        case 'custom':
+            item.select.options = options.map(temp => {
+                return {
+                    label: temp,
+                    value: temp,
+                }
+            });
+            break;
+        case 'currentColumn':
+            item.dataAction = '/Api/CMS/Content/SelectData';
+            item.dataParams = {
+                columnNum,
+                labelFieldName: labelFieldName,
+                valueFieldName: valueFieldName,
             }
-        }),
-    };
+            break;
+
+        default:
+            break;
+    }
 
     if (elseOptions.multiple) {
         item.select.mode = 'multiple';
@@ -295,6 +352,11 @@ function SetRegulars(regularTypes: RegularType[] | undefined, item: FormItem) {
     }
 }
 
+/**
+ * 处理表单提交数据
+ * @param columnFields 栏目字段
+ * @param value 旧数据
+ */
 export function handleSubmitFormData(columnFields: ColumnField[], value: any) {
     columnFields.forEach(field => {
         const fieldName = lowerCaseFieldName(field.name);
@@ -302,6 +364,11 @@ export function handleSubmitFormData(columnFields: ColumnField[], value: any) {
         const options = JSON.parse(field.options);
 
         switch (field.optionType) {
+            case FormItemType.tags:
+                if (Array.isArray(fieldValue)) {
+                    value[fieldName] = fieldValue.join(DefaultSplit)
+                }
+                break;
             case FormItemType.editor:
                 if (typeof fieldValue !== 'string' && fieldValue.toHTML) {
                     value[fieldName] = fieldValue.toHTML();
@@ -313,6 +380,11 @@ export function handleSubmitFormData(columnFields: ColumnField[], value: any) {
                     if (selectOptions.multiple && fieldValue instanceof Array) {
                         value[fieldName] = fieldValue.join(',');
                     }
+                }
+                break;
+            case FormItemType.cascader:
+                if (Array.isArray(fieldValue)) {
+                    value[fieldName] = fieldValue[fieldValue.length - 1];
                 }
                 break;
         }

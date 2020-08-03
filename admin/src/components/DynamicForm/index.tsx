@@ -11,6 +11,7 @@ import styles from './style.less'
 import UploadCustom from "../FormCustom/UploadCustom";
 import defaultSetting from '../../../config/defaultSettings';
 import { HandleResult } from "@/utils/request";
+import { SelectProps } from "antd/lib/select";
 
 
 export enum FormItemType {
@@ -27,6 +28,7 @@ export enum FormItemType {
     rangePicker,
     upload,
     region,
+    tags,
 }
 
 export function GetFormItemTypeName(type: number) {
@@ -55,6 +57,8 @@ export function GetFormItemTypeName(type: number) {
             return '上传组件';
         case FormItemType.region:
             return '城市组件';
+        case FormItemType.tags:
+            return '标签';
         default:
             return '文本框';
     }
@@ -104,7 +108,7 @@ const editUploadFn: MediaType['uploadFn'] = param => {
     xhr.send(fd)
 }
 
-const getFormItem = (item: FormItem) => {
+const FormItemDOM = (item: FormItem) => {
     const type = item.type || FormItemType.input;
     switch (type) {
         case FormItemType.switch:
@@ -114,7 +118,13 @@ const getFormItem = (item: FormItem) => {
         case FormItemType.textArea:
             return <Input.TextArea {...item.textarea} />
         case FormItemType.select:
-            return <Select {...item.select} />
+            return <Select {...item.select} />;
+        case FormItemType.tags:
+            const tags: SelectProps<any> = {
+                ...item.select,
+                mode: "tags"
+            }
+            return <Select {...tags} />;
         case FormItemType.password:
             return <Input.Password {...item.password} />
         case FormItemType.upload:
@@ -206,16 +216,23 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
             function asyncData(item: FormItem) {
                 if (item.dataAction) {
                     asyncCount += 1;
-                    getAsyncData(item.dataAction, fieldActionParams && fieldActionParams(item)).then(res => {
+                    getAsyncData(item.dataAction, {
+                        ...fieldActionParams && fieldActionParams(item),
+                        ...item.dataParams,
+                    }).then(res => {
 
                         switch (item.type) {
                             case FormItemType.select:
-                                if (item.select)
-                                    item.select.options = res?.data || [];
+                                item.select = {
+                                    ...item.select,
+                                    options: res?.data || []
+                                }
                                 break;
                             case FormItemType.cascader:
-                                if (item.cascader)
-                                    item.cascader.options = res?.data || [];
+                                item.cascader = {
+                                    ...item.cascader,
+                                    options: res?.data || []
+                                }
                                 break;
                         }
 
@@ -230,26 +247,6 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                     case FormItemType.select:
                     case FormItemType.cascader:
                         asyncData(item);
-                        break;
-                    case FormItemType.editor:
-                        if (item.rules) {
-                            item.rules = item.rules.map(temp => {
-                                if (temp.required) {
-                                    item.validateTrigger = 'onBlur';
-                                    temp.validator = (_, value) => {
-                                        return new Promise((resolve, reject) => {
-                                            if (value.isEmpty()) {
-                                                reject(`请输入 ${item.label}`)
-                                            } else {
-                                                resolve()
-                                            }
-                                        })
-                                    }
-                                }
-
-                                return temp;
-                            })
-                        }
                         break;
                 }
             })
@@ -324,6 +321,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
             form.current?.submit();
         },
         setValue: (value) => {
+            console.info('setValue', form.current, value);
             form.current?.setFieldsValue(value);
         },
         getValue: () => {
@@ -378,7 +376,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
                         return temp;
                     })}
                 >
-                    {getFormItem(item)}
+                    {FormItemDOM(item)}
                 </Form.Item>
             })}
         </Form> : <Empty description="未设置表单字段" />}
@@ -387,6 +385,13 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
 
 export default DynaminForm;
 
+export const DefaultSplit = '&|&|&';
+
+/**
+ * 处理设置的数据
+ * @param fields 字段
+ * @param oldData 旧数据
+ */
 export function handleFormData(fields: FormItem[], oldData: any): any {
     const newData = { ...oldData };
     fields.forEach(field => {
@@ -396,14 +401,15 @@ export function handleFormData(fields: FormItem[], oldData: any): any {
             case FormItemType.cascader:
                 newData[fieldName] = handleCascaderValue(field.cascader?.options, oldValue);
                 break;
+            case FormItemType.tags:
+                setSplitValue(newData, fieldName, oldValue, field);
+                break;
             case FormItemType.select:
                 if (field.select) {
                     switch (field.select.mode) {
                         case 'tags':
                         case 'multiple':
-                            newData[fieldName] = [];
-                            if (typeof oldValue === 'string')
-                                newData[fieldName] = oldValue.split(field.split || ',').filter(temp => !!temp);
+                            setSplitValue(newData, fieldName, oldValue, field);
                             break;
                     }
                 }
@@ -417,3 +423,10 @@ export function handleFormData(fields: FormItem[], oldData: any): any {
     });
     return newData;
 }
+
+function setSplitValue(newData: any, fieldName: string, oldValue: string | number, field: FormItem) {
+    newData[fieldName] = [];
+    if (typeof oldValue === 'string')
+        newData[fieldName] = oldValue.split(field.split || DefaultSplit).filter(temp => !!temp);
+}
+

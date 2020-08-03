@@ -49,11 +49,17 @@ namespace DataAccess.SqlServer.CMS
             string sql = $"SELECT * FROM {tableName} WHERE Id = (SELECT MAX(Id) FROM {tableName} WHERE Id < @Id)";
             return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {Id = id});
         }
-        
+
         public Task<dynamic> GetPrev(string tableName, int id)
         {
             string sql = $"SELECT * FROM {tableName} WHERE Id = (SELECT MIN(Id) FROM {tableName} WHERE Id > @Id)";
             return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {Id = id});
+        }
+
+        public Task<IEnumerable<dynamic>> GetByColumnNum(string tableName, string columnNum)
+        {
+            string sql = $"SELECT * FROM {tableName} WHERE ColumnNum = @ColumnNum";
+            return MainConnection.Interface.GetConnection().QueryAsync(sql, new {ColumnNum = columnNum});
         }
     }
 }
