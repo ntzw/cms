@@ -107,8 +107,8 @@ namespace Web.Controllers
                 Site = site,
                 ModelTable = model,
                 Data = item,
-                NextData = await ContentService.Interface.GetNext(model.SqlTableName, id),
-                PrevData = await ContentService.Interface.GetPrev(model.SqlTableName, id)
+                NextData = await ContentService.Interface.GetNext(model.SqlTableName, column.Num, id),
+                PrevData = await ContentService.Interface.GetPrev(model.SqlTableName, column.Num, id)
             };
 
             ViewBag.Seo = new ContentSeo
@@ -118,30 +118,23 @@ namespace Web.Controllers
                 Desc = item.SeoDesc
             };
 
-
             await ContentService.Interface.UpdateClickCount(model.SqlTableName, id, clickCount + 1);
             return View($"~/{templatePath}");
         }
 
-        [Route("info/{modelNum}/{num}")]
-        public async Task<IActionResult> Info(string modelNum, string num)
+        [Route("info/{columnNum}/{num}")]
+        public async Task<IActionResult> Info(string columnNum, string num)
         {
-            var model = await ModelTableService.Interface.GetByNum(modelNum);
-            if (model == null) return NotFound();
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null) return NotFound();
 
-            var item = await ContentService.Interface.GetByNum(model.SqlTableName, num);
+            var item = await ContentService.Interface.GetByNum(cm?.ModelTable.SqlTableName, num);
             if (item == null) return NotFound();
 
-            string columnNum = item.ColumnNum;
-            if (columnNum.IsEmpty()) return NotFound();
-
-            var column = await ColumnService.Interface.GetByNum(columnNum);
-            if (column == null) return NotFound();
-
-            var site = await SiteService.Interface.GetByNum(column.SiteNum);
+            var site = await SiteService.Interface.GetByNum(cm?.Column.SiteNum);
             if (site == null) return NotFound();
 
-            return await Info(site, column, model, item);
+            return await Info(site, cm?.Column, cm?.ModelTable, item);
         }
 
         public IActionResult NotFound()

@@ -13,7 +13,7 @@ namespace Foundation.Modal
     {
         public SqlServerPageRequest()
         {
-            Sort = new SqlServerSort().Add("Id", "DESC");
+            Sort = new SqlServerSort().Add("Id");
             Queries = new List<IQuery>();
         }
 
@@ -46,7 +46,7 @@ namespace Foundation.Modal
             {
                 foreach (var keyValue in defaultSort)
                 {
-                    Sort.Add(keyValue.Key, keyValue.Value);
+                    Sort.Add(keyValue.Key, ToSortOrder(keyValue.Value.ToStr().ToLower()));
                 }
             }
 
@@ -55,13 +55,18 @@ namespace Foundation.Modal
                 foreach (var jToken in sort)
                 {
                     if (jToken.Key.IsSqlField())
-                        Sort.Add(jToken.Key, jToken.Value.ToStr());
+                        Sort.Add(jToken.Key, ToSortOrder(jToken.Value.ToStr()));
                 }
             }
             else if (defaultSort == null)
             {
-                Sort.Add("Id", "DESC");
+                Sort.Add("Id");
             }
+        }
+
+        private static SortOrder ToSortOrder(string order)
+        {
+            return order == "desc" ? SortOrder.DESC : SortOrder.ASC;
         }
 
         private QuerySymbol GetQuerySymbol(JObject form, string key)

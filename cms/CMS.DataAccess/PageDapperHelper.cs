@@ -7,12 +7,12 @@ namespace DataAccess
 {
     public abstract class PageDapperHelper
     {
-        protected virtual string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
+        protected virtual string OutDefaultParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
         {
-            return OutDefaultPageParams(queries, out whereParams, out List<string> whereSql);
+            return OutDefaultParams(queries, out whereParams, out List<string> whereSql);
         }
 
-        protected virtual string OutDefaultPageParams(List<IQuery> queries, out IDictionary<string, object> whereParams,
+        protected virtual string OutDefaultParams(List<IQuery> queries, out IDictionary<string, object> whereParams,
             out List<string> whereSql)
         {
             whereSql = new List<string>();
@@ -55,8 +55,7 @@ namespace DataAccess
         /// <returns></returns>
         protected virtual string GetPageDataSql(IPageRequest req, string whereSql, string tableName)
         {
-            return
-                $"SELECT * FROM (SELECT *,ROW_NUMBER() OVER({req.Sort.ToSql()}) AS RowNum FROM [{tableName}] WHERE 1=1 {whereSql}) AS temp WHERE RowNum BETWEEN {req.Begin} AND {req.End} ";
+            return $"SELECT * FROM (SELECT *,ROW_NUMBER() OVER({req.Sort.ToSql()}) AS RowNum FROM [{tableName}] WHERE 1=1 {whereSql}) AS temp WHERE RowNum BETWEEN {req.Begin} AND {req.End} ";
         }
     }
 }

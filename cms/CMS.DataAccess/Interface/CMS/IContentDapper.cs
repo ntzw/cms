@@ -17,11 +17,11 @@ namespace DataAccess.Interface.CMS
         Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum);
 
         Task<int> UpdateClickCount(string tableName, int id, int count);
-        
-        Task<dynamic> GetNext(string tableName, int id);
 
-        Task<dynamic> GetPrev(string tableName, int id);
-        
-        Task<IEnumerable<dynamic>> GetByColumnNum(string tableName, string columnNum);
+        Task<dynamic> GetNext(string tableName, string columnNum, int id);
+
+        Task<dynamic> GetPrev(string tableName, string columnNum, int id);
+
+        Task<IEnumerable<dynamic>> GetByConditions(string tableName, ISelectRequest request);
     }
 }

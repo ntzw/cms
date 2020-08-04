@@ -94,7 +94,7 @@ namespace DataAccess
         public virtual async Task<PageResponse> Page(IPageRequest req)
         {
             string tableName = GetTableName();
-            string whereSql = OutDefaultPageParams(req.Queries, out IDictionary<string, object> whereParams);
+            string whereSql = OutDefaultParams(req.Queries, out IDictionary<string, object> whereParams);
             string dataSql = GetPageDataSql(req, whereSql, tableName);
             string countSql = GetPageCountSql(whereSql, tableName);
 

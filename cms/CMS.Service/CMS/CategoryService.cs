@@ -28,10 +28,10 @@ namespace Service.CMS
 
         public async Task<PageResponse> GetTreeTableData(string columnNum)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return PageResponse.Error("栏目未绑定模型");
+            var columnModel = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (columnModel == null) return PageResponse.Error("栏目未绑定模型");
 
-            var data = await _dapper.GetByColumnNum(columnNum, model.SqlCategoryTableName);
+            var data = await _dapper.GetByColumnNum(columnNum, columnModel?.ModelTable.SqlCategoryTableName);
 
             var columns = data as Category[] ?? data.ToArray();
             return new PageResponse(await GetTreeTableData(columns.ToList(), ""), columns.Length);
@@ -66,18 +66,18 @@ namespace Service.CMS
 
         public async Task<Category> GetById(string columnNum, int id)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return null;
+            var columnModel = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (columnModel == null) return null;
 
-            return await _dapper.GetById(model.SqlCategoryTableName, id);
+            return await _dapper.GetById(columnModel?.ModelTable.SqlCategoryTableName, id);
         }
 
         public async Task<List<CascaderDataType>> GetCascaderData(string columnNum)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return null;
+            var columnModel = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (columnModel == null) return null;
 
-            var data = await _dapper.GetByColumnNum(columnNum, model.SqlCategoryTableName);
+            var data = await _dapper.GetByColumnNum(columnNum, columnModel?.ModelTable.SqlCategoryTableName);
             var categories = data as Category[] ?? data.ToArray();
             return GetCascaderData(categories.ToList(), "");
         }
@@ -109,11 +109,11 @@ namespace Service.CMS
 
             if (columnNum.IsEmpty()) return HandleResult.Error("无效的提交数据");
 
-            var column = await ColumnService.Interface.GetByNum(columnNum);
-            if (column == null) return HandleResult.Error("无效的提交数据");
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null) return HandleResult.Error("无效的提交数据");
 
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return HandleResult.Error("无效的提交数据");
+            var column = cm?.Column;
+            var model = cm?.ModelTable;
 
             var oldData = (num.IsEmpty() ? null : await _dapper.GetByNum(model.SqlCategoryTableName, num));
 
@@ -151,10 +151,10 @@ namespace Service.CMS
 
         public async Task<HandleResult> Delete(string columnNum, string ids)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return HandleResult.Error("无效参数");
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null) return HandleResult.Error("无效参数");
 
-            int count = await _dapper.Delete(model.SqlCategoryTableName,
+            int count = await _dapper.Delete(cm?.ModelTable.SqlCategoryTableName,
                 ids.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries));
 
             return count > 0 ? HandleResult.Success() : HandleResult.Error("");

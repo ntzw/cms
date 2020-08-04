@@ -104,28 +104,6 @@ namespace Service.CMS
             return data;
         }
 
-
-        readonly ConcurrentDictionary<string, ModelTable> _modelTables = new ConcurrentDictionary<string, ModelTable>();
-
-        /// <summary>
-        /// 获取栏目模型
-        /// </summary>
-        /// <param name="columnNum"></param>
-        /// <returns></returns>
-        public async Task<ModelTable> GetModelByNum(string columnNum)
-        {
-            if (!_modelTables.ContainsKey(columnNum))
-            {
-                var column = await GetByNum(columnNum);
-                if (column == null || column.ModelNum.IsEmpty()) return null;
-
-                var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
-                _modelTables[columnNum] = model;
-            }
-
-            return _modelTables[columnNum];
-        }
-
         /// <summary>
         /// 获取站点所有栏目
         /// </summary>
@@ -140,5 +118,39 @@ namespace Service.CMS
         {
             return GetDapper().GetByParentNum(parentNum);
         }
+
+        readonly ConcurrentDictionary<string, ModelTable> _modelTables = new ConcurrentDictionary<string, ModelTable>();
+        readonly ConcurrentDictionary<string, Column> _columns = new ConcurrentDictionary<string, Column>();
+
+        /// <summary>
+        /// 获取栏目模型
+        /// </summary>
+        /// <param name="columnNum"></param>
+        /// <returns></returns>
+        public async Task<ColumnModel?> GetModelByNum(string columnNum)
+        {
+            if (!_modelTables.ContainsKey(columnNum))
+            {
+                var column = await GetByNum(columnNum);
+                if (column == null || column.ModelNum.IsEmpty()) return null;
+
+                var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
+                _modelTables[columnNum] = model;
+                _columns[columnNum] = column;
+            }
+
+            return new ColumnModel
+            {
+                Column = _columns[columnNum],
+                ModelTable = _modelTables[columnNum]
+            };
+        }
+    }
+
+    public struct ColumnModel
+    {
+        public Column Column { get; set; }
+
+        public ModelTable ModelTable { get; set; }
     }
 }

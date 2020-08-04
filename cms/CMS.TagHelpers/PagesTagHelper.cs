@@ -58,33 +58,35 @@ namespace CMS.TagHelpers
         {
             output.TagName = "div";
             output.Attributes.Add("class", "pages");
-
-            var ul = new TagBuilder("ul");
-            if (Current > 1)
+            if (Total > 0)
             {
-                ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(1)}\">{FirstText}</a></li>");
-                ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(Current - 1)}\">{PrevText}</a></li>");
-            }
-
-            foreach (var page in PageList)
-            {
-                if (page == Current)
+                var ul = new TagBuilder("ul");
+                if (Current > 1)
                 {
-                    ul.InnerHtml.AppendHtml($"<li class=\"thisclass\">{page}</li>");
+                    ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(1)}\">{FirstText}</a></li>");
+                    ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(Current - 1)}\">{PrevText}</a></li>");
                 }
-                else
+
+                foreach (var page in PageList)
                 {
-                    ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(page)}\">{page}</a></li>");
+                    if (page == Current)
+                    {
+                        ul.InnerHtml.AppendHtml($"<li class=\"thisclass\">{page}</li>");
+                    }
+                    else
+                    {
+                        ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(page)}\">{page}</a></li>");
+                    }
                 }
-            }
 
-            if (Current < TotalPage && TotalPage > 5)
-            {
-                ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(Current + 1)}\">{NextText}</a></li>");
-                ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(TotalPage)}\">{LastText}</a></li>");
-            }
+                if (Current < TotalPage && TotalPage > 5)
+                {
+                    ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(Current + 1)}\">{NextText}</a></li>");
+                    ul.InnerHtml.AppendHtml($"<li><a href=\"{GetPageUrl(TotalPage)}\">{LastText}</a></li>");
+                }
 
-            output.Content.SetHtmlContent(ul);
+                output.Content.SetHtmlContent(ul);
+            }
         }
 
         private string GetPageUrl(long page)

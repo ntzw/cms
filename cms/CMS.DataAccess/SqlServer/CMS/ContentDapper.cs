@@ -23,7 +23,7 @@ namespace DataAccess.SqlServer.CMS
 
         public async Task<PageResponse> Page(string tableName, IPageRequest req)
         {
-            string whereSql = OutDefaultPageParams(req.Queries, out IDictionary<string, object> whereParams);
+            string whereSql = OutDefaultParams(req.Queries, out IDictionary<string, object> whereParams);
             string dataSql = GetPageDataSql(req, whereSql, tableName);
             string countSql = GetPageCountSql(whereSql, tableName);
 
@@ -44,22 +44,29 @@ namespace DataAccess.SqlServer.CMS
             return MainConnection.Interface.GetConnection().ExecuteAsync(sql, new {Id = id, ClickCount = count});
         }
 
-        public Task<dynamic> GetNext(string tableName, int id)
+        public Task<dynamic> GetNext(string tableName, string columnNum, int id)
         {
-            string sql = $"SELECT * FROM {tableName} WHERE Id = (SELECT MAX(Id) FROM {tableName} WHERE Id < @Id)";
-            return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {Id = id});
+            string sql =
+                $"SELECT * FROM {tableName} WHERE Id = (SELECT MAX(Id) FROM {tableName} WHERE ColumnNum = @ColumnNum AND Id < @Id)";
+            return MainConnection.Interface.GetConnection()
+                .QueryFirstOrDefaultAsync(sql, new {Id = id, ColumnNum = columnNum});
         }
 
-        public Task<dynamic> GetPrev(string tableName, int id)
+        public Task<dynamic> GetPrev(string tableName, string columnNum, int id)
         {
-            string sql = $"SELECT * FROM {tableName} WHERE Id = (SELECT MIN(Id) FROM {tableName} WHERE Id > @Id)";
-            return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {Id = id});
+            string sql =
+                $"SELECT * FROM {tableName} WHERE Id = (SELECT MIN(Id) FROM {tableName} WHERE ColumnNum = @ColumnNum AND Id > @Id)";
+            return MainConnection.Interface.GetConnection()
+                .QueryFirstOrDefaultAsync(sql, new {Id = id, ColumnNum = columnNum});
         }
 
-        public Task<IEnumerable<dynamic>> GetByColumnNum(string tableName, string columnNum)
+        public Task<IEnumerable<dynamic>> GetByConditions(string tableName, ISelectRequest request)
         {
-            string sql = $"SELECT * FROM {tableName} WHERE ColumnNum = @ColumnNum";
-            return MainConnection.Interface.GetConnection().QueryAsync(sql, new {ColumnNum = columnNum});
+            string whereSql = OutDefaultParams(request.Queries, out IDictionary<string, object> whereParams);
+
+            string sql =
+                $"SELECT {(request.Top > 0 ? $"TOP {request.Top}" : "")} * FROM [{tableName}] WHERE 1=1 {whereSql} {request.Sort?.ToSql()}";
+            return MainConnection.Interface.GetConnection().QueryAsync(sql, whereParams);
         }
     }
 }

@@ -58,12 +58,18 @@ namespace Model.CMS
         /// </summary>
         [Switch("是否单篇")]
         public bool IsSingle { get; set; }
-        
+
         /// <summary>
         /// 是否启用Seo
         /// </summary>
         [Switch("是否启用SEO")]
         public bool IsSeo { get; set; }
+
+        /// <summary>
+        /// 是否开启内容置顶功能
+        /// </summary>
+        [Switch("是否开启内容置顶功能")]
+        public bool IsAllowTop { get; set; }
 
         /// <summary>
         /// Seo标题

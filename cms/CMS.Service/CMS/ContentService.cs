@@ -123,10 +123,10 @@ namespace Service.CMS
 
         public async Task<dynamic> GetFirstByColumnNum(string columnNum)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return null;
+            var columnModel = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (columnModel == null) return null;
 
-            return await GetFirstByColumnNum(model.SqlTableName, columnNum);
+            return await GetFirstByColumnNum(columnModel?.ModelTable.SqlTableName, columnNum);
         }
 
         public async Task<HandleResult> UpdateClickCount(string tableName, int id, int count)
@@ -135,22 +135,36 @@ namespace Service.CMS
             return exCount > 0 ? HandleResult.Success() : HandleResult.Error("");
         }
 
-        public Task<dynamic> GetNext(string tableName, int id)
+        public Task<dynamic> GetNext(string tableName, string columnNum, int id)
         {
-            return _dapper.GetNext(tableName, id);
+            return _dapper.GetNext(tableName, columnNum, id);
         }
 
-        public Task<dynamic> GetPrev(string tableName, int id)
+        public Task<dynamic> GetPrev(string tableName, string columnNum, int id)
         {
-            return _dapper.GetPrev(tableName, id);
+            return _dapper.GetPrev(tableName, columnNum, id);
+        }
+
+        public async Task<IEnumerable<dynamic>> GetByConditions(ISelectRequest request)
+        {
+            var columnField = request.GetQueryField("columnNum");
+            if (columnField == null) return null;
+
+            var cm = await ColumnService.Interface.GetModelByNum(columnField.Value.ToStr());
+            if (cm == null) return null;
+
+            return await _dapper.GetByConditions(cm?.ModelTable.SqlTableName, request);
         }
 
         public async Task<IEnumerable<dynamic>> GetByColumnNum(string columnNum)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return null;
-
-            return await _dapper.GetByColumnNum(model.SqlTableName, columnNum);
+            return await GetByConditions(new SqlServerSelectRequest
+            {
+                Queries = new List<IQuery>
+                {
+                    new DefaultQuery(columnNum, new DefaultQuerySql("columnNum"))
+                }
+            });
         }
 
         public async Task<List<Dictionary<string, object>>> GetDictionaryDataByColumnNum(string columnNum)
@@ -163,23 +177,16 @@ namespace Service.CMS
         public async Task<HandleResult> GetCascaderData(string columnNum, string labelFieldName,
             string currentFieldName)
         {
-            var model = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (model == null) return HandleResult.Error("栏目未绑定模型");
-
+            var data = await GetDictionaryDataByColumnNum(columnNum);
             var resData = new List<CascaderDataType>();
-            var data = (await _dapper.GetByColumnNum(model.SqlTableName, columnNum)).ToList();
             if (data.Count > 0)
             {
-                List<Dictionary<string, object>> newData = data
-                    .Select(temp => new Dictionary<string, object>(temp, StringComparer.OrdinalIgnoreCase)).ToList();
-
-                var firstItem = newData[0];
-
+                var firstItem = data[0];
                 if (!firstItem.ContainsKey(labelFieldName) ||
                     !firstItem.ContainsKey(currentFieldName))
                     return HandleResult.Error("无效字段");
 
-                resData = GetCascaderData(newData, "", currentFieldName, labelFieldName);
+                resData = GetCascaderData(data, "", currentFieldName, labelFieldName);
             }
 
             return new HandleResult

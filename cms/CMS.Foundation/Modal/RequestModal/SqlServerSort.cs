@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CMS.Enums;
 using Extension;
 
 namespace Foundation.Modal.RequestModal
@@ -7,12 +8,11 @@ namespace Foundation.Modal.RequestModal
     public class SqlServerSort : ISort
     {
         private readonly List<string> _field = new List<string>();
-        private readonly List<string> _order = new List<string>();
+        private readonly List<SortOrder> _order = new List<SortOrder>();
 
-
-        public ISort Add(string field, string order)
+        public ISort Add(string field, SortOrder order = SortOrder.DESC)
         {
-            if (!field.IsNotEmpty() || !order.IsNotEmpty()) return this;
+            if (!field.IsNotEmpty()) return this;
 
             _field.Add(field);
             _order.Add(order);
@@ -35,11 +35,10 @@ namespace Foundation.Modal.RequestModal
             List<string> temp = new List<string>();
             for (int i = 0; i < _field.Count && i < _order.Count; i++)
             {
-                temp.Add(
-                    $"{(prefix.IsNotEmpty() ? $"[{prefix}]." : "")}[{_field[i]}] {(_order[i].ToLower() == "desc" ? "desc" : "asc")}");
+                temp.Add($"{(prefix.IsNotEmpty() ? $"[{prefix}]." : "")}[{_field[i]}] {_order[i].ToString()}");
             }
 
-            return $"ORDER BY {string.Join(",", temp)}";
+            return _field.Count > 0 ? $"ORDER BY {string.Join(",", temp)}" : "";
         }
     }
 }
