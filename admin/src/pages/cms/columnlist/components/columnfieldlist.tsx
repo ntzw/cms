@@ -165,6 +165,9 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                 fullScreen: false,
                                 setting: false,
                             }}
+                            onChange={({ pageSize }) => {
+                                console.info(pageSize);
+                            }}
                             actionRef={exitsTableAction}
                             request={(params, sort, query) => {
                                 params['columnNum'] = Array.isArray(column) ? column[0]?.num : column?.num;

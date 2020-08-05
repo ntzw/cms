@@ -148,7 +148,7 @@ namespace Service.CMS
         public async Task<IEnumerable<dynamic>> GetByConditions(ISelectRequest request)
         {
             var columnField = request.GetQueryField("columnNum");
-            if (columnField == null) return null;
+            if (columnField == null || columnField.Value.ToStr().IsEmpty()) return null;
 
             var cm = await ColumnService.Interface.GetModelByNum(columnField.Value.ToStr());
             if (cm == null) return null;

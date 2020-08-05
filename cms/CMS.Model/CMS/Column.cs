@@ -68,7 +68,7 @@ namespace Model.CMS
         /// <summary>
         /// 是否开启内容置顶功能
         /// </summary>
-        [Switch("是否开启内容置顶功能")]
+        [Switch("开启置顶功能", CheckedChildren = "已开启", UnCheckedChildren = "未开启")]
         public bool IsAllowTop { get; set; }
 
         /// <summary>
