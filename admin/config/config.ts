@@ -21,6 +21,12 @@ export default defineConfig({
   dynamicImport: {
     loading: '@/components/PageLoading/index',
   },
+  //react-router 的前缀
+  base: defaultSettings.configBasePath,
+  //指向静态资源文件所在的路径
+  publicPath: '/admin/',
+  //发布输出路径
+  outputPath: '../build/wwwroot/admin/',
   targets: {
     ie: 11,
   },

@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Extension;
+using Foundation.Application;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
-using Helper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Model.CMS;
 using Model.CMS.Content;
 using Service.CMS;
-using Web.Models;
 
 namespace Web.Controllers
 {
@@ -80,6 +75,8 @@ namespace Web.Controllers
                     Total = rep.Total,
                 }
             };
+            
+            ViewBag.Site = site;
 
             return View($"~/{templatePath}");
         }
@@ -117,6 +114,8 @@ namespace Web.Controllers
                 Keyword = item.SeoKeyword,
                 Desc = item.SeoDesc
             };
+
+            ViewBag.Site = site;
 
             await ContentService.Interface.UpdateClickCount(model.SqlTableName, id, clickCount + 1);
             return View($"~/{templatePath}");

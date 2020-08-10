@@ -5,3 +5,13 @@ cms/.idea
 */obj
 *obj
 *bin
+cms/CMS.Web/wwwroot/upload
+build
+cms/.vs/cms/config/applicationhost.config
+cms/.vs/cms/DesignTimeBuild/.dtbcache.v2
+cms/.vs/cms/v16/.suo
+cms/CMS.Web/wwwroot/admin
+cms/CMS.Web/Properties/PublishProfiles
+cms/CMS.Web/.config
+CMS.Web.csproj.user
+appsettings.json

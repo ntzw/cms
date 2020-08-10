@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Foundation.Application;
 using Foundation.Attribute.AuthorizeModel;
-using Helper;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -17,14 +17,16 @@ namespace Foundation.Attribute
         public const string Scheme = "AdminLoginScheme";
         public const string ClaimsIssuer = "";
 
+        private const string LoginAdminSessionName = "LoginAdminSessionName";
+
         public AdminCookieAttribute()
         {
-            this.AuthenticationSchemes = Scheme;
+            AuthenticationSchemes = Scheme;
         }
 
         public static async void Login(HttpContext context, AdminLogin administrator)
         {
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(Scheme, JwtClaimTypes.Name, JwtClaimTypes.Role);
+            var claimsIdentity = new ClaimsIdentity(Scheme, JwtClaimTypes.Name, JwtClaimTypes.Role);
             claimsIdentity.AddClaims(new[]
             {
                 new Claim(JwtClaimTypes.Id, administrator.Id),
@@ -35,19 +37,19 @@ namespace Foundation.Attribute
                 new Claim(JwtClaimTypes.IdentityProvider, administrator.Num ?? "")
             });
 
-            ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             await context.SignInAsync(Scheme, claimsPrincipal, new AuthenticationProperties
             {
                 IsPersistent = administrator.IsCookiePersistent,
                 ExpiresUtc = administrator.ExpiresUtc,
-                AllowRefresh = administrator.IsCookiePersistent,
+                AllowRefresh = administrator.IsCookiePersistent
             });
         }
 
 
         public static async Task<bool> IsLogin(HttpContext context)
         {
-            AuthenticateResult result = await context.AuthenticateAsync(Scheme);
+            var result = await context.AuthenticateAsync(Scheme);
             return result?.Principal?.Identity?.IsAuthenticated ?? false;
         }
 
@@ -55,7 +57,7 @@ namespace Foundation.Attribute
         {
             try
             {
-                Claim claim = claims.First(item => item.Type == types);
+                var claim = claims.First(item => item.Type == types);
                 return claim?.Value;
             }
             catch (Exception e)
@@ -70,9 +72,9 @@ namespace Foundation.Attribute
             var enumerable = claims.ToList();
             return new AdminLogin
             {
-                Id = (GetClaimValue(enumerable, JwtClaimTypes.Id)),
-                Name = (GetClaimValue(enumerable, JwtClaimTypes.Name)),
-                RoleNum = (GetClaimValue(enumerable, JwtClaimTypes.Role)),
+                Id = GetClaimValue(enumerable, JwtClaimTypes.Id),
+                Name = GetClaimValue(enumerable, JwtClaimTypes.Name),
+                RoleNum = GetClaimValue(enumerable, JwtClaimTypes.Role),
                 SingleLoginToken = GetClaimValue(enumerable, JwtClaimTypes.ReferenceTokenId),
                 AccountName = GetClaimValue(enumerable, JwtClaimTypes.PreferredUserName),
                 Num = GetClaimValue(enumerable, JwtClaimTypes.IdentityProvider)
@@ -85,13 +87,11 @@ namespace Foundation.Attribute
             await context.SignOutAsync(Scheme);
         }
 
-        private const string LoginAdminSessionName = "LoginAdminSessionName";
-
         public static void RemoveLoginSession()
         {
             SessionHelper.Remove(LoginAdminSessionName);
         }
-        
+
         public static void SetLoginAdmin(AdminLogin administrator)
         {
             SessionHelper.Set(LoginAdminSessionName, administrator);

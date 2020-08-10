@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using CMS.Enums;
 
 namespace CMS.React

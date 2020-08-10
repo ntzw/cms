@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
+using Foundation.Application;
 using Helper;
 
 namespace Foundation.DataAccess.Connections

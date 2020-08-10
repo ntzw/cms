@@ -3,6 +3,7 @@ import { Settings as ProSettings } from '@ant-design/pro-layout';
 type DefaultSettings = ProSettings & {
   pwa: boolean;
   basePath: string;
+  configBasePath: string;
 };
 
 let basePath = '';
@@ -27,6 +28,7 @@ const proSettings: DefaultSettings = {
   pwa: false,
   iconfontUrl: '',
   basePath,
+  configBasePath: '/admin',
 };
 
 export type { DefaultSettings };

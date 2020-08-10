@@ -1,4 +1,3 @@
-using System;
 using CMS.Enums;
 
 namespace CMS.React.Component

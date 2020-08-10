@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using CMS.Enums;
+using Helper;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Helper
+namespace Foundation.Application
 {
     public static class CacheHelper
     {
         /// <summary>
-        /// 设置缓存
+        ///     设置缓存
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
@@ -30,7 +31,8 @@ namespace Helper
 
         public static void SetObject(string key, object obj, int saveDay = 1)
         {
-            GlobalApplication.Cache.Set(key, obj, new MemoryCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddDays(saveDay)));
+            GlobalApplication.Cache.Set(key, obj,
+                new MemoryCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddDays(saveDay)));
         }
 
         public static string Get(string key)

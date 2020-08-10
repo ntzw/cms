@@ -1,7 +1,8 @@
 using Extension;
+using Helper;
 using Microsoft.AspNetCore.Http;
 
-namespace Helper
+namespace Foundation.Application
 {
     public class SessionHelper
     {

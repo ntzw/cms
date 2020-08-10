@@ -57,5 +57,17 @@ namespace Model.CMS
         /// </summary>
         [Input("Seo描述")]
         public string SeoDescription { get; set; }
+        
+        /// <summary>
+        /// 版权信息
+        /// </summary>
+        [Input("版权信息")]
+        public string Copyright { get; set; }
+        
+        /// <summary>
+        /// 备案号
+        /// </summary>
+        [Input("备案号")]
+        public string RecordNo { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Extension;
+using Foundation.Application;
 using Foundation.Attribute;
 using Foundation.ControllerFormatter;
 using Foundation.Modal;
@@ -63,6 +64,8 @@ namespace Web
             {
                 options.InputFormatters.Insert(0, new JsonInputFormatter());
             });
+
+            services.AddRazorPages().AddRazorRuntimeCompilation();
         }
 
         private static async Task AdminValidateFail(CookieValidatePrincipalContext context)
@@ -87,7 +90,7 @@ namespace Web
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

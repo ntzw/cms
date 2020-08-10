@@ -1,4 +1,6 @@
-namespace Helper
+using Helper;
+
+namespace Foundation.Application
 {
     public class ConfigHelper
     {

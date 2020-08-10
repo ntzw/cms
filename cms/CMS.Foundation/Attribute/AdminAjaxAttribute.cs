@@ -1,7 +1,5 @@
 using System.Threading.Tasks;
-using Foundation.Modal;
 using Foundation.Modal.Result;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Foundation.Attribute
@@ -10,14 +8,12 @@ namespace Foundation.Attribute
     {
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            if (!(await AdminCookieAttribute.IsLogin(context.HttpContext)))
-            {
+            if (!await AdminCookieAttribute.IsLogin(context.HttpContext))
                 context.Result = new HandleResult
                 {
                     IsSuccess = false,
-                    Message = "登录状态已失效,请重新登录!",
+                    Message = "登录状态已失效,请重新登录!"
                 };
-            }
         }
     }
 }

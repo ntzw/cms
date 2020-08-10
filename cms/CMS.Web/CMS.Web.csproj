@@ -3,10 +3,18 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <RootNamespace>Web</RootNamespace>
+        <RazorCompileOnPublish>false</RazorCompileOnPublish>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CMS.DataAccess\CMS.DataAccess.csproj" />
+      <ProjectReference Include="..\CMS.Enums\CMS.Enums.csproj" />
+      <ProjectReference Include="..\CMS.Extension\CMS.Extension.csproj" />
+      <ProjectReference Include="..\CMS.Foundation\CMS.Foundation.csproj" />
       <ProjectReference Include="..\CMS.Helper\CMS.Helper.csproj" />
+      <ProjectReference Include="..\CMS.Model\CMS.Model.csproj" />
+      <ProjectReference Include="..\CMS.React\CMS.React.csproj" />
+      <ProjectReference Include="..\CMS.Service\CMS.Service.csproj" />
       <ProjectReference Include="..\CMS.TagHelpers\CMS.TagHelpers.csproj" />
       <ProjectReference Include="..\CMS.WebApi\CMS.WebApi.csproj" />
       <ProjectReference Include="..\CMS.WebView\CMS.WebView.csproj" />
@@ -83,6 +91,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.6" />
     </ItemGroup>
 
     <ItemGroup>

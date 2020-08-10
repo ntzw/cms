@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-namespace Extension
+namespace Foundation.Application
 {
     public static class SessionExtension
     {
@@ -17,31 +17,28 @@ namespace Extension
         {
             try
             {
-                if (!session.IsAvailable) return default(T);
+                if (!session.IsAvailable) return default;
 
-                string value = session.GetString(key);
-                return string.IsNullOrEmpty(value) ? default(T) : JsonConvert.DeserializeObject<T>(value);
+                var value = session.GetString(key);
+                return string.IsNullOrEmpty(value) ? default : JsonConvert.DeserializeObject<T>(value);
             }
             catch (Exception ex)
             {
-                return default(T);
+                return default;
             }
         }
 
         public static List<T> GetListObject<T>(this ISession session, string key)
         {
-            if (!session.IsAvailable) return default(List<T>);
+            if (!session.IsAvailable) return default;
 
-            string value = session.GetString(key);
-            return string.IsNullOrEmpty(value) ? default(List<T>) : JsonConvert.DeserializeObject<List<T>>(value);
+            var value = session.GetString(key);
+            return string.IsNullOrEmpty(value) ? default : JsonConvert.DeserializeObject<List<T>>(value);
         }
 
         public static void SetObject<T>(this ISession session, string key, List<T> ids)
         {
-            if (ids != null && session.IsAvailable)
-            {
-                session.SetString(key, JsonConvert.SerializeObject(ids));
-            }
+            if (ids != null && session.IsAvailable) session.SetString(key, JsonConvert.SerializeObject(ids));
         }
 
         public static bool IsExistsValue(this ISession session, string key)
