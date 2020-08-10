@@ -14,6 +14,17 @@ export function ContentPage({ params, sort, query }: PageParamsType) {
     });
 }
 
+export function RecyclePage({ params, sort, query }: PageParamsType) {
+    return request('/Api/CMS/Content/RecyclePage', {
+        method: "POST",
+        data: {
+            params,
+            sort,
+            query
+        },
+    });
+}
+
 export function ContentSubmit(params: { columnNum: string; itemNum: string;[key: string]: any; }): AsyncHandleResult {
     return request('/Api/CMS/Content/Submit', {
         method: "POST",
@@ -56,6 +67,16 @@ export function ContentDelete(ids: number[], columnNum: string): AsyncHandleResu
 
 export function ContentMoveRecycle(ids: number[], columnNum: string): AsyncHandleResult {
     return request('/Api/CMS/Content/MoveRecycle', {
+        method: "POST",
+        data: {
+            ids,
+            columnNum,
+        },
+    });
+}
+
+export function ContentRemovedRecycle(ids: number[], columnNum: string): AsyncHandleResult {
+    return request('/Api/CMS/Content/RemovedRecycle', {
         method: "POST",
         data: {
             ids,

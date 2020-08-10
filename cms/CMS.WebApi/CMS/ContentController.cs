@@ -88,6 +88,17 @@ namespace WebApi.CMS
         }
 
         /// <summary>
+        /// 回收站分页数据
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        public Task<PageResponse> RecyclePage([FromBody] JObject form)
+        {
+            return ContentService.Interface.Page(form, true);
+        }
+
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="form"></param>

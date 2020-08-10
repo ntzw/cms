@@ -133,7 +133,7 @@ namespace Service.CMS
 
         #region 分页查询
 
-        public async Task<PageResponse> Page(JObject form)
+        public async Task<PageResponse> Page(JObject form, bool isRecycle = false)
         {
             var req = new SqlServerPageRequest(form);
 
@@ -146,7 +146,7 @@ namespace Service.CMS
             var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (model == null) return PageResponse.Error("栏目未绑定模型");
 
-            req.Queries.Add(new DefaultQuery(false, new DefaultQuerySql("IsDel")));
+            req.Queries.Add(new DefaultQuery(isRecycle, new DefaultQuerySql("IsDel")));
 
             return await Page(model.SqlTableName, req);
         }

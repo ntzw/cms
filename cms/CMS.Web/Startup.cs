@@ -1,4 +1,6 @@
 using System;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using Extension;
 using Foundation.Application;
@@ -38,7 +40,7 @@ namespace Web
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();
             services.AddSession();
-
+            services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
             services.AddAuthentication().AddCookie(AdminCookieAttribute.Scheme, o =>
             {
                 o.ClaimsIssuer = AdminCookieAttribute.ClaimsIssuer;

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { connect, Loading, GlobalModelState } from 'umi'
 import { ContentManagementProps, ContentModelState, ColumnItem } from "./data";
-import { PageHeaderWrapper } from '@ant-design/pro-layout';
+import { PageHeaderWrapper, PageLoading } from '@ant-design/pro-layout';
 import { Card, Row, Col, Menu, Empty } from 'antd';
 import ContentManage from './components/ContentManage';
 
@@ -83,11 +83,13 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
                         bodyStyle={{ padding: 10, paddingTop: 15 }}
                     >
                         {currentColumnNum && currentTableFields && currentTableFields.length > 0 ?
-                            <ContentManage
-                                currentColumn={currentColumn}
-                                currentColumnNum={currentColumnNum}
-                                currentTableFields={currentTableFields}
-                            /> : <Empty description="未选择栏目或栏目未设置字段" />}
+                            <Suspense fallback={<PageLoading />}>
+                                <ContentManage
+                                    currentColumn={currentColumn}
+                                    currentColumnNum={currentColumnNum}
+                                    currentTableFields={currentTableFields}
+                                />
+                            </Suspense> : <Empty description="未选择栏目或栏目未设置字段" />}
                     </Card>
                 </Col>
             </Row>

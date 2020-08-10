@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { ContentManageProps, ColumnContentItem, ColumnItem, ContentEditState, CategoryManagementState } from '../data';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
 import { ContentPage, GetEditValue, ContentSubmit, SubmitContentTopStatus, ContentDelete, ContentMoveRecycle } from '../service';
@@ -6,13 +6,15 @@ import { ColumnField, ContentFormAction } from '@/components/Content/data';
 import { lowerCaseFieldName } from '@/utils/utils';
 import moment from 'moment';
 import { Button, Tooltip, Spin, message, Switch, Modal } from 'antd';
-import { EditOutlined, PlusOutlined, BarsOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined, BarsOutlined, DeleteOutlined, RestOutlined } from '@ant-design/icons';
 import ContentEditDrawer from './ContentEditDrawer';
 import CategoryManagement from './CategoryManagement';
 import ContentForm from '@/components/Content/ContentForm';
 import { Column } from '../../columnlist/data';
 import { HandleResult } from '@/utils/request';
 import { DeleteConfirm } from '@/utils/msg';
+import { PageLoading } from '@ant-design/pro-layout';
+import RecycleList from './RecycleList';
 
 
 const ContentListTable: React.FC<{
@@ -32,74 +34,14 @@ const ContentListTable: React.FC<{
         const [categoryManage, setCategoryManage] = useState<CategoryManagementState>({
             visible: false,
         });
+        const [recycleDrawer, setRecycleDrawer] = useState(false);
         const [loadColumns, setLoadColumns] = useState(false);
         const contentAction = useRef<ContentFormAction>();
 
         useEffect(() => {
             if (currentTableFields && currentTableFields.length > 0) {
                 setLoadColumns(true);
-                const columns: ProColumns<ColumnContentItem>[] = currentTableFields.map((temp): ProColumns<ColumnContentItem> => {
-                    return {
-                        dataIndex: lowerCaseFieldName(temp.name),
-                        title: temp.explain,
-                        ellipsis: true,
-                        width: 100,
-                    }
-                });
-
-                if (currentColumn?.isAllowTop) {
-                    columns.push({
-                        dataIndex: 'isTop',
-                        title: '是否置顶',
-                        render: (_, row) => {
-                            return <Switch
-                                checked={row.isTop}
-                                checkedChildren="已置顶"
-                                unCheckedChildren="未置顶"
-                                onChange={(isTop: boolean) => {
-                                    SubmitContentTopStatus(row.num, row.columnNum, isTop).then(res => {
-                                        if (res.isSuccess) {
-                                            message.success('置顶状态修改成功');
-                                            tableAction.current?.reload();
-                                        } else {
-                                            message.error('置顶状态修改失败');
-                                        }
-                                    })
-                                }}
-                            />
-                        }
-                    })
-                }
-
-                columns.push({
-                    dataIndex: 'createDate',
-                    title: '创建时间',
-                    render: (value) => {
-                        return moment(value + '').format('YYYY-MM-DD HH:mm')
-                    }
-                })
-
-                columns.push({
-                    dataIndex: '_',
-                    title: '操作',
-                    render: (_, row) => {
-                        return <Button.Group>
-                            <Tooltip title="编辑">
-                                <Button
-                                    icon={<EditOutlined />}
-                                    type="primary"
-                                    onClick={() => {
-                                        setContentEdit({
-                                            visible: true,
-                                            itemNum: row.num,
-                                        })
-                                    }}
-                                />
-                            </Tooltip>
-                        </Button.Group>
-                    }
-                })
-
+                const columns: ProColumns<ColumnContentItem>[] = fieldsToColumns(currentTableFields, currentColumn, tableAction, setContentEdit);
                 setContentTableColumns(columns);
                 tableAction.current?.reload();
                 setLoadColumns(false);
@@ -147,6 +89,7 @@ const ContentListTable: React.FC<{
                                 if (res.isSuccess) {
                                     message.success('数据操作成功');
                                     tableAction.current?.reload();
+                                    tableAction.current?.clearSelected();
                                 } else {
                                     message.error('数据操作失败');
                                 }
@@ -178,34 +121,59 @@ const ContentListTable: React.FC<{
                                 visible: true,
                             })
                         }}
-                    >类别管理</Button>
+                    >类别管理</Button>,
+                    currentColumn?.isAllowRecycle && <Button
+                        icon={<RestOutlined />}
+                        onClick={() => {
+                            setRecycleDrawer(true);
+                        }}
+                    >
+                        查看回收站
+                    </Button>
                 ]}
             />
-            <ContentEditDrawer
-                {...contentEdit}
-                actionRef={contentAction}
-                afterVisibleChange={(visible) => {
-                    if (!visible) {
-                        tableAction.current?.reload();
-                    }
-                }}
-                onClose={(isSuccess) => {
-                    setContentEdit({
-                        ...contentEdit,
-                        visible: false
-                    })
-                }}
-            />
-            <CategoryManagement
-                {...categoryManage}
-                onClose={() => {
-                    contentAction.current?.reoladFieldItem();
-                    setCategoryManage({
-                        ...categoryManage,
-                        visible: false,
-                    })
-                }}
-            />
+            <Suspense fallback={<PageLoading />}>
+                <ContentEditDrawer
+                    {...contentEdit}
+                    actionRef={contentAction}
+                    afterVisibleChange={(visible) => {
+                        if (!visible) {
+                            tableAction.current?.reload();
+                        }
+                    }}
+                    onClose={(isSuccess) => {
+                        setContentEdit({
+                            ...contentEdit,
+                            visible: false
+                        })
+                    }}
+                />
+            </Suspense>
+            <Suspense fallback={<PageLoading />}>
+                <CategoryManagement
+                    {...categoryManage}
+                    onClose={() => {
+                        contentAction.current?.reoladFieldItem();
+                        setCategoryManage({
+                            ...categoryManage,
+                            visible: false,
+                        })
+                    }}
+                />
+            </Suspense>
+            <Suspense fallback={<PageLoading />}>
+                <RecycleList
+                    visible={recycleDrawer}
+                    onClose={() => { setRecycleDrawer(false); }}
+                    afterVisibleChange={(visible) => {
+                        if (!visible) {
+                            tableAction.current?.reload();
+                        }
+                    }}
+                    currentColumn={currentColumn}
+                    currentTableFields={currentTableFields}
+                />
+            </Suspense>
         </Spin>
     }
 
@@ -308,3 +276,67 @@ const ContentManage: React.FC<ContentManageProps> = ({
 }
 
 export default ContentManage;
+
+function fieldsToColumns(currentTableFields: ColumnField[], currentColumn: ColumnItem | undefined, tableAction: React.MutableRefObject<TableAction | undefined>, setContentEdit: React.Dispatch<React.SetStateAction<ContentEditState>>) {
+    const columns: ProColumns<ColumnContentItem>[] = currentTableFields.map((temp): ProColumns<ColumnContentItem> => {
+        return {
+            dataIndex: lowerCaseFieldName(temp.name),
+            title: temp.explain,
+            ellipsis: true,
+            width: 100,
+        };
+    });
+
+    if (currentColumn?.isAllowTop) {
+        columns.push({
+            dataIndex: 'isTop',
+            title: '是否置顶',
+            render: (_, row) => {
+                return <Switch
+                    checked={row.isTop}
+                    checkedChildren="已置顶"
+                    unCheckedChildren="未置顶"
+                    onChange={(isTop: boolean) => {
+                        SubmitContentTopStatus(row.num, row.columnNum, isTop).then(res => {
+                            if (res.isSuccess) {
+                                message.success('置顶状态修改成功');
+                                tableAction.current?.reload();
+                            }
+                            else {
+                                message.error('置顶状态修改失败');
+                            }
+                        });
+                    }} />;
+            }
+        });
+    }
+
+    columns.push({
+        dataIndex: 'createDate',
+        title: '创建时间',
+        render: (value) => {
+            return moment(value + '').format('YYYY-MM-DD HH:mm');
+        }
+    });
+
+    columns.push({
+        dataIndex: '_',
+        title: '操作',
+        render: (_, row) => {
+            return <Button.Group>
+                <Tooltip title="编辑">
+                    <Button
+                        icon={<EditOutlined />}
+                        type="primary"
+                        onClick={() => {
+                            setContentEdit({
+                                visible: true,
+                                itemNum: row.num,
+                            });
+                        }} />
+                </Tooltip>
+            </Button.Group>;
+        }
+    });
+    return columns;
+}
