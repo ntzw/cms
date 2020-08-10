@@ -23,5 +23,11 @@ namespace DataAccess.Interface.CMS
         Task<dynamic> GetPrev(string tableName, string columnNum, int id);
 
         Task<IEnumerable<dynamic>> GetByConditions(string tableName, ISelectRequest request);
+        
+        Task<int> UpdateIsTop(string tableName, string num, bool isTop);
+        
+        Task<int> Delete(string tableName, List<int> ids);
+        
+        Task<int> Recycle(string tableName, List<int> ids, bool isDel);
     }
 }

@@ -33,6 +33,37 @@ export function GetEditValue(itemNum: string, columnNum: string): AsyncHandleRes
     });
 }
 
+export function SubmitContentTopStatus(num: string, columnNum: string, isTop: boolean): AsyncHandleResult {
+    return request('/Api/CMS/Content/UpdateTopStatus', {
+        method: "POST",
+        data: {
+            num,
+            columnNum,
+            isTop
+        },
+    });
+}
+
+export function ContentDelete(ids: number[], columnNum: string): AsyncHandleResult {
+    return request('/Api/CMS/Content/Delete', {
+        method: "POST",
+        data: {
+            ids,
+            columnNum,
+        },
+    });
+}
+
+export function ContentMoveRecycle(ids: number[], columnNum: string): AsyncHandleResult {
+    return request('/Api/CMS/Content/MoveRecycle', {
+        method: "POST",
+        data: {
+            ids,
+            columnNum,
+        },
+    });
+}
+
 export function categoryPage(columnNum: string) {
     return request('/Api/CMS/Category/Page', {
         method: "POST",

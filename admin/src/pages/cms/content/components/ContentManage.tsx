@@ -1,16 +1,18 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ContentManageProps, ColumnContentItem, ColumnItem, ContentEditState, CategoryManagementState } from '../data';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
-import { ContentPage, GetEditValue, ContentSubmit } from '../service';
+import { ContentPage, GetEditValue, ContentSubmit, SubmitContentTopStatus, ContentDelete, ContentMoveRecycle } from '../service';
 import { ColumnField, ContentFormAction } from '@/components/Content/data';
 import { lowerCaseFieldName } from '@/utils/utils';
 import moment from 'moment';
-import { Button, Tooltip, Spin, message } from 'antd';
-import { EditOutlined, PlusOutlined, BarsOutlined } from '@ant-design/icons';
+import { Button, Tooltip, Spin, message, Switch, Modal } from 'antd';
+import { EditOutlined, PlusOutlined, BarsOutlined, DeleteOutlined } from '@ant-design/icons';
 import ContentEditDrawer from './ContentEditDrawer';
 import CategoryManagement from './CategoryManagement';
 import ContentForm from '@/components/Content/ContentForm';
 import { Column } from '../../columnlist/data';
+import { HandleResult } from '@/utils/request';
+import { DeleteConfirm } from '@/utils/msg';
 
 
 const ContentListTable: React.FC<{
@@ -44,6 +46,30 @@ const ContentListTable: React.FC<{
                         width: 100,
                     }
                 });
+
+                if (currentColumn?.isAllowTop) {
+                    columns.push({
+                        dataIndex: 'isTop',
+                        title: '是否置顶',
+                        render: (_, row) => {
+                            return <Switch
+                                checked={row.isTop}
+                                checkedChildren="已置顶"
+                                unCheckedChildren="未置顶"
+                                onChange={(isTop: boolean) => {
+                                    SubmitContentTopStatus(row.num, row.columnNum, isTop).then(res => {
+                                        if (res.isSuccess) {
+                                            message.success('置顶状态修改成功');
+                                            tableAction.current?.reload();
+                                        } else {
+                                            message.error('置顶状态修改失败');
+                                        }
+                                    })
+                                }}
+                            />
+                        }
+                    })
+                }
 
                 columns.push({
                     dataIndex: 'createDate',
@@ -101,7 +127,7 @@ const ContentListTable: React.FC<{
                 params={{
 
                 }}
-                toolBarRender={(action) => [
+                toolBarRender={(action, { selectedRowKeys, selectedRows }) => [
                     <Button
                         icon={<PlusOutlined />}
                         type="primary"
@@ -111,6 +137,40 @@ const ContentListTable: React.FC<{
                             })
                         }}
                     >新增</Button>,
+                    selectedRows && selectedRows.length > 0 && <Button
+                        icon={<DeleteOutlined />}
+                        type="primary"
+                        danger
+                        onClick={() => {
+                            const ids = selectedRows?.map(item => item.id) || [];
+                            const resCallback = (res: HandleResult) => {
+                                if (res.isSuccess) {
+                                    message.success('数据操作成功');
+                                    tableAction.current?.reload();
+                                } else {
+                                    message.error('数据操作失败');
+                                }
+                            };
+
+                            if (currentColumn?.isAllowRecycle) {
+                                Modal.confirm({
+                                    title: '系统提示',
+                                    content: '确定将数据移入回收站？',
+                                    okText: '确定',
+                                    cancelText: '取消',
+                                    onOk: () => {
+                                        ContentMoveRecycle(ids, currentColumn?.num || '').then(resCallback);
+                                    }
+                                })
+                            } else {
+                                DeleteConfirm(() => {
+                                    ContentDelete(ids, currentColumn?.num || '').then(resCallback);
+                                })
+                            }
+                        }}
+                    >
+                        {currentColumn?.isAllowRecycle ? '移动到回收站' : '删除'}
+                    </Button>,
                     currentColumn?.isCategory && <Button
                         icon={<BarsOutlined />}
                         onClick={() => {
@@ -183,6 +243,7 @@ const ContentSinageEdit: React.FC<{
                     columnNum={currentColumnNum || ''}
                     isSeo={currentColumn?.isSeo}
                     isCategory={currentColumn?.isCategory}
+                    isAllowTop={currentColumn?.isAllowTop}
                     onFinish={(value) => {
                         setSubmiting(true);
                         return new Promise(resolve => {

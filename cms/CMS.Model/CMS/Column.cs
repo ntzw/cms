@@ -60,16 +60,22 @@ namespace Model.CMS
         public bool IsSingle { get; set; }
 
         /// <summary>
+        /// 是否开启内容置顶功能
+        /// </summary>
+        [Switch("开启置顶", CheckedChildren = "已开启", UnCheckedChildren = "未开启")]
+        public bool IsAllowTop { get; set; }
+
+        /// <summary>
+        /// 开启回收站功能
+        /// </summary>
+        [Switch("开启回收站", CheckedChildren = "已开启", UnCheckedChildren = "未开启", Extra = "关闭回收站功能，数据已经删除将不可恢复，请谨慎操作")]
+        public bool IsAllowRecycle { get; set; }
+
+        /// <summary>
         /// 是否启用Seo
         /// </summary>
         [Switch("是否启用SEO")]
         public bool IsSeo { get; set; }
-
-        /// <summary>
-        /// 是否开启内容置顶功能
-        /// </summary>
-        [Switch("开启置顶功能", CheckedChildren = "已开启", UnCheckedChildren = "未开启")]
-        public bool IsAllowTop { get; set; }
 
         /// <summary>
         /// Seo标题

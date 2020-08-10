@@ -146,5 +146,69 @@ namespace WebApi.CMS
 
             return await ContentService.Interface.GetCascaderData(columnNum, labelFieldName, currentFieldName);
         }
+
+        public async Task<HandleResult> UpdateTopStatus([FromBody] JObject form)
+        {
+            string num = form["num"].ToStr();
+            string columnNum = form["columnNum"].ToStr();
+            bool isTop = form["isTop"].ToBoolean();
+            if (num.IsEmpty() || columnNum.IsEmpty()) return HandleResult.Error("参数错误");
+
+            return await ContentService.Interface.UpdateIsTop(columnNum, num, isTop);
+        }
+
+        /// <summary>
+        /// 删除内容数据
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        public async Task<HandleResult> Delete([FromBody] JObject form)
+        {
+            string columnNum = form["columnNum"].ToStr();
+            if (!(form["ids"] is JArray ids) || ids.Count <= 0 || columnNum.IsEmpty())
+                return HandleResult.Error("无效数据");
+
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null || cm?.ModelTable == null) return HandleResult.Error("无效参数");
+
+            return await ContentService.Interface.Delete(cm?.ModelTable.SqlTableName,
+                ids.Select(temp => temp.ToInt()).ToList());
+        }
+
+        /// <summary>
+        /// 移入回收站
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        public async Task<HandleResult> MoveRecycle([FromBody] JObject form)
+        {
+            string columnNum = form["columnNum"].ToStr();
+            if (!(form["ids"] is JArray ids) || ids.Count <= 0 || columnNum.IsEmpty())
+                return HandleResult.Error("无效数据");
+
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null || cm?.ModelTable == null) return HandleResult.Error("无效参数");
+
+            return await ContentService.Interface.MoveRecycle(cm?.ModelTable.SqlTableName,
+                ids.Select(temp => temp.ToInt()).ToList());
+        }
+
+        /// <summary>
+        /// 移出回收站
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        public async Task<HandleResult> RemovedRecycle([FromBody] JObject form)
+        {
+            string columnNum = form["columnNum"].ToStr();
+            if (!(form["ids"] is JArray ids) || ids.Count <= 0 || columnNum.IsEmpty())
+                return HandleResult.Error("无效数据");
+
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null || cm?.ModelTable == null) return HandleResult.Error("无效参数");
+
+            return await ContentService.Interface.Removed(cm?.ModelTable.SqlTableName,
+                ids.Select(temp => temp.ToInt()).ToList());
+        }
     }
 }

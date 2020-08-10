@@ -53,7 +53,8 @@ namespace Web.Controllers
                 Size = 15,
                 Queries = new List<IQuery>
                 {
-                    new DefaultQuery(column.Num, new DefaultQuerySql("columnNum"))
+                    new DefaultQuery(column.Num, new DefaultQuerySql("columnNum")),
+                    new DefaultQuery(false, new DefaultQuerySql("IsDel"))
                 }
             };
 

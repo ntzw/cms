@@ -47,7 +47,7 @@ namespace Service.CMS
             {
                 var formFieldName = columnField.Name.ToFieldNameLower();
                 var value = form.ContainsKey(formFieldName) ? form[formFieldName] : "";
-                
+
                 switch (columnField.OptionType)
                 {
                     case ReactFormItemType.Input:
@@ -77,6 +77,21 @@ namespace Service.CMS
                     default:
                         throw new Exception("无处理分类逻辑");
                 }
+            }
+        }
+
+        /// <summary>
+        /// 设置 DictionaryData
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="ignoreFields"></param>
+        public void SetDictionaryData(Dictionary<string, object> data, string[] ignoreFields = null)
+        {
+            foreach (var dataKey in data.Keys)
+            {
+                if (ignoreFields != null && ignoreFields.Contains(dataKey, StringComparer.OrdinalIgnoreCase)) continue;
+
+                AddFieldAndValue(dataKey, data[dataKey]);
             }
         }
 

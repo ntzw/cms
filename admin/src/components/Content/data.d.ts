@@ -6,6 +6,7 @@ interface ContentFormBaseProps {
     itemNum?: string;
     isCategory?: boolean;
     isSeo?: boolean;
+    isAllowTop?: boolean;
 }
 
 export interface ContentFormProps extends ContentFormBaseProps {

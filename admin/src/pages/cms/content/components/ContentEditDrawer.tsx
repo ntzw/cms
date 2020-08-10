@@ -127,6 +127,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
             columnNum={currentColumnNum || ''}
             isCategory={currentColumn?.isCategory}
             isSeo={currentColumn?.isSeo}
+            isAllowTop={currentColumn?.isAllowTop}
             columnFields={columnFields}
             actionRef={formAction}
             onFinish={(value) => {

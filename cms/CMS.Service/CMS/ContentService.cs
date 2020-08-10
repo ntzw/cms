@@ -32,6 +32,16 @@ namespace Service.CMS
             return _dapper.GetByItem(tableName, num);
         }
 
+        public async Task<dynamic> GetByNumAndColumn(string columnNum, string num)
+        {
+            var model = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (model?.ModelTable == null) return null;
+
+            return GetByNum(model?.ModelTable.SqlTableName, num);
+        }
+
+        #region 编辑内容
+
         public async Task<HandleResult> Edit(JObject form, string accountNum)
         {
             string itemNum = form["num"].ToStr();
@@ -64,7 +74,7 @@ namespace Service.CMS
             contentEdit.AddFieldAndValue("SeoKeyword", form["seoKeyword"].ToStr());
             contentEdit.AddFieldAndValue("SeoDesc", form["seoDesc"].ToStr());
             contentEdit.AddFieldAndValue("CategoryNum", form["categoryNum"].ToStr());
-
+            contentEdit.AddFieldAndValue("IsTop", form["isTop"].ToBoolean());
 
             if (id > 0)
             {
@@ -84,10 +94,42 @@ namespace Service.CMS
                 contentEdit.AddFieldAndValue("ColumnNum", columnNum);
             }
 
-            string sql = id > 0 ? contentEdit.GetUpdateSql(id) : contentEdit.GetAddSql();
-            var res = await _dapper.Execute(sql, contentEdit.GetValue());
+            return id > 0 ? await Update(contentEdit, id) : await Add(contentEdit);
+        }
+
+        #endregion
+
+        public Task<HandleResult> Update(Dictionary<string, object> form, string tableName)
+        {
+            if (!form.ContainsKey("id")) return Task.FromResult(HandleResult.Error("无效参数"));
+
+            int id = form["id"].ToInt();
+            if (id <= 0) return Task.FromResult(HandleResult.Error("无效参数"));
+
+            var sqlHelper = new DynamicTableSqlHelper(tableName);
+            sqlHelper.SetDictionaryData(form, new[] {"id"});
+
+            return Update(sqlHelper, id);
+        }
+
+        public async Task<HandleResult> Update(DynamicTableSqlHelper form, int id)
+        {
+            string sql = form.GetUpdateSql(id);
+            if (sql.IsEmpty()) return HandleResult.Error("无效参数");
+
+            var res = await _dapper.Execute(sql, form.GetValue());
             return res > 0 ? HandleResult.Success() : HandleResult.Error("操作失败");
         }
+
+        public async Task<HandleResult> Add(DynamicTableSqlHelper form)
+        {
+            string sql = form.GetAddSql();
+            if (sql.IsEmpty()) return HandleResult.Error("无效参数");
+
+            var res = await _dapper.Execute(sql, form.GetValue());
+            return res > 0 ? HandleResult.Success() : HandleResult.Error("操作失败");
+        }
+
 
         #region 分页查询
 
@@ -103,6 +145,8 @@ namespace Service.CMS
 
             var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (model == null) return PageResponse.Error("栏目未绑定模型");
+
+            req.Queries.Add(new DefaultQuery(false, new DefaultQuerySql("IsDel")));
 
             return await Page(model.SqlTableName, req);
         }
@@ -153,7 +197,12 @@ namespace Service.CMS
             var cm = await ColumnService.Interface.GetModelByNum(columnField.Value.ToStr());
             if (cm == null) return null;
 
-            return await _dapper.GetByConditions(cm?.ModelTable.SqlTableName, request);
+            return await GetByConditions(cm?.ModelTable.SqlTableName, request);
+        }
+
+        public Task<IEnumerable<dynamic>> GetByConditions(string tableName, ISelectRequest request)
+        {
+            return _dapper.GetByConditions(tableName, request);
         }
 
         public async Task<IEnumerable<dynamic>> GetByColumnNum(string columnNum)
@@ -162,7 +211,8 @@ namespace Service.CMS
             {
                 Queries = new List<IQuery>
                 {
-                    new DefaultQuery(columnNum, new DefaultQuerySql("columnNum"))
+                    new DefaultQuery(columnNum, new DefaultQuerySql("columnNum")),
+                    new DefaultQuery(false, new DefaultQuerySql("IsDel"))
                 }
             });
         }
@@ -170,8 +220,21 @@ namespace Service.CMS
         public async Task<List<Dictionary<string, object>>> GetDictionaryDataByColumnNum(string columnNum)
         {
             var data = await GetByColumnNum(columnNum);
-            return data?.Select(temp => new Dictionary<string, object>(temp, StringComparer.OrdinalIgnoreCase))
-                .ToList();
+            return data?.Select(temp =>
+            {
+                Dictionary<string, object> item = DynamicToDictionary(temp);
+                return item;
+            }).ToList();
+        }
+
+        /// <summary>
+        /// 将Dynamic 值转 不区分大小写的 Dictionary
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public IDictionary<string, object> DynamicToDictionary(dynamic item)
+        {
+            return item == null ? null : new Dictionary<string, object>(item, StringComparer.OrdinalIgnoreCase);
         }
 
         public async Task<HandleResult> GetCascaderData(string columnNum, string labelFieldName,
@@ -217,6 +280,52 @@ namespace Service.CMS
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// 更新是否置顶
+        /// </summary>
+        /// <param name="columnNum"></param>
+        /// <param name="num"></param>
+        /// <param name="isTop"></param>
+        /// <returns></returns>
+        public async Task<HandleResult> UpdateIsTop(string columnNum, string num, bool isTop)
+        {
+            var cm = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (cm == null || cm?.ModelTable == null) return HandleResult.Error("无效参数");
+
+            var count = await _dapper.UpdateIsTop(cm?.ModelTable.SqlTableName, num, isTop);
+            return count > 0 ? HandleResult.Success() : HandleResult.Error("");
+        }
+
+        /// <summary>
+        /// 删除数据
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public async Task<HandleResult> Delete(string tableName, List<int> ids)
+        {
+            var count = await _dapper.Delete(tableName, ids);
+            return count > 0 ? HandleResult.Success() : HandleResult.Error("");
+        }
+
+        /// <summary>
+        /// 移动到回收站
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public async Task<HandleResult> MoveRecycle(string tableName, List<int> ids)
+        {
+            var count = await _dapper.Recycle(tableName, ids, true);
+            return count > 0 ? HandleResult.Success() : HandleResult.Error("");
+        }
+
+        public async Task<HandleResult> Removed(string tableName, List<int> ids)
+        {
+            var count = await _dapper.Recycle(tableName, ids, false);
+            return count > 0 ? HandleResult.Success() : HandleResult.Error("");
         }
     }
 }

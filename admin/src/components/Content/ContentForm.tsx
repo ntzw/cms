@@ -47,7 +47,16 @@ enum RegularType {
     MobilePhone = 1,
 }
 
-const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef, columnFields, onFinish, isSeo = true, isCategory = false }) => {
+const ContentForm: React.FC<ContentFormProps> = ({
+    columnNum,
+    itemNum,
+    actionRef,
+    columnFields,
+    onFinish,
+    isSeo = true,
+    isCategory = false,
+    isAllowTop = false
+}) => {
     const [formFields, setFormFields] = useState<FormItem[]>([]);
     const [seoFormFields] = useState([{
         label: '标题',
@@ -119,6 +128,18 @@ const ContentForm: React.FC<ContentFormProps> = ({ columnNum, itemNum, actionRef
                     dataAction: '/Api/CMS/Category/CascaderData',
                     cascader: {
                         options: []
+                    }
+                })
+            }
+
+            if (isAllowTop) {
+                fields.push({
+                    label: '是否置顶',
+                    name: 'isTop',
+                    type: FormItemType.switch,
+                    switch: {
+                        checkedChildren: '已置顶',
+                        unCheckedChildren: '未置顶',
                     }
                 })
             }

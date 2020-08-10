@@ -14,6 +14,8 @@ export interface Column extends ModalBase {
     isCategory: boolean;
     isSingle: boolean;
     isSeo: boolean;
+    isAllowTop: boolean;
+    isAllowRecycle: boolean;
     children: Column[];
 }
 

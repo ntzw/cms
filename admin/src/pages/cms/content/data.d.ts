@@ -22,6 +22,9 @@ export interface ColumnContentItem {
     seoTitle: string;
     seoKeyword: string;
     seoDesc: string;
+    isTop: boolean;
+    categoryNum: string;
+    columnNum: string;
     [key: string]: any;
 }
 

@@ -91,6 +91,8 @@ namespace Service.CMS
                 item.TryAdd("IsCategory", column.IsCategory);
                 item.TryAdd("IsSingle", column.IsSingle);
                 item.TryAdd("IsSeo", column.IsSeo);
+                item.TryAdd("IsAllowTop", column.IsAllowTop);
+                item.TryAdd("IsAllowRecycle", column.IsAllowRecycle);
                 item.TryAdd("ModelName",
                     column.ModelNum.IsNotEmpty() && models.ContainsKey(column.ModelNum) ? models[column.ModelNum] : "");
 

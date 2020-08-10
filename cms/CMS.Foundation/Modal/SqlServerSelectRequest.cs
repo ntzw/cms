@@ -7,7 +7,7 @@ namespace Foundation.Modal
 {
     public class SqlServerSelectRequest : ISelectRequest
     {
-        public int Top { get; set; }
+        public int TopCount { get; set; }
         public List<IQuery> Queries { get; set; }
         public ISort Sort { get; set; }
 

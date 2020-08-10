@@ -4,7 +4,7 @@ namespace Foundation.Modal.RequestModal
 {
     public interface ISelectRequest
     {
-        public int Top { get; set; }
+        public int TopCount { get; set; }
         
         List<IQuery> Queries { get; set; }
         
