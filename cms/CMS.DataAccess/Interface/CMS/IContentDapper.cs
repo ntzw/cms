@@ -13,9 +13,7 @@ namespace DataAccess.Interface.CMS
         Task<int> Execute(string sql, object data);
 
         Task<PageResponse> Page(string tableName, IPageRequest req);
-
-        Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum);
-
+        
         Task<int> UpdateClickCount(string tableName, int id, int count);
 
         Task<dynamic> GetNext(string tableName, string columnNum, int id);

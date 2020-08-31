@@ -12,6 +12,7 @@ using Foundation.Modal.RequestModal;
 using Foundation.Modal.Result;
 using Helper;
 using Model.CMS;
+using Model.CMS.Content;
 using Newtonsoft.Json.Linq;
 
 namespace Service.CMS
@@ -55,18 +56,17 @@ namespace Service.CMS
             var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (model == null) return HandleResult.Error("栏目未绑定模型");
 
-            IDictionary<string, object> oldData = null;
+            ContentData oldData = null;
             if (column.IsSingle)
             {
-                oldData =
-                    await _dapper.GetFirstByColumnNum(model.SqlTableName, column.Num) as IDictionary<string, object>;
+                oldData = await GetFirstByColumnNum(model.SqlTableName, column.Num);
             }
             else if (itemNum.IsNotEmpty())
             {
-                oldData = await _dapper.GetByItem(model.SqlTableName, itemNum) as IDictionary<string, object>;
+                oldData = await GetByItem(model.SqlTableName, itemNum);
             }
 
-            var id = oldData?["Id"].ToInt() ?? 0;
+            var id = oldData?.Id ?? 0;
 
             var contentEdit = new DynamicTableSqlHelper(model.SqlTableName);
             contentEdit.SetJObjectFormData(await ColumnFieldService.Interface.GetByColumnNum(columnNum), form);
@@ -95,6 +95,12 @@ namespace Service.CMS
             }
 
             return id > 0 ? await Update(contentEdit, id) : await Add(contentEdit);
+        }
+
+        public async Task<ContentData> GetByItem(string tableName, string num)
+        {
+            var data = await _dapper.GetByItem(tableName, num);
+            return new ContentData(data);
         }
 
         #endregion
@@ -160,17 +166,39 @@ namespace Service.CMS
 
         #endregion
 
-        public Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum)
+        public async Task<ContentData> GetFirstByColumnNum(string tableName, string columnNum)
         {
-            return _dapper.GetFirstByColumnNum(tableName, columnNum);
+            var list = await _dapper.GetByConditions(tableName, new SqlServerSelectRequest
+            {
+                TopCount = 1,
+                Queries = new List<IQuery>
+                {
+                    new DefaultQuery(columnNum, new DefaultQuerySql("ColumnNum"))
+                }
+            });
+            var enumerable = list.ToList();
+            if (enumerable.Any()) return new ContentData(enumerable[0]);
+            return null;
         }
 
-        public async Task<dynamic> GetFirstByColumnNum(string columnNum)
+        public async Task<ContentData> GetFirstByColumnNum(string columnNum)
         {
             var columnModel = await ColumnService.Interface.GetModelByNum(columnNum);
             if (columnModel == null) return null;
 
             return await GetFirstByColumnNum(columnModel?.ModelTable.SqlTableName, columnNum);
+        }
+
+        public async Task<ContentData> GetFirstByColumnNum(string columnNum, ISelectRequest request)
+        {
+            var columnModel = await ColumnService.Interface.GetModelByNum(columnNum);
+            if (columnModel == null) return null;
+
+            request?.Queries.Add(new DefaultQuery(columnNum, new DefaultQuerySql("ColumnNum")));
+
+            var list = (await _dapper.GetByConditions(columnModel?.ModelTable.SqlTableName, request)).ToList();
+            if (list.Count > 0) return new ContentData(list[0]);
+            return null;
         }
 
         public async Task<HandleResult> UpdateClickCount(string tableName, int id, int count)
@@ -179,14 +207,17 @@ namespace Service.CMS
             return exCount > 0 ? HandleResult.Success() : HandleResult.Error("");
         }
 
-        public Task<dynamic> GetNext(string tableName, string columnNum, int id)
+        public async Task<ContentData> GetNext(string tableName, string columnNum, int id)
         {
-            return _dapper.GetNext(tableName, columnNum, id);
+            var data = await _dapper.GetNext(tableName, columnNum, id);
+
+            return new ContentData(data);
         }
 
-        public Task<dynamic> GetPrev(string tableName, string columnNum, int id)
+        public async Task<ContentData> GetPrev(string tableName, string columnNum, int id)
         {
-            return _dapper.GetPrev(tableName, columnNum, id);
+            var data = await _dapper.GetPrev(tableName, columnNum, id);
+            return new ContentData(data);
         }
 
         public async Task<IEnumerable<dynamic>> GetByConditions(ISelectRequest request)
@@ -232,7 +263,7 @@ namespace Service.CMS
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public IDictionary<string, object> DynamicToDictionary(dynamic item)
+        public static IDictionary<string, object> DynamicToDictionary(dynamic item)
         {
             return item == null ? null : new Dictionary<string, object>(item, StringComparer.OrdinalIgnoreCase);
         }

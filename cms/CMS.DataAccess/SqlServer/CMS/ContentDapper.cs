@@ -32,12 +32,6 @@ namespace DataAccess.SqlServer.CMS
                 await MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync<long>(countSql, whereParams));
         }
 
-        public Task<dynamic> GetFirstByColumnNum(string tableName, string columnNum)
-        {
-            string sql = $"SELECT TOP 1 * FROM {tableName} WHERE ColumnNum = @ColumnNum ";
-            return MainConnection.Interface.GetConnection().QueryFirstOrDefaultAsync(sql, new {ColumnNum = columnNum});
-        }
-
         public Task<int> UpdateClickCount(string tableName, int id, int count)
         {
             string sql = $"UPDATE [{tableName}] SET [ClickCount] = @ClickCount WHERE Id = @Id";

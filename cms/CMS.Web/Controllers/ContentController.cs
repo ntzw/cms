@@ -21,7 +21,7 @@ namespace Web.Controllers
         public IActionResult Index()
         {
             var site = SessionHelper.Get<Site>("CurrentSite");
-            if (site == null) return NotFound();
+            if (site == null) return Error404();
 
             return View($"~/Views/Content/{site.SiteFolder}/Index.cshtml");
         }
@@ -30,22 +30,20 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> List(string num, int current = 1)
         {
-            if (num.IsEmpty()) return NotFound();
+            if (num.IsEmpty()) return Error404();
 
             var site = SiteService.Interface.GetCurrentSite();
-            if (site == null) return NotFound();
+            if (site == null) return Error404();
 
             var column = await ColumnService.Interface.GetByNum(num);
-            if (column == null || column.SiteNum != site.Num) return NotFound();
+            if (column == null || column.SiteNum != site.Num) return Error404();
 
-            var model = await ModelTableService.Interface.GetByNum(column.ModelNum);
-            if (model == null) return NotFound();
-
+            var model = column.ModelNum.IsEmpty() ? null : await ModelTableService.Interface.GetByNum(column.ModelNum);
             if (column.IsSingle)
                 return await Info(site, column, model);
 
             string templatePath = $"Views/Content/{site.SiteFolder}/{column.ListTemplatePath}";
-            if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return NotFound();
+            if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return Error404();
 
             var req = new SqlServerPageRequest
             {
@@ -58,67 +56,68 @@ namespace Web.Controllers
                 }
             };
 
-            var rep = await ContentService.Interface.Page(model.SqlTableName, req);
-
-            ViewBag.Seo = new ContentSeo
+            var seo = new ContentSeo();
+            if (model != null)
             {
-            };
-            ViewData.Model = new ContentList
-            {
-                Column = column,
-                ModelTable = model,
-                Site = site,
-                Data = rep.Data,
-                PageConfig = new PageConfig
+                var rep = await ContentService.Interface.Page(model.SqlTableName, req);
+                ViewData.Model = new ContentList
                 {
-                    Current = req.Current,
-                    Size = req.Size,
-                    Total = rep.Total,
-                }
-            };
-            
-            ViewBag.Site = site;
+                    Column = column,
+                    ModelTable = model,
+                    Site = site,
+                    Data = rep.Data,
+                    PageConfig = new PageConfig
+                    {
+                        Current = req.Current,
+                        Size = req.Size,
+                        Total = rep.Total,
+                    }
+                };
+            }
 
+            ViewBag.Seo = seo;
+            ViewBag.Site = site;
             return View($"~/{templatePath}");
         }
 
         [NonAction]
         private async Task<IActionResult> Info(Site site, Column column, ModelTable model)
         {
-            var item = await ContentService.Interface.GetFirstByColumnNum(model.SqlTableName, column.Num);
-            return await Info(site, column, model, item);
+            return await Info(site, column, model,
+                model != null
+                    ? await ContentService.Interface.GetFirstByColumnNum(model.SqlTableName, column.Num)
+                    : null);
         }
 
         [NonAction]
-        private async Task<IActionResult> Info(Site site, Column column, ModelTable model, dynamic item)
+        private async Task<IActionResult> Info(Site site, Column column, ModelTable model, ContentData item)
         {
             string templatePath = $"Views/Content/{site.SiteFolder}/{column.InfoTemplatePath}";
-            if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return NotFound();
+            if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return Error404();
 
-            IDictionary<string, object> dataItem = item;
-            int clickCount = dataItem["ClickCount"].ToInt();
-            int id = dataItem["Id"].ToInt();
-
-            ViewData.Model = new ContentInfo
+            var seo = new ContentSeo();
+            var info = new ContentInfo();
+            if (item != null)
             {
-                Column = column,
-                Site = site,
-                ModelTable = model,
-                Data = item,
-                NextData = await ContentService.Interface.GetNext(model.SqlTableName, column.Num, id),
-                PrevData = await ContentService.Interface.GetPrev(model.SqlTableName, column.Num, id)
-            };
+                int clickCount = item.ClickCount;
+                int id = item.Id;
 
-            ViewBag.Seo = new ContentSeo
-            {
-                Title = item.SeoTitle,
-                Keyword = item.SeoKeyword,
-                Desc = item.SeoDesc
-            };
+                info.Column = column;
+                info.Site = site;
+                info.ModelTable = model;
+                info.Data = item;
+                info.NextData = await ContentService.Interface.GetNext(model.SqlTableName, column.Num, id);
+                info.PrevData = await ContentService.Interface.GetPrev(model.SqlTableName, column.Num, id);
 
+                seo.Title = item.SeoTitle;
+                seo.Keyword = item.SeoKeyword;
+                seo.Desc = item.SeoDesc;
+                await ContentService.Interface.UpdateClickCount(model.SqlTableName, id, clickCount + 1);
+            }
+
+            ViewData.Model = info;
+            ViewBag.Seo = seo;
             ViewBag.Site = site;
-
-            await ContentService.Interface.UpdateClickCount(model.SqlTableName, id, clickCount + 1);
             return View($"~/{templatePath}");
         }
 
@@ -126,18 +125,19 @@ namespace Web.Controllers
         public async Task<IActionResult> Info(string columnNum, string num)
         {
             var cm = await ColumnService.Interface.GetModelByNum(columnNum);
-            if (cm == null) return NotFound();
+            if (cm == null) return Error404();
 
             var item = await ContentService.Interface.GetByNum(cm?.ModelTable.SqlTableName, num);
-            if (item == null) return NotFound();
+            if (item == null) return Error404();
 
             var site = await SiteService.Interface.GetByNum(cm?.Column.SiteNum);
-            if (site == null) return NotFound();
+            if (site == null) return Error404();
 
             return await Info(site, cm?.Column, cm?.ModelTable, item);
         }
 
-        public IActionResult NotFound()
+        [NonAction]
+        private IActionResult Error404()
         {
             return View("~/Views/Error/404.cshtml");
         }

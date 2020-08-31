@@ -29,7 +29,7 @@ export const buildTemplateValue = (template?: string, tableData?: TableType) => 
             TableName: tableData.name,
             NowDateTime: moment().format('YYYY-MM-DD HH:mm:ss'),
             Fields: fields,
-            ModalFields: fields.filter(temp => ['Id','Num','CreateDate','UpdateDate','CreateAccountNum','UpdateAccountNum'].indexOf(temp.columnName) === -1)
+            ModalFields: fields.filter(temp => ['Id', 'Num', 'CreateDate', 'UpdateDate', 'CreateAccountNum', 'UpdateAccountNum'].indexOf(temp.columnName) === -1)
         });
     }
     return '';
@@ -45,6 +45,8 @@ export const getEditrMdModeByFileName = (fileName: string) => {
                 return 'text/html';
             case 'cs':
                 return 'text/x-csharp';
+            case 'cshtml':
+                return 'application/x-cshtml';
             default:
                 return 'text/plain';
         }

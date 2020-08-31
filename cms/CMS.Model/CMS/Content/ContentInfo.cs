@@ -8,7 +8,7 @@ namespace Model.CMS.Content
 
         public ModelTable ModelTable { get; set; }
 
-        public dynamic Data { get; set; }
+        public ContentData Data { get; set; }
         
         public dynamic NextData { get; set; }
         
