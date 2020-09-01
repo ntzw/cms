@@ -13,10 +13,56 @@ using Extension;
 using Foundation.Modal;
 using Model.CMS;
 
-namespace DataAccess.SqlServer.CMS
+namespace DataAccess.MySql.CMS
 {
     public class ModelFieldDapper : DefaultDataAccess<ModelField>, IModelFieldDapper
     {
+        public Task<int> CreateField(string fieldName, string tableName, ReactFormItemType fieldType)
+        {
+            var sql = $"IF COL_LENGTH('{tableName}', '{fieldName}') IS NULL ";
+            switch (fieldType)
+            {
+                case ReactFormItemType.Input:
+                case ReactFormItemType.Password:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  nvarchar (500) NULL";
+                    break;
+                case ReactFormItemType.TextArea:
+                case ReactFormItemType.Editor:
+                case ReactFormItemType.Tags:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  nvarchar (MAX) NULL";
+                    break;
+                case ReactFormItemType.Radio:
+                case ReactFormItemType.Select:
+                case ReactFormItemType.CheckBox:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  nvarchar (1000) NULL";
+                    break;
+                case ReactFormItemType.DataPicker:
+                case ReactFormItemType.RangePicker:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  datetime  NULL";
+                    break;
+                case ReactFormItemType.Upload:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  nvarchar  (4000) NULL";
+                    break;
+                case ReactFormItemType.Region:
+                case ReactFormItemType.Cascader:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  int NULL";
+                    break;
+                case ReactFormItemType.Switch:
+                    sql += $"ALTER TABLE {tableName} ADD {fieldName}  bit NULL";
+                    break;
+                default:
+                    throw new Exception("不存在字段类型");
+            }
+
+            return sql.IsNotEmpty() ? Connection().ExecuteAsync(sql) : Task.FromResult(0);
+        }
+
+        public Task<ModelField> GetByName(string fieldName, string modelNum)
+        {
+            var sql = $"SELECT * FROM {GetTableName()} WHERE Name = @Name AND ModelNum = @ModelNum";
+            return Connection().QueryFirstOrDefaultAsync<ModelField>(sql, new {Name = fieldName, ModelNum = modelNum});
+        }
+
         protected override Action<IQuery, List<string>, IDictionary<string, object>> GetPageSetParamsAction()
         {
             return (query, whereSql, whereParams) =>
@@ -36,52 +82,6 @@ namespace DataAccess.SqlServer.CMS
                         break;
                 }
             };
-        }
-
-        public Task<int> CreateField(string fieldName, string tableName, ReactFormItemType fieldType)
-        {
-            var sql = $"IF COL_LENGTH('{tableName}', '{fieldName}') IS NULL ";
-            switch (fieldType)
-            {
-                case ReactFormItemType.Input:
-                case ReactFormItemType.Password:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [nvarchar] (500) NULL";
-                    break;
-                case ReactFormItemType.TextArea:
-                case ReactFormItemType.Editor:
-                case ReactFormItemType.Tags:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [nvarchar] (MAX) NULL";
-                    break;
-                case ReactFormItemType.Radio:
-                case ReactFormItemType.Select:
-                case ReactFormItemType.CheckBox:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [nvarchar] (1000) NULL";
-                    break;
-                case ReactFormItemType.DataPicker:
-                case ReactFormItemType.RangePicker:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [datetime]  NULL";
-                    break;
-                case ReactFormItemType.Upload:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [nvarchar]  (4000) NULL";
-                    break;
-                case ReactFormItemType.Region:
-                case ReactFormItemType.Cascader:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [int] NULL";
-                    break;
-                case ReactFormItemType.Switch:
-                    sql += $"ALTER TABLE [{tableName}] ADD [{fieldName}]  [bit] NULL";
-                    break;
-                default:
-                    throw new Exception("不存在字段类型");
-            }
-
-            return sql.IsNotEmpty() ? Connection().ExecuteAsync(sql) : Task.FromResult(0);
-        }
-
-        public Task<ModelField> GetByName(string fieldName, string modelNum)
-        {
-            string sql = $"SELECT * FROM {GetTableName()} WHERE Name = @Name AND ModelNum = @ModelNum";
-            return Connection().QueryFirstOrDefaultAsync<ModelField>(sql, new {Name = fieldName, ModelNum = modelNum});
         }
     }
 }

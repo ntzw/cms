@@ -35,7 +35,7 @@ namespace Foundation.Modal.RequestModal
             List<string> temp = new List<string>();
             for (int i = 0; i < _field.Count && i < _order.Count; i++)
             {
-                temp.Add($"{(prefix.IsNotEmpty() ? $"[{prefix}]." : "")}[{_field[i]}] {_order[i].ToString()}");
+                temp.Add($"{(prefix.IsNotEmpty() ? $"{prefix}." : "")}{_field[i]} {_order[i].ToString()}");
             }
 
             return _field.Count > 0 ? $"ORDER BY {string.Join(",", temp)}" : "";

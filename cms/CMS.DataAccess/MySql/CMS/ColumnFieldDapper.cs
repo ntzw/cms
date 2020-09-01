@@ -4,33 +4,32 @@
  */
 
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using DataAccess.Interface.CMS;
-using Foundation.DataAccess.Interface;
 using Model.CMS;
 
-namespace DataAccess.SqlServer.CMS
+namespace DataAccess.MySql.CMS
 {
     public class ColumnFieldDapper : DefaultDataAccess<ColumnField>, IColumnFieldDapper
     {
         public Task<IEnumerable<ColumnField>> GetByModelFieldNum(string columnNum, List<string> modelFieldNum)
         {
-            string sql = $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum AND ModelFieldNum IN @ModelFieldNum ";
+            var sql =
+                $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum AND ModelFieldNum IN @ModelFieldNum ";
             return Connection()
                 .QueryAsync<ColumnField>(sql, new {ColumnNum = columnNum, ModelFieldNum = modelFieldNum});
         }
 
         public Task<IEnumerable<ColumnField>> GetByColumnNum(string columnNum)
         {
-            string sql = $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum ORDER BY Sort DESC";
+            var sql = $"SELECT * FROM {GetTableName()} WHERE ColumnNum = @ColumnNum ORDER BY Sort DESC";
             return Connection().QueryAsync<ColumnField>(sql, new {ColumnNum = columnNum});
         }
 
         public Task<int> Clear(string[] columnNums)
         {
-            string sql = $"DELETE FROM {GetTableName()} WHERE ColumnNum IN @ColumnNum";
+            var sql = $"DELETE FROM {GetTableName()} WHERE ColumnNum IN @ColumnNum";
             return Connection().ExecuteAsync(sql, new {ColumnNum = columnNums});
         }
     }

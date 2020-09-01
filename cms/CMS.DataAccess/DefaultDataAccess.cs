@@ -1,24 +1,25 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Dynamic;
 using System.Threading.Tasks;
+using CMS.Enums;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using DataAccess.MySql;
+using DataAccess.SqlServer;
 using Extension;
+using Foundation.Application;
 using Foundation.DataAccess.Connections;
+using Foundation.DataAccess.Interface;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
 using Foundation.Modal.Result;
 
 namespace DataAccess
 {
-    public class DefaultDataAccess<T> : PageDapperHelper where T : class, new()
+    public class DefaultDataAccess<T> : IDataAccess
+        where T : class, new()
     {
-        protected virtual IDbConnection Connection()
-        {
-            return MainConnection.Interface.GetConnection();
-        }
-
         public Task<IEnumerable<T>> GetAll()
         {
             return Connection().GetAllAsync<T>();
@@ -94,13 +95,24 @@ namespace DataAccess
         public virtual async Task<PageResponse> Page(IPageRequest req)
         {
             string tableName = GetTableName();
-            string whereSql = OutDefaultParams(req.Queries, out IDictionary<string, object> whereParams);
-            string dataSql = GetPageDataSql(req, whereSql, tableName);
-            string countSql = GetPageCountSql(whereSql, tableName);
+            string whereSql =
+                PageSqlHelper().OutDefaultParams(req.Queries, out IDictionary<string, object> whereParams);
+            string dataSql = PageSqlHelper().GetPageDataSql(req, whereSql, tableName);
+            string countSql = PageSqlHelper().GetPageCountSql(whereSql, tableName);
 
             return new PageResponse(await Connection().QueryAsync<dynamic>(dataSql, whereParams),
                 await Connection().QueryFirstAsync<long>(countSql, whereParams));
         }
+
+        /// <summary>
+        /// 获取分页查询参数回调
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Action<IQuery, List<string>, IDictionary<string, object>> GetPageSetParamsAction()
+        {
+            return null;
+        }
+
         #endregion
 
         protected static string GetTableName()
@@ -111,6 +123,22 @@ namespace DataAccess
         protected static string GetTableName<TT>() where TT : class, new()
         {
             return new TT().GetAttribute<TableAttribute>()?.Name;
+        }
+
+        public virtual IDbConnection Connection()
+        {
+            return MainConnection.Interface.GetConnection();
+        }
+
+        public IPageSqlHelper PageSqlHelper()
+        {
+            switch (MainConnection.Interface.GetDataProvider())
+            {
+                case DataProvider.MySql:
+                    return MySqlPageHelper.Instance;
+                default:
+                    return SqlServerPageHelper.Instance;
+            }
         }
     }
 }

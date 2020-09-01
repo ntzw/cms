@@ -1,19 +1,25 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using Foundation.DataAccess.Interface;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
 
 namespace DataAccess
 {
-    public abstract class PageDapperHelper
+    public abstract class PageDapperHelper : IPageSqlHelper
     {
-        protected virtual string OutDefaultParams(List<IQuery> queries, out IDictionary<string, object> whereParams)
+        public string OutDefaultParams(List<IQuery> queries,
+            out IDictionary<string, object> whereParams,
+            Action<IQuery, List<string>, IDictionary<string, object>> setAction = null)
         {
-            return OutDefaultParams(queries, out whereParams, out List<string> whereSql);
+            return OutDefaultParams(queries, out whereParams, out List<string> whereSql, setAction);
         }
 
-        protected virtual string OutDefaultParams(List<IQuery> queries, out IDictionary<string, object> whereParams,
-            out List<string> whereSql)
+        public string OutDefaultParams(List<IQuery> queries,
+            out IDictionary<string, object> whereParams,
+            out List<string> whereSql,
+            Action<IQuery, List<string>, IDictionary<string, object>> setAction = null)
         {
             whereSql = new List<string>();
             whereParams = new ExpandoObject();
@@ -21,19 +27,21 @@ namespace DataAccess
             {
                 foreach (var query in queries)
                 {
-                    SetQueryWhereSqlAndParams(query, whereParams, whereSql);
+                    if (setAction != null)
+                    {
+                        setAction(query, whereSql, whereParams);
+                    }
+                    else
+                    {
+                        whereSql.Add(query.QuerySql.ToWhereString());
+                        whereParams.Add(query.QuerySql.ParamName, query.Value);
+                    }
                 }
             }
 
             return whereSql.Count > 0 ? $"AND {string.Join(" AND ", whereSql)}" : "";
         }
 
-        protected virtual void SetQueryWhereSqlAndParams(IQuery query, IDictionary<string, object> whereParams,
-            List<string> whereSql)
-        {
-            whereSql.Add(query.QuerySql.ToWhereString());
-            whereParams.Add(query.QuerySql.ParamName, query.Value);
-        }
 
         /// <summary>
         /// 获取分页查询总数SQL
@@ -41,10 +49,7 @@ namespace DataAccess
         /// <param name="whereSql"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        protected virtual string GetPageCountSql(string whereSql, string tableName)
-        {
-            return $"SELECT COUNT(Id) FROM {tableName} WHERE 1=1 {whereSql}";
-        }
+        public abstract string GetPageCountSql(string whereSql, string tableName);
 
         /// <summary>
         /// 获取分页查询数据SQL
@@ -53,9 +58,6 @@ namespace DataAccess
         /// <param name="whereSql"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        protected virtual string GetPageDataSql(IPageRequest req, string whereSql, string tableName)
-        {
-            return $"SELECT * FROM (SELECT *,ROW_NUMBER() OVER({req.Sort.ToSql()}) AS RowNum FROM [{tableName}] WHERE 1=1 {whereSql}) AS temp WHERE RowNum BETWEEN {req.Begin} AND {req.End} ";
-        }
+        public abstract string GetPageDataSql(IPageRequest req, string whereSql, string tableName);
     }
 }

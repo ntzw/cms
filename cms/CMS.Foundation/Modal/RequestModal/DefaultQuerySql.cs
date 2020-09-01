@@ -23,7 +23,7 @@ namespace Foundation.Modal.RequestModal
 
         public string ToWhereString()
         {
-            return $"[{_fieldName}] {GetSymbol()} @{_paramName}";
+            return $"{_fieldName} {GetSymbol()} @{_paramName}";
         }
 
         public string FieldName => _fieldName;

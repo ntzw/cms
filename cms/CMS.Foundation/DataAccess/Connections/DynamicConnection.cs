@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
 using Foundation.Application;
 using Helper;
+using MySql.Data.MySqlClient;
 
 namespace Foundation.DataAccess.Connections
 {
@@ -15,27 +17,35 @@ namespace Foundation.DataAccess.Connections
             _dbBaseName = dbBaseName;
         }
 
-        private SqlConnectionStringBuilder _builder;
+        readonly ConcurrentDictionary<string, string> _connectionString = new ConcurrentDictionary<string, string>();
 
-        protected override SqlConnectionStringBuilder GetDbConnectionBuilder()
+        protected override string GetDbConnectionBuilderString()
         {
-            if (_builder != null) return _builder;
-
             string sqlConnectName = ConfigHelper.GetAppSetting("currentConnectionStringName");
-            string sqlConnectionString = ConfigHelper.GetAppSetting("connectionStrings:" + sqlConnectName);
-            var mainBuilder = new SqlConnectionStringBuilder(sqlConnectionString)
-            {
-                Pooling = true
-            };
 
-            sqlConnectionString =
-                $"Server={mainBuilder.DataSource};User Id={mainBuilder.UserID};Pwd={mainBuilder.Password};DataBase={_dbBaseName};Persist Security Info=True;";
-            _builder = new SqlConnectionStringBuilder(sqlConnectionString)
+            if (!_connectionString.ContainsKey(sqlConnectName))
             {
-                Pooling = true
-            };
+                string sqlConnectionString = ConfigHelper.GetAppSetting("_connectionStrings:" + sqlConnectName);
+                switch (sqlConnectName.ToLower())
+                {
+                    case "sqlserver":
+                        _connectionString[sqlConnectName] = new SqlConnectionStringBuilder(sqlConnectionString)
+                        {
+                            Pooling = true
+                        }.ConnectionString;
+                        break;
+                    case "mysql":
+                        _connectionString[sqlConnectName] = new MySqlConnectionStringBuilder(sqlConnectionString)
+                        {
+                            Pooling = true
+                        }.ConnectionString;
+                        break;
+                    default:
+                        throw new Exception("只支持 sqlserver 、 mysql");
+                }
+            }
 
-            return _builder;
+            return _connectionString[sqlConnectName];
         }
 
         private static readonly ConcurrentDictionary<string, DynamicConnection> SqlConnectionStringBuilders =
@@ -45,7 +55,7 @@ namespace Foundation.DataAccess.Connections
         {
             if (string.IsNullOrEmpty(dbBaseName))
                 dbBaseName = SessionHelper.Get("DynamicConnection");
-            
+
             if (!SqlConnectionStringBuilders.ContainsKey(dbBaseName))
                 SqlConnectionStringBuilders[dbBaseName] = new DynamicConnection(dbBaseName);
 
