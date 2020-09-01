@@ -5,7 +5,7 @@ using Model.Account;
 
 namespace DataAccess.Interface.Utils
 {
-    public interface ICodeGenerate: IDefaultDataAccess<Administrator>
+    public interface ICodeGenerateDapper: IDefaultDataAccess<Administrator>
     {
         Task<IEnumerable<string>> GetAllTableName();
         Task<IEnumerable<dynamic>> GetTableFields(string tableName);

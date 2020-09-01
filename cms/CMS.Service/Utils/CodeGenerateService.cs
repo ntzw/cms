@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataAccess;
 using DataAccess.Interface.Utils;
 using DataAccess.SqlServer.Utils;
 
@@ -14,7 +15,7 @@ namespace Service.Utils
         private static CodeGenerateService _interface;
         public static CodeGenerateService Interface => _interface ??= new CodeGenerateService();
 
-        private readonly ICodeGenerate _dapper = new CodeGenerateDapper();
+        private readonly ICodeGenerateDapper _dapper = DataAccessFactory.GetInstance<ICodeGenerateDapper>();
         
         public Task<IEnumerable<string>> GetAllTableName()
         {

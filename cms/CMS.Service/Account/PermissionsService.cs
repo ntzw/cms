@@ -3,17 +3,15 @@
  * email：ntzw.geek@gmail.com
  */
 
+using DataAccess;
 using DataAccess.Interface.Account;
-using DataAccess.SqlServer.Account;
 using Model.Account;
 
 namespace Service.Account
 {
     public class PermissionsService : DefaultService<Permissions, IPermissionsDapper>
     {
-        private IPermissionsDapper _dapper;
-
-        protected override IPermissionsDapper GetDapper() => _dapper ??= new PermissionsDapper();
+        protected override IPermissionsDapper GetDapper() => DataAccessFactory.GetInstance<IPermissionsDapper>();
 
         private PermissionsService()
         {

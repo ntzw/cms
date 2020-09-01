@@ -10,6 +10,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React.Model;
+using DataAccess;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Extension;
@@ -21,9 +22,7 @@ namespace Service.CMS
 {
     public class ColumnService : DefaultService<Column, IColumnDapper>
     {
-        private IColumnDapper _dapper;
-
-        protected override IColumnDapper GetDapper() => _dapper ??= new ColumnDapper();
+        protected override IColumnDapper GetDapper() => DataAccessFactory.GetInstance<IColumnDapper>();
 
         private ColumnService()
         {

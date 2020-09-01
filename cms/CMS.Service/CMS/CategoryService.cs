@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React.Model;
+using DataAccess;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Extension;
@@ -16,7 +17,7 @@ namespace Service.CMS
 {
     public class CategoryService
     {
-        private readonly ICategoryDapper _dapper = new CategoryDapper();
+        private readonly ICategoryDapper _dapper = DataAccessFactory.GetInstance<ICategoryDapper>();
 
         private CategoryService()
         {

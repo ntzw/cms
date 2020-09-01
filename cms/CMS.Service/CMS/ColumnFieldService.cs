@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataAccess;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Foundation.Modal.Result;
@@ -14,9 +15,7 @@ namespace Service.CMS
 {
     public class ColumnFieldService : DefaultService<ColumnField, IColumnFieldDapper>
     {
-        private ColumnFieldDapper _dapper;
-
-        protected override IColumnFieldDapper GetDapper() => _dapper ??= new ColumnFieldDapper();
+        protected override IColumnFieldDapper GetDapper() => DataAccessFactory.GetInstance<IColumnFieldDapper>();
 
         private ColumnFieldService()
         {

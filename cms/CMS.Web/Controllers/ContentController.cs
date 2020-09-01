@@ -56,7 +56,7 @@ namespace Web.Controllers
                 }
             };
 
-            var seo = new ContentSeo();
+            var seo = new ContentSeo(column);
             if (model != null)
             {
                 var rep = await ContentService.Interface.Page(model.SqlTableName, req);
@@ -95,7 +95,7 @@ namespace Web.Controllers
             string templatePath = $"Views/Content/{site.SiteFolder}/{column.InfoTemplatePath}";
             if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return Error404();
 
-            var seo = new ContentSeo();
+            var seo = new ContentSeo(column);
             var info = new ContentInfo();
             if (item != null)
             {

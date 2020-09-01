@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React.Model;
+using DataAccess;
 using DataAccess.Interface.CMS;
-using DataAccess.SqlServer.CMS;
 using Extension;
 using Foundation.Modal;
 using Foundation.Modal.RequestModal;
 using Foundation.Modal.Result;
 using Helper;
-using Model.CMS;
 using Model.CMS.Content;
 using Newtonsoft.Json.Linq;
 
@@ -19,7 +17,7 @@ namespace Service.CMS
 {
     public class ContentService
     {
-        private readonly IContentDapper _dapper = new ContentDapper();
+        private readonly IContentDapper _dapper = DataAccessFactory.GetInstance<IContentDapper>();
 
         private ContentService()
         {

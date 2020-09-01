@@ -5,7 +5,6 @@ using Model.Account;
 
 namespace DataAccess.Interface.Account
 {
-    
     public interface IAdminDapper : IDefaultDataAccess<Administrator>
     {
         Task<Administrator> GetByAccountName(string accountName);

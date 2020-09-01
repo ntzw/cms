@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
+using Foundation.DataAccess.Interface;
 using Foundation.Modal.Result;
 using Model.CMS;
 
 namespace DataAccess.Interface.CMS
 {
-    public interface ICategoryDapper
+    public interface ICategoryDapper: IDataAccess
     {
         Task<IEnumerable<Category>> GetByColumnNum(string columnNum, string tableName);
         Task<Category> GetById(string tableName, int id);

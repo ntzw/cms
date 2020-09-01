@@ -6,6 +6,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React.Model;
+using DataAccess;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Foundation.Application;
@@ -18,9 +19,7 @@ namespace Service.CMS
 {
     public class SiteService : DefaultService<Site, ISiteDapper>
     {
-        private SiteDapper _dapper;
-
-        protected override ISiteDapper GetDapper() => _dapper ??= new SiteDapper();
+        protected override ISiteDapper GetDapper() => DataAccessFactory.GetInstance<ISiteDapper>();
 
         private SiteService()
         {
@@ -33,7 +32,7 @@ namespace Service.CMS
         {
             return SessionHelper.Get<Site>("CurrentSite");
         }
-        
+
         public async Task<HandleResult> RemoveOtherDefault(int excludeId)
         {
             return new HandleResult

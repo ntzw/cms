@@ -8,6 +8,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React.Model;
+using DataAccess;
 using DataAccess.Interface.Account;
 using DataAccess.SqlServer.Account;
 using Foundation.Modal;
@@ -18,9 +19,7 @@ namespace Service.Account
 {
     public class RoleService : DefaultService<Role, IRoleDapper>
     {
-        private IRoleDapper _dapper;
-
-        protected override IRoleDapper GetDapper() => _dapper ??= new RoleDapper();
+        protected override IRoleDapper GetDapper() => DataAccessFactory.GetInstance<IRoleDapper>();
 
         private RoleService()
         {

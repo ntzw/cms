@@ -8,7 +8,7 @@ using Helper;
 using Model.CMS;
 using Newtonsoft.Json.Linq;
 
-namespace Service.CMS
+namespace Service
 {
     public class DynamicTableSqlHelper
     {

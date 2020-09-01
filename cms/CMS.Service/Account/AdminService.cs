@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using DataAccess;
 using DataAccess.Interface.Account;
 using DataAccess.SqlServer.Account;
 using Extension;
@@ -13,9 +14,8 @@ namespace Service.Account
 {
     public class AdminService : DefaultService<Administrator, IAdminDapper>
     {
-        private IAdminDapper _dapper;
 
-        protected override IAdminDapper GetDapper() => _dapper ??= new AdminDapper();
+        protected override IAdminDapper GetDapper() => DataAccessFactory.GetInstance<IAdminDapper>();
 
         private AdminService()
         {

@@ -5,6 +5,7 @@
 
 using System.Threading.Tasks;
 using CMS.Enums;
+using DataAccess;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Extension;
@@ -16,9 +17,7 @@ namespace Service.CMS
 {
     public class ModelFieldService : DefaultService<ModelField, IModelFieldDapper>
     {
-        private ModelFieldDapper _dapper;
-
-        protected override IModelFieldDapper GetDapper() => _dapper ??= new ModelFieldDapper();
+        protected override IModelFieldDapper GetDapper() => DataAccessFactory.GetInstance<IModelFieldDapper>();
 
         private ModelFieldService()
         {

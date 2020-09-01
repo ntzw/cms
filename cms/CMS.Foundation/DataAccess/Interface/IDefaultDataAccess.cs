@@ -6,10 +6,11 @@ using Foundation.Modal.Result;
 
 namespace Foundation.DataAccess.Interface
 {
-    public interface IDefaultDataAccess<TModal> where TModal : class, new()
+    public interface IDefaultDataAccess<TModal> : IDataAccess
+        where TModal : class, new()
     {
         Task<IEnumerable<TModal>> GetAll();
-        
+
         Task<TModal> GetById(int id);
 
         Task<TModal> GetByNum(string num);
@@ -31,7 +32,7 @@ namespace Foundation.DataAccess.Interface
         Task<bool> Update(TModal t);
 
         Task<bool> Update(List<TModal> t);
-        
+
         Task<PageResponse> Page(IPageRequest req);
     }
 }

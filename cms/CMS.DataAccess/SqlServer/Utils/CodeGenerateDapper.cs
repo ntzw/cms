@@ -8,7 +8,7 @@ using Model.Account;
 
 namespace DataAccess.SqlServer.Utils
 {
-    public class CodeGenerateDapper : DefaultDataAccess<Administrator>, ICodeGenerate
+    public class CodeGenerateDapperDapper : DefaultDataAccess<Administrator>, ICodeGenerateDapper
     {
         public Task<IEnumerable<string>> GetAllTableName()
         {

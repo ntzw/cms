@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.React.Model;
+using DataAccess;
 using DataAccess.Interface.CMS;
 using DataAccess.SqlServer.CMS;
 using Foundation.Modal;
@@ -16,9 +17,7 @@ namespace Service.CMS
 {
     public class ModelTableService : DefaultService<ModelTable, IModelTableDapper>
     {
-        private ModelTableDapper _dapper;
-
-        protected override IModelTableDapper GetDapper() => _dapper ??= new ModelTableDapper();
+        protected override IModelTableDapper GetDapper() => DataAccessFactory.GetInstance<IModelTableDapper>();
 
         private ModelTableService()
         {
@@ -36,6 +35,7 @@ namespace Service.CMS
                 await GetDapper().CreateCategoryTable($"{tableName}_Category");
             });
         }
+
         public Task<ModelTable> GetByTableName(string tableName)
         {
             return GetDapper().GetByTableName(tableName);
