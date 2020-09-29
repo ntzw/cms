@@ -16,7 +16,7 @@ namespace Foundation.Application
 
         public static IMemoryCache Cache { get; private set; }
 
-        public static IHostingEnvironment Env { get; private set; }
+        public static IWebHostEnvironment Env { get; private set; }
 
         public static ILoggerFactory Log { get; private set; }
 
@@ -25,7 +25,7 @@ namespace Foundation.Application
             Configuration = app.ApplicationServices.GetRequiredService<IConfiguration>();
             ContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             Cache = app.ApplicationServices.GetRequiredService<IMemoryCache>();
-            Env = app.ApplicationServices.GetRequiredService<IHostingEnvironment>();
+            Env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
             Log = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
         }
     }

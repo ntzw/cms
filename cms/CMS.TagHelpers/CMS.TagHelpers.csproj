@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CMS.Service\CMS.Service.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Content.Abstractions\CMS.Modules.Content.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

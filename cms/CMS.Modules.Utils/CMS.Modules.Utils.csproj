@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CMS.Foundation\CMS.Foundation.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Account.Abstractions\CMS.Modules.Account.Abstractions.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Utils.Abstractions\CMS.Modules.Utils.Abstractions.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CMS.Foundation\CMS.Foundation.csproj" />
+      <ProjectReference Include="..\CMS.React\CMS.React.csproj" />
+    </ItemGroup>
+
+</Project>

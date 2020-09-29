@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using Foundation.Application;
-using Helper;
 using MySql.Data.MySqlClient;
 
 namespace Foundation.DataAccess.Connections
 {
     public class DynamicConnection : DbConnection
     {
+        private static readonly ConcurrentDictionary<string, DynamicConnection> SqlConnectionStringBuilders =
+            new ConcurrentDictionary<string, DynamicConnection>();
+
+        private readonly ConcurrentDictionary<string, string> _connectionString =
+            new ConcurrentDictionary<string, string>();
+
         private readonly string _dbBaseName;
 
         private DynamicConnection(string dbBaseName)
@@ -17,15 +21,13 @@ namespace Foundation.DataAccess.Connections
             _dbBaseName = dbBaseName;
         }
 
-        readonly ConcurrentDictionary<string, string> _connectionString = new ConcurrentDictionary<string, string>();
-
         protected override string GetDbConnectionBuilderString()
         {
-            string sqlConnectName = ConfigHelper.GetAppSetting("currentConnectionStringName");
+            var sqlConnectName = ConfigHelper.GetAppSetting("currentConnectionStringName");
 
             if (!_connectionString.ContainsKey(sqlConnectName))
             {
-                string sqlConnectionString = ConfigHelper.GetAppSetting("_connectionStrings:" + sqlConnectName);
+                var sqlConnectionString = ConfigHelper.GetAppSetting("_connectionStrings:" + sqlConnectName);
                 switch (sqlConnectName.ToLower())
                 {
                     case "sqlserver":
@@ -47,9 +49,6 @@ namespace Foundation.DataAccess.Connections
 
             return _connectionString[sqlConnectName];
         }
-
-        private static readonly ConcurrentDictionary<string, DynamicConnection> SqlConnectionStringBuilders =
-            new ConcurrentDictionary<string, DynamicConnection>();
 
         public static DynamicConnection Interface(string dbBaseName = "")
         {

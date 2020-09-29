@@ -13,7 +13,7 @@ namespace Foundation.DataAccess.Connections
 
         public DataProvider GetDataProvider()
         {
-            string sqlConnectName = ConfigHelper.GetAppSetting("currentConnectionStringName");
+            var sqlConnectName = ConfigHelper.GetAppSetting("currentConnectionStringName");
 
             switch (sqlConnectName.ToLower())
             {

@@ -1,5 +1,8 @@
 namespace Foundation.Modal.Result
 {
+    /// <summary>
+    /// 处理程序返回类
+    /// </summary>
     public class HandleResult : ResultBase
     {
         public object Data { get; set; }
@@ -13,7 +16,7 @@ namespace Foundation.Modal.Result
             };
         }
 
-        public static HandleResult Error(string errorMsg)
+        public static HandleResult Error(string errorMsg = "无效参数")
         {
             return new HandleResult
             {

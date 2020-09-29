@@ -1,7 +1,11 @@
 using System;
+using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using CMS.Modules.Account;
+using CMS.Modules.Content.Abstractions.Interface.Service;
+using CMS.Modules.Content.Abstractions.Model;
 using Extension;
 using Foundation.Application;
 using Foundation.Attribute;
@@ -18,8 +22,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Service.Account;
-using Service.CMS;
 
 namespace Web
 {
@@ -68,6 +70,17 @@ namespace Web
             });
 
             services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            services.AddSingleton<IModuleInitializer, CMS.Modules.Account.ModuleInitializer>();
+            services.AddSingleton<IModuleInitializer, CMS.Modules.Content.ModuleInitializer>();
+            services.AddSingleton<IModuleInitializer, CMS.Modules.Utils.ModuleInitializer>();
+
+            var sp = services.BuildServiceProvider();
+            var moduleInitializers = sp.GetServices<IModuleInitializer>();
+            foreach (var moduleInitializer in moduleInitializers)
+            {
+                moduleInitializer.ConfigureServices(services);
+            }
         }
 
         private static async Task AdminValidateFail(CookieValidatePrincipalContext context)
@@ -79,6 +92,12 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var moduleInitializers = app.ApplicationServices.GetServices<IModuleInitializer>();
+            foreach (var moduleInitializer in moduleInitializers)
+            {
+                moduleInitializer.Configure(app, env);
+            }
+
             GlobalApplication.Inject(app);
 
             if (env.IsDevelopment())
@@ -103,8 +122,19 @@ namespace Web
             {
                 var host = content.Request.Host.Value;
 
-                var site = await SiteService.Interface.GetByHost(host) ?? await SiteService.Interface.GetByDefault();
-                SessionHelper.Set("CurrentSite", site);
+
+                var currentSite = SessionHelper.Get<Site>("CurrentSite");
+                if (currentSite == null)
+                {
+                    var siteService = app.ApplicationServices.GetService<ISiteService>();
+                    var site = await siteService.GetByHost(host) ?? await siteService.GetByDefault();
+
+                    site.IsMobileSite = site.IsEnableMobileSite && site.MobileHost.IsNotEmpty() && site.MobileHost
+                        .Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries).ToList()
+                        .Exists(temp => string.Equals(temp, host));
+
+                    SessionHelper.Set("CurrentSite", site);
+                }
 
                 await next();
             });

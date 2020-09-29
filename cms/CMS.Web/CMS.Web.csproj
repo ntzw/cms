@@ -7,17 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CMS.DataAccess\CMS.DataAccess.csproj" />
       <ProjectReference Include="..\CMS.Enums\CMS.Enums.csproj" />
       <ProjectReference Include="..\CMS.Extension\CMS.Extension.csproj" />
       <ProjectReference Include="..\CMS.Foundation\CMS.Foundation.csproj" />
       <ProjectReference Include="..\CMS.Helper\CMS.Helper.csproj" />
-      <ProjectReference Include="..\CMS.Model\CMS.Model.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Account\CMS.Modules.Account.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Content.Abstractions\CMS.Modules.Content.Abstractions.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Content\CMS.Modules.Content.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Utils.Abstractions\CMS.Modules.Utils.Abstractions.csproj" />
+      <ProjectReference Include="..\CMS.Modules.Utils\CMS.Modules.Utils.csproj" />
       <ProjectReference Include="..\CMS.React\CMS.React.csproj" />
-      <ProjectReference Include="..\CMS.Service\CMS.Service.csproj" />
       <ProjectReference Include="..\CMS.TagHelpers\CMS.TagHelpers.csproj" />
-      <ProjectReference Include="..\CMS.WebApi\CMS.WebApi.csproj" />
-      <ProjectReference Include="..\CMS.WebView\CMS.WebView.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -116,7 +116,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Views\Content" />
       <Folder Include="wwwroot\images\gzzcgs" />
     </ItemGroup>
 

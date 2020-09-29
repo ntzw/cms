@@ -1,12 +1,19 @@
+using CMS.Modules.Content.Abstractions.Interface.Service;
 using Extension;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Service.CMS;
 
 namespace CMS.TagHelpers
 {
     public class SeoTagHelper : TagHelper
     {
+        private readonly ISiteService _siteService;
+
+        public SeoTagHelper(ISiteService siteService)
+        {
+            _siteService = siteService;
+        }
+        
         public string Title { get; set; }
 
         public string Keywords { get; set; }
@@ -18,15 +25,18 @@ namespace CMS.TagHelpers
         {
             output.TagName = null;
 
-            var site = SiteService.Interface.GetCurrentSite();
+            var site = _siteService.GetCurrentSite();
             
             output.Content.AppendHtml(new HtmlString($"<title>{(Title.IsEmpty() ? site?.SeoTitle : Title)}</title>"));
+            output.Content.AppendLine();
             output.Content.AppendHtml(
                 new HtmlString(
                     $"<meta name=\"keywords\" content=\"{(Keywords.IsEmpty() ? site?.SeoKeywords : Keywords)}\"/>"));
+            output.Content.AppendLine();
             output.Content.AppendHtml(
                 new HtmlString(
                     $"<meta name=\"description\" content=\"{(Description.IsEmpty() ? site?.SeoDescription : Description)}\"/>"));
+            output.Content.AppendLine();
         }
     }
 }
