@@ -147,8 +147,11 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                     ContentSubmit(newValue).then(res => {
                         if (res.isSuccess) {
                             message.success('数据提交成功');
-                            if (isClose)
+                            if (isClose) {
                                 onClose(res.isSuccess);
+                            } else if (!itemNum) {
+                                formAction.current?.clear();
+                            }
                         } else {
                             message.error(res.message || '数据提交失败');
                         }

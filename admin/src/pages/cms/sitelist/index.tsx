@@ -139,6 +139,9 @@ const AdminList: React.FC<SiteListProps> = () => {
                     if (value.host instanceof Array)
                         value.host = value.host.join(',');
 
+                    if (value.mobileHost instanceof Array)
+                        value.mobileHost = value.mobileHost.join(',');
+
                     Submit(value).then(res => {
                         resolve();
                         if (res.isSuccess) {
