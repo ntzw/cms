@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
@@ -71,10 +73,23 @@ namespace Web
 
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
-            services.AddSingleton<IModuleInitializer, CMS.Modules.Account.ModuleInitializer>();
-            services.AddSingleton<IModuleInitializer, CMS.Modules.Content.ModuleInitializer>();
-            services.AddSingleton<IModuleInitializer, CMS.Modules.Utils.ModuleInitializer>();
-
+            var baseType = typeof(IModuleInitializer);
+            var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
+            var referencedAssemblies = System.IO.Directory.GetFiles(path, "*.dll").ToList().FindAll(temp =>
+            {
+                string fileName = Path.GetFileName(temp);
+                return fileName.StartsWith("CMS.Modules");
+            }).Select(Assembly.LoadFrom).ToArray();
+            var types = referencedAssemblies
+                .SelectMany(a => a.DefinedTypes)
+                .Select(type => type.AsType())
+                .Where(x => x != baseType && baseType.IsAssignableFrom(x)).ToArray();
+            var implementTypes = types.Where(x => x.IsClass).ToArray();
+            foreach (var implementType in implementTypes)
+            {
+                services.AddSingleton(baseType, implementType);
+            }
+            
             var sp = services.BuildServiceProvider();
             var moduleInitializers = sp.GetServices<IModuleInitializer>();
             foreach (var moduleInitializer in moduleInitializers)
