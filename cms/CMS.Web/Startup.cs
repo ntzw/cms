@@ -136,8 +136,7 @@ namespace Web
             app.Use(async (content, next) =>
             {
                 var host = content.Request.Host.Value;
-
-
+                
                 var currentSite = SessionHelper.Get<Site>("CurrentSite");
                 if (currentSite == null)
                 {

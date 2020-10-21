@@ -73,6 +73,10 @@ namespace CMS.Modules.Content.Controllers
             string columnNum = form["columnNum"].ToStr();
             if (columnNum.IsEmpty()) return HandleResult.Error("请选择栏目");
 
+            var column = await _columnService.GetByNum(columnNum);
+            if (column == null) return HandleResult.Error("栏目不存在");
+            if (column.ModelNum.IsEmpty()) return HandleResult.Error("栏目未绑定模型");
+            
             return new HandleResult
             {
                 IsSuccess = true,
