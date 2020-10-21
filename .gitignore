@@ -13,5 +13,6 @@ cms/.vs/cms/v16/.suo
 cms/CMS.Web/wwwroot/admin
 cms/CMS.Web/Properties/PublishProfiles
 cms/CMS.Web/.config
+cms/CMS.Web/Views
 CMS.Web.csproj.user
 appsettings.json
