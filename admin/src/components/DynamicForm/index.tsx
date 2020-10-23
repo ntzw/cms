@@ -12,6 +12,8 @@ import UploadCustom from "../FormCustom/UploadCustom";
 import defaultSetting from '../../../config/defaultSettings';
 import { HandleResult } from "@/utils/request";
 import { SelectProps } from "antd/lib/select";
+import { EditType } from "@/pages/cms/columnlist/components/modelfieldadd";
+import EditorMd from "../Editor/EditorMd";
 
 
 export enum FormItemType {
@@ -44,7 +46,7 @@ export function GetFormItemTypeName(type: number) {
         case FormItemType.cascader:
             return '级联选择';
         case FormItemType.editor:
-            return '富文本编辑器';
+            return '编辑器';
         case FormItemType.radio:
             return '单选按钮';
         case FormItemType.checkBox:
@@ -108,6 +110,10 @@ const editUploadFn: MediaType['uploadFn'] = param => {
     xhr.send(fd)
 }
 
+/**
+ * 返回表单项
+ * @param item 
+ */
 const FormItemDOM = (item: FormItem) => {
     const type = item.type || FormItemType.input;
     switch (type) {
@@ -135,19 +141,36 @@ const FormItemDOM = (item: FormItem) => {
             }
             return <></>;
         case FormItemType.editor:
-            return <BraftEditor
-                className={styles.myEditor}
-                placeholder="请输入正文内容"
-                media={{
-                    externals: {
-                        image: false,
-                        video: false,
-                        audio: false,
-                        embed: false,
-                    },
-                    uploadFn: editUploadFn,
-                }}
-            />;
+            switch (item.editType) {
+                case EditType.Markdown编辑器:
+                    return <EditorMd
+                        style={{ width: '100%' }}
+                        config={{
+                            placeholder: '添加内容',
+                            imageUpload: true,
+                            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                            imageUploadURL: "/Api/Utils/Upload/EditorMd",
+                            watch: false,
+                            height: 540
+                        }}
+                    />
+                default:
+                    return <BraftEditor
+                        className={styles.myEditor}
+                        placeholder="请输入正文内容"
+                        media={{
+                            externals: {
+                                image: false,
+                                video: false,
+                                audio: false,
+                                embed: false,
+                            },
+                            uploadFn: editUploadFn,
+                        }}
+                    />;
+            }
+
+
         default:
             return <Input {...item.input} />
     }
@@ -321,7 +344,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
             form.current?.submit();
         },
         setValue: (value) => {
-        
+
             form.current?.setFieldsValue(value);
         },
         getValue: () => {
@@ -415,7 +438,13 @@ export function handleFormData(fields: FormItem[], oldData: any): any {
                 }
                 break;
             case FormItemType.editor:
-                newData[fieldName] = oldValue && BraftEditor.createEditorState(oldValue);
+                switch (field.editType) {
+                    case EditType.Markdown编辑器:
+                        break;
+                    default:
+                        newData[fieldName] = oldValue && BraftEditor.createEditorState(oldValue);
+                        break;
+                }
                 break;
             default:
                 break;

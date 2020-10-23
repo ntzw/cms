@@ -351,11 +351,10 @@ namespace CMS.Modules.Content.Service
             return await Page(model.SqlTableName, req);
         }
 
-        public async Task<PageResponse<ContentData>> Page(string tableName, IPageRequest req)
+        public async Task<PageResponse> Page(string tableName, IPageRequest req)
         {
             if (!req.ContainsQueryField("columnNum")) return PageResponse<ContentData>.Error("无效数据");
-            var res =  await _dapper.Page(tableName, req);
-            return new PageResponse<ContentData>(res.Data.Select(temp => new ContentData(temp)), res.Total);
+            return await _dapper.Page(tableName, req);
         }
 
         public async Task<PageResponse<ContentData>> PageByColumn(string columnNum, IPageRequest req)

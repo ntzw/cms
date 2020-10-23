@@ -66,6 +66,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
             onClose();
         }}
         maskClosable={false}
+        destroyOnClose={true}
         afterVisibleChange={(visible) => {
             if (isLoadData && itemNum && currentColumnNum) {
                 formAction.current?.loading(true);

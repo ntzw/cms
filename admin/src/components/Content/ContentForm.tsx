@@ -4,6 +4,7 @@ import DynaminForm, { FormItemType, handleFormData, DefaultSplit } from '@/compo
 import { DynaminFormProps, FormItem, DynaminFormAction } from '@/components/DynamicForm/data';
 import { lowerCaseFieldName } from '@/utils/utils';
 import { Row, Col, Card, Spin } from 'antd';
+import { EditType } from '@/pages/cms/columnlist/components/modelfieldadd';
 
 interface BaseOptions {
     required?: boolean;
@@ -41,6 +42,10 @@ interface UploadOptions extends BaseOptions {
 interface SwitchOptions extends BaseOptions {
     checkedChildren: string;
     unCheckedChildren: string;
+}
+
+interface EditOptions extends BaseOptions {
+    editType: EditType;
 }
 
 enum RegularType {
@@ -169,7 +174,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 if (Array.isArray(data.categoryNum)) {
                     data.categoryNum = data.categoryNum[data.categoryNum.length - 1];
                 }
-
+                console.info('onFinish', data);
                 onFinish(handleSubmitFormData(columnFields, data)).then(res => {
                     setLoading({
                         ...loading,
@@ -223,6 +228,11 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
 export default ContentForm;
 
+/**
+ * 解析栏目字段
+ * @param fields 
+ * @param columnNum 
+ */
 export function parsingColumnFields(fields: ColumnField[], columnNum: string) {
     return fields.map((temp): FormItem => {
         const options: BaseOptions = JSON.parse(temp.options);
@@ -279,6 +289,11 @@ export function parsingColumnFields(fields: ColumnField[], columnNum: string) {
                 break;
             case FormItemType.cascader:
                 SetCascaderOptions(item, elseOptions as CascaderOptions, columnNum);
+                break;
+            case FormItemType.editor:
+                const editOptions = elseOptions as EditOptions;
+
+                item.editType = editOptions.editType;
                 break;
         }
 

@@ -32,5 +32,17 @@ namespace CMS.Modules.Utils.Controllers
 
             return ext.IsImage() ? await _uploadImageUtil.Upload(file, form) : await _uploadFileUtil.Upload(file, form);
         }
+
+        public async Task<dynamic> EditorMd()
+        {
+            IFormFile file = ControllerContext.HttpContext.Request.Form.Files[0];
+            var res = await _uploadImageUtil.Upload(file);
+            return new
+            {
+                success = res.IsSuccess ? 1 : 0, // 0 表示上传失败，1 表示上传成功
+                message = res.Message,
+                url = res.Data // 上传成功时才返回
+            };
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace CMS.Modules.Content.Abstractions.Interface.Service
 
         Task<PageResponse> Page(JObject form, bool isRecycle = false);
 
-        Task<PageResponse<ContentData>> Page(string tableName, IPageRequest req);
+        Task<PageResponse> Page(string tableName, IPageRequest req);
 
         Task<PageResponse<ContentData>> PageByColumn(string columnNum, IPageRequest req);
 

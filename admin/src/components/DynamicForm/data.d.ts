@@ -5,6 +5,7 @@ import { CascaderProps, CascaderOptionType } from 'antd/lib/cascader';
 import { SwitchProps } from 'antd/lib/switch';
 import { Store } from 'antd/lib/form/interface';
 import { UploadCustomProps } from '../FormCustom/data';
+import { EditType } from '@/pages/cms/columnlist/components/modelfieldadd';
 
 export interface FormItem {
     label: string;
@@ -16,6 +17,7 @@ export interface FormItem {
     valuePropName?: string;
     validateTrigger?: string;
     split?: string;
+    editType?: EditType;
     rules?: RuleObject[];
     input?: InputProps;
     password?: PasswordProps;

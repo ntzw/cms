@@ -94,7 +94,7 @@ namespace Web.Controllers
                     Column = column,
                     ModelTable = model,
                     Site = site,
-                    Data = rep.Data,
+                    Data = rep.Data.Select(temp => new ContentData(temp)),
                     PageConfig = new PageConfig
                     {
                         Current = req.Current,
@@ -159,7 +159,7 @@ namespace Web.Controllers
                     Column = column,
                     ModelTable = model,
                     Site = site,
-                    Data = rep.Data,
+                    Data = rep.Data.Select(temp => new ContentData(temp)),
                     PageConfig = new PageConfig
                     {
                         Current = req.Current,
@@ -263,7 +263,11 @@ namespace Web.Controllers
         [NonAction]
         private IActionResult Error404()
         {
-            return View("~/Views/Error/404.cshtml");
+            var site = SessionHelper.Get<Site>("CurrentSite");
+            if (site == null) return Content("");
+            
+            string folderName = site.IsMobileSite ? site.MobileSiteFolder : site.SiteFolder;
+            return View($"~/Views/Content/{folderName}/404.cshtml");
         }
     }
 }

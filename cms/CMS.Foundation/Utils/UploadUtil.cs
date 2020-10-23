@@ -106,7 +106,7 @@ namespace Foundation.Utils
             return back.IndexOf(ext.ToLower().TrimStart('.')) > -1;
         }
 
-        public async Task<HandleResult> Upload(IFormFile file, IFormCollection form)
+        public async Task<HandleResult> Upload(IFormFile file, IFormCollection form = null)
         {
             string folderPath = Path.GetFullPath($"wwwroot{GetSaveWebFolderPath()}");
             if (!Directory.Exists(folderPath))

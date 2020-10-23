@@ -68,16 +68,12 @@ const GlobalModel: GlobalModelType = {
           payload: res.data
         });
 
-        const selectedSite: SiteSelectItem | undefined = yield select(
-          (state: ConnectState) => state.global.selectedSite,
-        );
-        if (!selectedSite) {
-          const defaultSite = res.data?.find(temp => temp.isDefault);
-          yield put({
-            type: 'setCurrentSite',
-            payload: (defaultSite && defaultSite.num) || (res.data?.[0] && res.data?.[0].num),
-          });
-        }
+        const num = localStorage.getItem('currentSiteNum');
+        const defaultSite = res.data?.find(temp => temp.isDefault);
+        yield put({
+          type: 'setCurrentSite',
+          payload: num || (defaultSite && defaultSite.num) || (res.data?.[0] && res.data?.[0].num),
+        });
 
       }
     },
@@ -151,6 +147,8 @@ const GlobalModel: GlobalModelType = {
       };
     },
     setCurrentSite(state, { payload }): GlobalModelState {
+      localStorage.setItem('currentSiteNum', payload);
+
       return {
         siteData: [],
         notices: [],

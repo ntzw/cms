@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/lib/editormd/css/editormd.css"/>
-
+    <style>
+        .editormd {
+            margin: 0px;
+        }
+    </style>
 </head>
-<body style="margin: 0;">
+<body style="margin: 0; padding-right: 2px;">
 <div id="test-editor">
-    <textarea style="display:none;"></textarea>
 </div>
 <script src="/lib/jquery/jquery.min.js"></script>
 <script src="/lib/editormd/editormd.min.js"></script>
@@ -19,13 +22,14 @@
             width: "100%",
             path: "/lib/editormd/lib/",
             onload: function () {
-                editor.fullscreen();
+                //editor.fullscreen();
                 top.window.postMessage({
                     id: iframeId,
                     action: 'onload',
+                    data: $('#test-editor').height() + 20
                 }, '*');
             },
-        })
+        });
 
         var editorHandles = ['onresize', 'onchange', 'onpreviewing', 'onpreviewed', 'onfullscreen', 'onfullscreenExit', 'onscroll', 'onpreviewscroll'];
         for (var i = 0; i < editorHandles.length; i++) {

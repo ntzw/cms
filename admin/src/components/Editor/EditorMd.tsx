@@ -5,6 +5,7 @@ interface EditorMdProps extends IframeHTMLAttributes<any> {
     config?: { [key: string]: any },
     onFinish?: (value: string) => void;
     onReady?: () => void;
+    value?: string;
 }
 
 export interface EditorMdInstance {
@@ -14,8 +15,10 @@ export interface EditorMdInstance {
     setCodeMirrorOption: (mode: string) => void;
 }
 
-const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProps> = ({ style, onReady, config, onFinish }, ref) => {
+const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProps> = ({ value, style, onReady, config, onFinish, onChange }, ref) => {
     const [editorId] = useState(`editormd${Date.now()}`);
+    const [valueState, setValueState] = useState(true);
+    const [iframeHeight, setIframeHeight] = useState((config && config.height) || 100)
 
     React.useImperativeHandle(ref, () => ({
         submit: (valueType = 'markdown') => {
@@ -67,14 +70,23 @@ const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProp
                 case 'onchange':
                     if (typeof onFinish === 'function')
                         onFinish(data);
+
+                    if (typeof onChange === 'function')
+                        onChange(data);
                     break;
                 case 'onload':
                     if (onReady)
                         onReady();
+
+                    setIframeHeight(data);
                     break;
                 case 'getValue':
                     if (typeof onFinish === 'function')
                         onFinish(data);
+                    break;
+                case 'onfullscreen':
+                    break;
+                case 'onfullscreenExit':
                     break;
                 default:
                     break;
@@ -84,14 +96,34 @@ const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProp
 
     useEffect(() => {
         window.addEventListener("message", messageEvent, false);
-
         return function cleanup() {
             window.removeEventListener("message", messageEvent, false);
         }
     });
 
+    useEffect(() => {
+        return () => {
+            setValueState(true);
+        }
+    }, [])
+
+    useEffect(() => {
+        if (value && valueState) {
+            setValueState(false);
+            getIframeWindow(editorId)?.postMessage({
+                action: 'setValue',
+                data: [value]
+            }, '*')
+        }
+
+        //console.info(value);
+    }, [value])
+
     return <iframe
-        style={style}
+        style={{
+            ...style,
+            height: iframeHeight
+        }}
         frameBorder="no"
         src={`${defaultConfig.basePath}/editormd.html?id=${editorId}`}
         id={editorId}

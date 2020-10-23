@@ -261,6 +261,26 @@ const SwitchOptions = () => {
     </>
 }
 
+const EditOptions = () => {
+    return <>
+        <Form.Item
+            key="editType"
+            name="editType"
+            label="编辑器模式"
+        >
+            <Select>
+                <Select.Option value={EditType.富文本编辑器}>富文本编辑器</Select.Option>
+                <Select.Option value={EditType.Markdown编辑器}>Markdown编辑器</Select.Option>
+            </Select>
+        </Form.Item>
+    </>
+}
+
+export enum EditType {
+    富文本编辑器,
+    Markdown编辑器
+}
+
 export const CascaderDataSource: SelectProps<any>['options'] = [{
     label: '城市',
     value: 'region'
@@ -350,7 +370,9 @@ const FormFieldOptions: React.FC<{
         case FormItemType.switch:
             return <SwitchOptions />;
         case FormItemType.cascader:
-            return <CascaderOptions form={form} oldValue={oldValue} />
+            return <CascaderOptions form={form} oldValue={oldValue} />;
+        case FormItemType.editor:
+            return <EditOptions />;
         default:
             return <></>;
     }
@@ -444,6 +466,7 @@ const ModelFieldAdd: React.FC<ModelFieldAddProps> = ({
                     accept: imageAccepts,
                     checkedChildren: '是',
                     unCheckedChildren: '否',
+                    editType: EditType.富文本编辑器
                 }}
                 onFinish={(value) => {
                     setLoading({

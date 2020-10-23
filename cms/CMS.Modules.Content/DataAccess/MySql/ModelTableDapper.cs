@@ -81,6 +81,7 @@ namespace CMS.Modules.Content.DataAccess.MySql
                       `SeoKeyword`       text         null,
                       `SeoDesc`          text         null,
                       `ClickCount`       int          null,
+                      `IsTop` tinyint(1) NULL DEFAULT NULL,
 					  PRIMARY KEY (`Id`) USING BTREE
 					) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;";
         }
