@@ -126,6 +126,8 @@ namespace Web
                 app.UseHsts();
             }
 
+            app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
+            
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
 

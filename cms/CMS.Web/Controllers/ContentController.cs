@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CMS.Enums;
 using CMS.Modules.Content.Abstractions.Interface.Service;
 using CMS.Modules.Content.Abstractions.Model;
 using CMS.Modules.Content.Abstractions.Model.Content;
@@ -46,6 +47,70 @@ namespace Web.Controllers
             return View($"~/Views/Content/{folderName}/Index.cshtml");
         }
 
+        [Route("tag/{num}/{tag}/{current:int?}")]
+        [HttpGet]
+        public async Task<IActionResult> Tag(string num, string tag, int current = 1)
+        {
+            if (num.IsEmpty() || tag.IsEmpty()) return Error404();
+
+            var site = _siteService.GetCurrentSite();
+            if (site == null) return Error404();
+
+            var column = await _columnService.GetByNum(num);
+            if (column == null || column.SiteNum != site.Num) return Error404();
+
+            var model = column.ModelNum.IsEmpty() ? null : await _modelTableService.GetByNum(column.ModelNum);
+            string folderName = site.IsMobileSite ? site.MobileSiteFolder : site.SiteFolder;
+            
+            string templatePath = $"Views/Content/{folderName}/{column.ListTemplatePath}";
+            if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return Error404();
+
+            int size = 15;
+            switch (column.Num)
+            {
+                case "9a32d00252853c5e":
+                    size = 3;
+                    break;
+            }
+
+            var req = new SqlServerPageRequest
+            {
+                Current = current,
+                Size = size,
+                Queries = new List<IQuery>
+                {
+                    new DefaultQuery(column.Num, new DefaultQuerySql("columnNum")),
+                    new DefaultQuery(false, new DefaultQuerySql("IsDel")),
+                    new DefaultQuery($"|{tag}|", new DefaultQuerySql("CONCAT('|', Tag, '|')", QuerySymbol.Like))
+                }
+            };
+
+            var seo = new ContentSeo(column);
+            if (model != null)
+            {
+                var rep = await _contentService.Page(model.SqlTableName, req);
+                ViewData.Model = new ContentList
+                {
+                    Column = column,
+                    ModelTable = model,
+                    Site = site,
+                    Data = rep.Data,
+                    PageConfig = new PageConfig
+                    {
+                        Current = req.Current,
+                        Size = req.Size,
+                        Total = rep.Total,
+                        UrlTemplate = "/tag/" + column.Num + "/" + tag + "/{p}"
+                    }
+                };
+            }
+
+            ViewBag.Seo = seo;
+            ViewBag.Site = site;
+            ViewBag.Tag = tag;
+            return View($"~/{templatePath}");
+        }
+
         [Route("list/{num}/{current:int?}")]
         [HttpGet]
         public async Task<IActionResult> List(string num, int current = 1)
@@ -61,15 +126,23 @@ namespace Web.Controllers
             var model = column.ModelNum.IsEmpty() ? null : await _modelTableService.GetByNum(column.ModelNum);
             if (column.IsSingle)
                 return await RenderInfo(site, column, model);
-            
+
             string folderName = site.IsMobileSite ? site.MobileSiteFolder : site.SiteFolder;
             string templatePath = $"Views/Content/{folderName}/{column.ListTemplatePath}";
             if (!System.IO.File.Exists(Path.GetFullPath(templatePath))) return Error404();
 
+            int size = 15;
+            switch (column.Num)
+            {
+                case "9a32d00252853c5e":
+                    size = 3;
+                    break;
+            }
+
             var req = new SqlServerPageRequest
             {
                 Current = current,
-                Size = 15,
+                Size = size,
                 Queries = new List<IQuery>
                 {
                     new DefaultQuery(column.Num, new DefaultQuerySql("columnNum")),
@@ -92,6 +165,7 @@ namespace Web.Controllers
                         Current = req.Current,
                         Size = req.Size,
                         Total = rep.Total,
+                        UrlTemplate = "/list/" + column.Num + "/{p}"
                     }
                 };
             }
@@ -159,12 +233,6 @@ namespace Web.Controllers
             return View($"~/{templatePath}");
         }
 
-        [NonAction]
-        private IActionResult Error404()
-        {
-            return View("~/Views/Error/404.cshtml");
-        }
-
         public async Task<HandleResult> Submit(IFormCollection form)
         {
             string columnNum = form["columnNum"];
@@ -190,6 +258,12 @@ namespace Web.Controllers
             tableSqlHelper.SetData(columnFields, edit);
 
             return await _contentService.Add(tableSqlHelper);
+        }
+        
+        [NonAction]
+        private IActionResult Error404()
+        {
+            return View("~/Views/Error/404.cshtml");
         }
     }
 }

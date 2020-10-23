@@ -24,7 +24,7 @@ namespace CMS.TagHelpers
 
         public string LastText { get; set; } = "尾页";
 
-        public string UrlTemplate { get; set; } = "/{page}.html";
+        public string UrlTemplate { get; set; } = "/{p}.html";
 
         private long TotalPage => Math.Max((Total + PageSize - 1) / PageSize, 1);
 
