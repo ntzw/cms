@@ -80,12 +80,24 @@ namespace Foundation.Modal
             return symbol;
         }
 
+        /// <summary>
+        /// 当前页码
+        /// </summary>
         public int Current { get; set; } = 1;
 
+        /// <summary>
+        /// 一页数量
+        /// </summary>
         public int Size { get; set; } = 10;
 
+        /// <summary>
+        /// 查询参数
+        /// </summary>
         public List<IQuery> Queries { get; set; }
 
+        /// <summary>
+        /// 排序
+        /// </summary>
         public ISort Sort { get; set; }
 
         public long Begin => (Current - 1) * Size + 1;

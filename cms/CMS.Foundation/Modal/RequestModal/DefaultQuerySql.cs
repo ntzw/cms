@@ -1,5 +1,6 @@
 using System;
 using CMS.Enums;
+using Helper;
 
 namespace Foundation.Modal.RequestModal
 {
@@ -10,7 +11,7 @@ namespace Foundation.Modal.RequestModal
         private readonly QuerySymbol _symbol;
 
         public DefaultQuerySql(string fieldName, QuerySymbol symbol = QuerySymbol.Equal) :
-            this(fieldName, fieldName, symbol)
+            this(fieldName, $"p_{RandomHelper.CreateNum()}", symbol)
         {
         }
 

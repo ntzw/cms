@@ -10,7 +10,7 @@ namespace CMS.Modules.Content.Abstractions.Model.Content
 
         public ModelTable ModelTable { get; set; }
 
-        public IEnumerable<dynamic> Data { get; set; }
+        public IEnumerable<ContentData> Data { get; set; }
 
         public PageConfig PageConfig { get; set; }
     }
@@ -22,9 +22,12 @@ namespace CMS.Modules.Content.Abstractions.Model.Content
         public int Size { get; set; }
 
         public long Total { get; set; }
-
+        
+        public string UrlTemplate { get; set; }
         public long Begin => (Current - 1) * Size + 1;
 
         public long End => Current * Size;
+        
+        
     }
 }
