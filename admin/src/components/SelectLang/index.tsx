@@ -42,7 +42,7 @@ const SelectLang: React.FC<SelectLangProps> = (props) => {
   return (
     <HeaderDropdown overlay={langMenu} placement="bottomRight">
       <span className={classNames(styles.dropDown, className)}>
-        <GlobalOutlined title="语言" />
+        <GlobalOutlined title="站点" />
       </span>
     </HeaderDropdown>
   );

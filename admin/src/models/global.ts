@@ -75,7 +75,7 @@ const GlobalModel: GlobalModelType = {
           const defaultSite = res.data?.find(temp => temp.isDefault);
           yield put({
             type: 'setCurrentSite',
-            payload: defaultSite || res.data?.[0],
+            payload: (defaultSite && defaultSite.num) || (res.data?.[0] && res.data?.[0].num),
           });
         }
 
@@ -156,7 +156,7 @@ const GlobalModel: GlobalModelType = {
         notices: [],
         collapsed: false,
         ...state,
-        selectedSite: state?.siteData.find(temp => temp.value = payload)
+        selectedSite: state?.siteData.find(temp => temp.num == payload)
       };
     },
     changeLayoutCollapsed(state, { payload }): GlobalModelState {

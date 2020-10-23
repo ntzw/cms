@@ -166,7 +166,7 @@ const ColumnFieldList: React.FC<ColumnFieldListProps> = ({ visible, onClose, col
                                 setting: false,
                             }}
                             onChange={({ pageSize }) => {
-                                console.info(pageSize);
+                               
                             }}
                             actionRef={exitsTableAction}
                             request={(params, sort, query) => {

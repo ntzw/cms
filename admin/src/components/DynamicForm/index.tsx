@@ -321,7 +321,7 @@ const DynaminForm = <T extends Store>(props: DynaminFormProps<T>) => {
             form.current?.submit();
         },
         setValue: (value) => {
-            console.info('setValue', form.current, value);
+        
             form.current?.setFieldsValue(value);
         },
         getValue: () => {
