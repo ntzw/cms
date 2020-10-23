@@ -74,6 +74,13 @@ namespace CMS.Modules.Content.DataAccess.MySql
 					  `UpdateAccountNum` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
 					  `IsDel` tinyint(1) NULL DEFAULT NULL,
 					  `Status` int NULL DEFAULT NULL,
+                      `SiteNum`          varchar(50)  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+                      `ColumnNum`        varchar(50)  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+                      `CategoryNum`      varchar(50)  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+                      `SeoTitle`         varchar(500)  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+                      `SeoKeyword`       text         null,
+                      `SeoDesc`          text         null,
+                      `ClickCount`       int          null,
 					  PRIMARY KEY (`Id`) USING BTREE
 					) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;";
         }
