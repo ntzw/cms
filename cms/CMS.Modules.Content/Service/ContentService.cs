@@ -45,7 +45,7 @@ namespace CMS.Modules.Content.Service
             var model = await _columnService.GetModelByNum(columnNum);
             if (model?.ModelTable == null) return null;
 
-            return GetByNum(model?.ModelTable.SqlTableName, num);
+            return await GetByNum(model?.ModelTable.SqlTableName, num);
         }
 
         public Task<HandleResult> Update(Dictionary<string, object> form, string tableName)

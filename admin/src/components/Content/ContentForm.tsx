@@ -63,7 +63,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
     isAllowTop = false
 }) => {
     const [formFields, setFormFields] = useState<FormItem[]>([]);
-    const [seoFormFields] = useState([{
+    const [seoFormFields] = useState<FormItem[]>([{
         label: '标题',
         name: 'seoTitle'
     }, {
@@ -71,14 +71,16 @@ const ContentForm: React.FC<ContentFormProps> = ({
         name: 'seoKeyword',
         type: FormItemType.textArea,
         textarea: {
-            maxLength: 500
+            maxLength: 500,
+            rows: 6,
         }
     }, {
         label: '描述',
         name: 'seoDesc',
         type: FormItemType.textArea,
         textarea: {
-            maxLength: 500
+            maxLength: 500,
+            rows: 6,
         }
     }])
     const [loading, setLoading] = useState({
@@ -174,7 +176,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 if (Array.isArray(data.categoryNum)) {
                     data.categoryNum = data.categoryNum[data.categoryNum.length - 1];
                 }
-                console.info('onFinish', data);
                 onFinish(handleSubmitFormData(columnFields, data)).then(res => {
                     setLoading({
                         ...loading,

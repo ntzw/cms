@@ -20,7 +20,7 @@ namespace CMS.Modules.Content.Controllers
         {
             _service = service;
         }
-        
+
         public async Task<PageResponse> Page([FromBody] JObject form)
         {
             string siteNum = form["siteNum"].ToStr();
@@ -78,7 +78,7 @@ namespace CMS.Modules.Content.Controllers
             if (form == null || form.Count <= 0) return HandleResult.Error("请选择要删除的数据");
 
             var deleteModels = form.Select(temp => new Column {Id = temp.ToInt()}).ToList();
-            
+
             //todo 需要延期删除无用的数据，栏目内容、栏目字段
             return await _service.Delete(deleteModels);
         }
@@ -93,6 +93,33 @@ namespace CMS.Modules.Content.Controllers
                 IsSuccess = true,
                 Data = await _service.GetCascaderData(siteNum)
             };
+        }
+
+        public async Task<HandleResult> GetSeo([FromBody] JObject form)
+        {
+            string num = form["num"].ToStr();
+            if (num.IsEmpty()) return HandleResult.Error("无效数据");
+
+            var column = await _service.GetByNum(num);
+            if (column == null) return HandleResult.Error("无效数据");
+
+            return HandleResult.Success(new
+            {
+                column.SeoTitle,
+                column.SeoKeyword,
+                column.SeoDesc
+            });
+        }
+
+        public async Task<HandleResult> UpdateSeo([FromBody]Column column)
+        {
+            var edit = await _service.GetByNum(column.Num);
+            if (edit == null) return HandleResult.Error("无效数据");
+
+            edit.SeoTitle = column.SeoTitle;
+            edit.SeoKeyword = column.SeoKeyword;
+            edit.SeoDesc = column.SeoDesc;
+            return await _service.Update(edit);
         }
     }
 }

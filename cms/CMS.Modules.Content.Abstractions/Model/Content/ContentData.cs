@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Extension;
 using Helper;
+using Newtonsoft.Json.Linq;
 
 namespace CMS.Modules.Content.Abstractions.Model.Content
 {
@@ -10,6 +11,67 @@ namespace CMS.Modules.Content.Abstractions.Model.Content
         private readonly Dictionary<string, object> _dicValue =
             new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
+        public ContentData(JObject form)
+        {
+            foreach (var keyValue in form)
+            {
+                switch (keyValue.Key.ToLower())
+                    {
+                        case "id":
+                            this.Id = keyValue.Value.ToInt();
+                            break;
+                        case "num":
+                            this.Num = keyValue.Value.ToString();
+                            break;
+                        case "createdate":
+                            this.CreateDate = keyValue.Value.ToDateTime();
+                            break;
+                        case "updatedate":
+                            this.UpdateDate = keyValue.Value.ToDateTime();
+                            break;
+                        case "createaccountnum":
+                            this.CreateAccountNum = keyValue.Value.ToStr();
+                            break;
+                        case "updateaccountnum":
+                            this.UpdateAccountNum = keyValue.Value.ToStr();
+                            break;
+                        case "isdel":
+                            this.IsDel = keyValue.Value.ToBoolean();
+                            break;
+                        case "status":
+                            this.Status = keyValue.Value.ToInt();
+                            break;
+                        case "sitenum":
+                            this.SiteNum = keyValue.Value.ToStr();
+                            break;
+                        case "columnnum":
+                            this.ColumnNum = keyValue.Value.ToStr();
+                            break;
+                        case "categorynum":
+                            this.CategoryNum = keyValue.Value.ToStr();
+                            break;
+                        case "seotitle":
+                            this.SeoTitle = keyValue.Value.ToStr();
+                            break;
+                        case "seokeyword":
+                            this.SeoKeyword = keyValue.Value.ToStr();
+                            break;
+                        case "seodesc":
+                            this.SeoDesc = keyValue.Value.ToStr();
+                            break;
+                        case "clickcount":
+                            this.ClickCount = keyValue.Value.ToInt();
+                            break;
+                        case "istop":
+                            this.IsTop = keyValue.Value.ToBoolean();
+                            break;
+                        default:
+                            _dicValue.Add(keyValue.Key, keyValue.Value);
+                            break;
+                    }
+            }
+        }
+        
         public ContentData(dynamic item)
         {
             if (item is IDictionary<string, object> itemValue)

@@ -13,7 +13,7 @@ namespace CMS.TagHelpers
         {
             _siteService = siteService;
         }
-        
+
         public string Title { get; set; }
 
         public string Keywords { get; set; }
@@ -26,16 +26,16 @@ namespace CMS.TagHelpers
             output.TagName = null;
 
             var site = _siteService.GetCurrentSite();
-            
+
             output.Content.AppendHtml(new HtmlString($"<title>{(Title.IsEmpty() ? site?.SeoTitle : Title)}</title>"));
             output.Content.AppendLine();
             output.Content.AppendHtml(
                 new HtmlString(
-                    $"<meta name=\"keywords\" content=\"{(Keywords.IsEmpty() ? site?.SeoKeywords : Keywords)}\"/>"));
+                    $"<meta name=\"keywords\" content=\"{(Keywords.IsEmpty() ? site?.SeoKeyword : Keywords)}\"/>"));
             output.Content.AppendLine();
             output.Content.AppendHtml(
                 new HtmlString(
-                    $"<meta name=\"description\" content=\"{(Description.IsEmpty() ? site?.SeoDescription : Description)}\"/>"));
+                    $"<meta name=\"description\" content=\"{(Description.IsEmpty() ? site?.SeoDesc : Description)}\"/>"));
             output.Content.AppendLine();
         }
     }

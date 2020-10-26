@@ -80,13 +80,13 @@ namespace CMS.Modules.Content.Abstractions.Model
         /// Seo关键词
         /// </summary>
         [Input("Seo关键词")]
-        public string SeoKeywords { get; set; }
+        public string SeoKeyword { get; set; }
         
         /// <summary>
         /// Seo描述
         /// </summary>
         [Input("Seo描述")]
-        public string SeoDescription { get; set; }
+        public string SeoDesc { get; set; }
         
         /// <summary>
         /// 是否手机站点

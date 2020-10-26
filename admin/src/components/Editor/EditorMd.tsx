@@ -79,6 +79,7 @@ const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProp
                         onReady();
 
                     setIframeHeight(data);
+                    setEditMdValue();
                     break;
                 case 'getValue':
                     if (typeof onFinish === 'function')
@@ -91,6 +92,16 @@ const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProp
                 default:
                     break;
             }
+        }
+    }
+
+    const setEditMdValue = () => {
+        if (value && valueState) {
+            setValueState(false);
+            getIframeWindow(editorId)?.postMessage({
+                action: 'setValue',
+                data: [value]
+            }, '*')
         }
     }
 
@@ -107,16 +118,10 @@ const EditorMdDOM: React.ForwardRefRenderFunction<EditorMdInstance, EditorMdProp
         }
     }, [])
 
-    useEffect(() => {
-        if (value && valueState) {
-            setValueState(false);
-            getIframeWindow(editorId)?.postMessage({
-                action: 'setValue',
-                data: [value]
-            }, '*')
-        }
 
-        //console.info(value);
+
+    useEffect(() => {
+        setEditMdValue();
     }, [value])
 
     return <iframe

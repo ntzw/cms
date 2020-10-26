@@ -89,7 +89,7 @@ namespace Web
             {
                 services.AddSingleton(baseType, implementType);
             }
-            
+
             var sp = services.BuildServiceProvider();
             var moduleInitializers = sp.GetServices<IModuleInitializer>();
             foreach (var moduleInitializer in moduleInitializers)
@@ -122,12 +122,12 @@ namespace Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
-            app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
-            
+
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -138,7 +138,7 @@ namespace Web
             app.Use(async (content, next) =>
             {
                 var host = content.Request.Host.Value;
-                
+
                 var currentSite = SessionHelper.Get<Site>("CurrentSite");
                 if (currentSite == null)
                 {

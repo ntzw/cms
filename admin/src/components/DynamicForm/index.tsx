@@ -146,11 +146,10 @@ const FormItemDOM = (item: FormItem) => {
                     return <EditorMd
                         style={{ width: '100%' }}
                         config={{
-                            placeholder: '添加内容',
+                            placeholder: '输入内容。PS:只有开启实时预览，编辑的数据才会生效！！！',
                             imageUpload: true,
                             imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
                             imageUploadURL: "/Api/Utils/Upload/EditorMd",
-                            watch: false,
                             height: 540
                         }}
                     />

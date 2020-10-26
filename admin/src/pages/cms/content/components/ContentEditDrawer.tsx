@@ -26,10 +26,12 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
         submit: false,
     })
     const [isClose, setIsClose] = useState(false);
+    const [isLoadTable, setIsLoadTable] = useState(false);
 
     useEffect(() => {
         formAction.current?.clear();
         setIsLoadData(true);
+        setIsLoadData(false);
     }, [itemNum])
 
     const action: ContentFormAction = {
@@ -68,7 +70,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
         maskClosable={false}
         destroyOnClose={true}
         afterVisibleChange={(visible) => {
-            if (isLoadData && itemNum && currentColumnNum) {
+            if (itemNum && currentColumnNum) {
                 formAction.current?.loading(true);
                 GetEditValue(itemNum, currentColumnNum).then(res => {
                     if (res.isSuccess) {
@@ -119,7 +121,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                 loading={loading.submit}
                 style={{ marginLeft: 10 }}
                 onClick={() => {
-                    onClose();
+                    onClose(isLoadTable);
                 }}
             >取消</Button>
         </div>}
@@ -152,6 +154,7 @@ const ContentEditDrawer: React.FC<ContentEditProps> = ({
                                 onClose(res.isSuccess);
                             } else if (!itemNum) {
                                 formAction.current?.clear();
+                                setIsLoadTable(true);
                             }
                         } else {
                             message.error(res.message || '数据提交失败');

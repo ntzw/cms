@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMS.Modules.Account.Abstractions.Interface.Service;
 using CMS.Modules.Content.Abstractions.Interface.Service;
+using CMS.Modules.Content.Abstractions.Model;
 using CMS.Modules.Content.Abstractions.Model.Content;
 using CMS.React.Model;
 using Extension;
@@ -76,7 +77,7 @@ namespace CMS.Modules.Content.Controllers
             var column = await _columnService.GetByNum(columnNum);
             if (column == null) return HandleResult.Error("栏目不存在");
             if (column.ModelNum.IsEmpty()) return HandleResult.Error("栏目未绑定模型");
-            
+
             return new HandleResult
             {
                 IsSuccess = true,
@@ -243,6 +244,41 @@ namespace CMS.Modules.Content.Controllers
 
             return await _service.Removed(cm?.ModelTable.SqlTableName,
                 ids.Select(temp => temp.ToInt()).ToList());
+        }
+
+        public async Task<HandleResult> GetSeo([FromBody] JObject form)
+        {
+            string num = form["num"].ToStr();
+            string columnNum = form["columnNum"].ToStr();
+            if (num.IsEmpty() || columnNum.IsEmpty()) return HandleResult.Error("无效数据");
+
+            var data = await _service.GetByNumAndColumn(columnNum, num);
+            if (data == null) return HandleResult.Error("无效数据");
+
+            var content = new ContentData(data);
+
+            return HandleResult.Success(new
+            {
+                content.SeoTitle,
+                content.SeoKeyword,
+                content.SeoDesc
+            });
+        }
+
+        public async Task<HandleResult> UpdateSeo([FromBody] JObject form)
+        {
+            var data = new ContentData(form);
+            if (data.Id <= 0 || data.ColumnNum.IsEmpty()) return HandleResult.Error();
+
+            var cm = await _columnService.GetModelByNum(data.ColumnNum);
+            if (cm == null || cm.Column == null || cm.ModelTable == null) return HandleResult.Error();
+
+            var tableSql = new DynamicTableSqlHelper(cm.ModelTable.SqlTableName);
+            tableSql.AddFieldAndValue("SeoTitle", data.SeoTitle);
+            tableSql.AddFieldAndValue("SeoKeyword", data.SeoKeyword);
+            tableSql.AddFieldAndValue("SeoDesc", data.SeoDesc);
+
+            return await _service.Update(tableSql, data.Id);
         }
     }
 }

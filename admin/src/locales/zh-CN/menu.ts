@@ -2,15 +2,19 @@ export default {
   'menu.welcome': '欢迎',
   'menu.more-blocks': '更多区块',
   'menu.home': '首页',
-  'menu.admin': '管理页',
-  'menu.admin.adminlist': '管理员管理',
-  'menu.admin.rolelist': '角色管理',
 
-  'menu.cms': '内容管理',
-  'menu.cms.sitelist': '站点管理',
+  'menu.content': '内容管理',
+
+  'menu.account': '账户',
+  'menu.account.adminlist': '管理员管理',
+  'menu.account.rolelist': '角色管理',
+
+  'menu.system': '系统',
+  'menu.system.sitelist': '站点管理',
+
+  'menu.cms': '内容设置',
   'menu.cms.modeltablelist': '模型管理',
   'menu.cms.columnlist': '栏目管理',
-  'menu.cms.content': '内容管理',
 
   'menu.login': '登录',
   'menu.register': '注册',
@@ -48,13 +52,5 @@ export default {
   'menu.exception.not-find': '404',
   'menu.exception.server-error': '500',
   'menu.exception.trigger': '触发错误',
-  'menu.account': '个人页',
-  'menu.account.center': '个人中心',
-  'menu.account.settings': '个人设置',
-  'menu.account.trigger': '触发报错',
-  'menu.account.logout': '退出登录',
-  'menu.editor': '图形编辑器',
-  'menu.editor.flow': '流程编辑器',
-  'menu.editor.mind': '脑图编辑器',
-  'menu.editor.koni': '拓扑编辑器',
+
 };

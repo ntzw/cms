@@ -1,9 +1,10 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, Fragment } from 'react';
 import { connect, Loading, GlobalModelState } from 'umi'
 import { ContentManagementProps, ContentModelState, ColumnItem } from "./data";
 import { PageHeaderWrapper, PageLoading } from '@ant-design/pro-layout';
-import { Card, Row, Col, Menu, Empty } from 'antd';
+import { Card, Row, Col, Menu, Empty, PageHeader, Button } from 'antd';
 import ContentManage from './components/ContentManage';
+import SeoForm from '@/components/Content/SeoForm';
 
 const { SubMenu } = Menu;
 
@@ -28,7 +29,16 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
 }) => {
     const [columnOpenKeys, setColumnOpenKeys] = useState<string[]>([]);
     const [rootSubmenuKeys, setRootSubmenuKeys] = useState<string[]>([]);
-
+    const [seoForm, setSeoForm] = useState<{
+        visible: boolean;
+        getDataUrl: string;
+        setDataUrl: string;
+        param?: { [key: string]: any };
+    }>({
+        visible: false,
+        getDataUrl: '',
+        setDataUrl: '',
+    });
 
 
     useEffect(() => {
@@ -44,10 +54,25 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
         }
     }, [currentSite])
 
-
-
-
-    return <PageHeaderWrapper>
+    return <PageHeaderWrapper
+        extra={<Fragment>
+            <Button.Group>
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        setSeoForm({
+                            visible: true,
+                            getDataUrl: '/Api/CMS/Site/GetSeo',
+                            setDataUrl: '/Api/CMS/Site/UpdateSeo',
+                            param: {
+                                num: currentSite?.num,
+                            }
+                        })
+                    }}
+                >站点SEO设置</Button>
+            </Button.Group>
+        </Fragment>}
+    >
         <Card bordered={false} bodyStyle={{ padding: 0 }} loading={loadingColumnData}>
             <Row>
                 <Col flex="260px">
@@ -94,6 +119,17 @@ const ContentManagement: React.FC<ContentManagementProps> = ({
                 </Col>
             </Row>
         </Card>
+        <Suspense fallback={<PageLoading />}>
+            <SeoForm
+                {...seoForm}
+                onClose={() => {
+                    setSeoForm({
+                        ...seoForm,
+                        visible: false,
+                    })
+                }}
+            />
+        </Suspense>
     </PageHeaderWrapper>
 }
 

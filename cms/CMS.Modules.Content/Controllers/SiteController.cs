@@ -23,7 +23,7 @@ namespace CMS.Modules.Content.Controllers
         {
             _service = service;
         }
-        
+
         public async Task<PageResponse> Page([FromBody] JObject form)
         {
             var req = new SqlServerPageRequest(form);
@@ -47,7 +47,7 @@ namespace CMS.Modules.Content.Controllers
             };
         }
 
-        public async Task<HandleResult> Edit([FromBody]Site model)
+        public async Task<HandleResult> Edit([FromBody] Site model)
         {
             var info = model.Id > 0 ? await _service.GetById(model.Id) : new Site();
             if (info == null) return HandleResult.Error("无效数据");
@@ -83,7 +83,7 @@ namespace CMS.Modules.Content.Controllers
         {
             return _service.GetSelectData();
         }
-        
+
         public async Task<HandleResult> TemplatePath([FromBody] JObject form)
         {
             string siteNum = form["siteNum"].ToStr();
@@ -108,6 +108,33 @@ namespace CMS.Modules.Content.Controllers
                     };
                 })
             };
+        }
+
+        public async Task<HandleResult> GetSeo([FromBody] JObject form)
+        {
+            string num = form["num"].ToStr();
+            if (num.IsEmpty()) return HandleResult.Error("无效数据");
+
+            var site = await _service.GetByNum(num);
+            if (site == null) return HandleResult.Error("无效数据");
+
+            return HandleResult.Success(new
+            {
+                site.SeoTitle,
+                site.SeoKeyword,
+                site.SeoDesc
+            });
+        }
+
+        public async Task<HandleResult> UpdateSeo([FromBody] Site site)
+        {
+            var edit = await _service.GetByNum(site.Num);
+            if (edit == null) return HandleResult.Error("无效数据");
+
+            edit.SeoTitle = site.SeoTitle;
+            edit.SeoKeyword = site.SeoKeyword;
+            edit.SeoDesc = site.SeoDesc;
+            return await _service.Update(edit);
         }
     }
 }

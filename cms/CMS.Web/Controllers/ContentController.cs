@@ -81,7 +81,7 @@ namespace Web.Controllers
                 {
                     new DefaultQuery(column.Num, new DefaultQuerySql("columnNum")),
                     new DefaultQuery(false, new DefaultQuerySql("IsDel")),
-                    new DefaultQuery($"|{tag}|", new DefaultQuerySql("CONCAT('|', Tag, '|')", QuerySymbol.Like))
+                    new DefaultQuery($"&|&|&{tag}&|&|&", new DefaultQuerySql("CONCAT('&|&|&', Tag, '&|&|&')", QuerySymbol.Like))
                 }
             };
 

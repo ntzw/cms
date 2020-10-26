@@ -14,7 +14,7 @@ namespace CMS.Modules.Content.Abstractions.Interface.Service
         Task<dynamic> GetByNum(string tableName, string num);
 
         Task<dynamic> GetByNumAndColumn(string columnNum, string num);
-
+        
         Task<HandleResult> Edit(JObject form, string accountNum);
 
         Task<ContentData> GetByItem(string tableName, string num);
