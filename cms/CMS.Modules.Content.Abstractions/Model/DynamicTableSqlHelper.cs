@@ -66,9 +66,17 @@ namespace CMS.Modules.Content.Abstractions.Model
                         break;
                     case ReactFormItemType.Radio:
                         break;
-                    case ReactFormItemType.CheckBox:
-                        break;
                     case ReactFormItemType.DataPicker:
+                        if (value.ToStr().IsNotEmpty())
+                        {
+                            AddFieldAndValue(columnField.Name, value.ToStr().ToDateTime());
+                        }
+                        else
+                        {
+                            AddFieldAndValue(columnField.Name, null);
+                        }
+                        break;
+                    case ReactFormItemType.CheckBox:
                         break;
                     case ReactFormItemType.RangePicker:
                         break;
@@ -80,7 +88,7 @@ namespace CMS.Modules.Content.Abstractions.Model
             }
         }
 
-        public void SetData(IEnumerable<ColumnField> fields, ContentData form)
+        public void SetContentData(IEnumerable<ColumnField> fields, ContentData form)
         {
             AddFieldAndValue("Num", form.Num);
             AddFieldAndValue("CreateDate", form.CreateDate);
@@ -97,7 +105,7 @@ namespace CMS.Modules.Content.Abstractions.Model
             AddFieldAndValue("SeoDesc", form.SeoDesc);
             AddFieldAndValue("ClickCount", form.ClickCount);
             AddFieldAndValue("IsTop", form.IsTop);
-            
+
             foreach (var columnField in fields)
             {
                 var formFieldName = columnField.Name.ToFieldNameLower();

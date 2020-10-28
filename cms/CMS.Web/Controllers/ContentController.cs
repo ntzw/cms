@@ -255,7 +255,7 @@ namespace Web.Controllers
             }
 
             var tableSqlHelper = new DynamicTableSqlHelper(columnModel.ModelTable.SqlTableName);
-            tableSqlHelper.SetData(columnFields, edit);
+            tableSqlHelper.SetContentData(columnFields, edit);
 
             return await _contentService.Add(tableSqlHelper);
         }

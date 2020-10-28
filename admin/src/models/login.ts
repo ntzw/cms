@@ -33,7 +33,7 @@ const Model: LoginModelType = {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response : HandleResult = yield call(fakeAccountLogin, payload);
+      const response: HandleResult = yield call(fakeAccountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
         payload: response,
@@ -55,6 +55,7 @@ const Model: LoginModelType = {
             return;
           }
         }
+        redirect = redirect.toLocaleLowerCase().replace(/^\/admin/, '');
         history.replace(redirect || '/');
       }
     },

@@ -12,6 +12,8 @@ namespace Web.Controllers
             var site = SessionHelper.Get<Site>("CurrentSite");
             if (site == null) return Content("");
             
+            
+            
             string folderName = site.IsMobileSite ? site.MobileSiteFolder : site.SiteFolder;
             return View($"~/Views/Content/{folderName}/{code}.cshtml");
         }

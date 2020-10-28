@@ -6,6 +6,8 @@ import { SwitchProps } from 'antd/lib/switch';
 import { Store } from 'antd/lib/form/interface';
 import { UploadCustomProps } from '../FormCustom/data';
 import { EditType } from '@/pages/cms/columnlist/components/modelfieldadd';
+import { DatePickerProps } from 'antd/lib/date-picker';
+import { RangePickerProps } from 'antd/lib/date-picker/generatePicker';
 
 export interface FormItem {
     label: string;
@@ -27,6 +29,8 @@ export interface FormItem {
     cascader?: CascaderProps;
     switch?: SwitchProps;
     upload?: UploadCustomProps;
+    datePicker?: DatePickerProps;
+    rangePicker?: RangePickerProps;
 }
 
 export interface DynaminFormProps<T extends Store> {

@@ -1,6 +1,6 @@
 import { DynaminFormProps, FormItem, AsyncResult, DynaminFormAction } from "./data";
 import React, { useState, createRef, useEffect } from "react";
-import { Spin, Input, Select, Cascader, Switch, Form, Empty } from "antd";
+import { Spin, Input, Select, Cascader, Switch, Form, Empty, DatePicker } from "antd";
 import { CascaderOptionType } from "antd/lib/cascader";
 import { Store } from "antd/lib/form/interface";
 import { FormInstance } from "antd/lib/form";
@@ -14,7 +14,7 @@ import { HandleResult } from "@/utils/request";
 import { SelectProps } from "antd/lib/select";
 import { EditType } from "@/pages/cms/columnlist/components/modelfieldadd";
 import EditorMd from "../Editor/EditorMd";
-
+import moment from "moment";
 
 export enum FormItemType {
     input,
@@ -117,6 +117,10 @@ const editUploadFn: MediaType['uploadFn'] = param => {
 const FormItemDOM = (item: FormItem) => {
     const type = item.type || FormItemType.input;
     switch (type) {
+        case FormItemType.rangePicker:
+            return <DatePicker.RangePicker {...item.rangePicker} />
+        case FormItemType.dataPicker:
+            return <DatePicker {...item.datePicker} />
         case FormItemType.switch:
             return <Switch {...item.switch} />
         case FormItemType.cascader:
@@ -410,7 +414,7 @@ export default DynaminForm;
 export const DefaultSplit = '&|&|&';
 
 /**
- * 处理设置的数据
+ * 处理表单设置的数据
  * @param fields 字段
  * @param oldData 旧数据
  */
@@ -420,6 +424,10 @@ export function handleFormData(fields: FormItem[], oldData: any): any {
         const fieldName: string = field.name;
         const oldValue: string | number = newData[fieldName];
         switch (field.type) {
+            case FormItemType.dataPicker:
+                if (oldValue)
+                    newData[fieldName] = moment(oldValue);
+                break;
             case FormItemType.cascader:
                 newData[fieldName] = handleCascaderValue(field.cascader?.options, oldValue);
                 break;
