@@ -54,7 +54,7 @@ let config: any = {
 
 const { NODE_ENV } = process.env;
 if (NODE_ENV === 'development') {
-  config.prefix = defaultSettings.basePath;
+  //config.prefix = defaultSettings.basePath;
 }
 
 /**

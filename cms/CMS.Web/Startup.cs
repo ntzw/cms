@@ -49,6 +49,8 @@ namespace Web
             {
                 o.ClaimsIssuer = AdminCookieAttribute.ClaimsIssuer;
                 o.LoginPath = new PathString("/Admin/Login");
+                o.Cookie.SameSite = SameSiteMode.Unspecified;
+                o.Cookie.SecurePolicy = CookieSecurePolicy.None;
 
                 o.Events = new CookieAuthenticationEvents
                 {

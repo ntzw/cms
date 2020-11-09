@@ -8,16 +8,24 @@
 export default {
   dev: {
     '/api/': {
-      target: 'https://preview.pro.ant.design',
+      target: 'https://localhost:5005',
       changeOrigin: true,
       pathRewrite: { '^': '' },
+      secure: false,
+    },
+    '/Api/': {
+      target: 'https://localhost:5005',
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+      secure: false,
     },
   },
   test: {
-    '/api/': {
-      target: 'https://preview.pro.ant.design',
+    '/Api/': {
+      target: 'https://localhost:5005',
       changeOrigin: true,
       pathRewrite: { '^': '' },
+      secure: false,
     },
   },
   pre: {
