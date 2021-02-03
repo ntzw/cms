@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, Suspense } from 'react';
+import React, { useRef, useState, useEffect, Suspense, createRef } from 'react';
 import { ContentManageProps, ColumnContentItem, ColumnItem, ContentEditState, CategoryManagementState } from '../data';
 import ProTable, { ActionType as TableAction, ProColumns } from '@/components/ListTable';
 import { ContentPage, GetEditValue, ContentSubmit, SubmitContentTopStatus, ContentDelete, ContentMoveRecycle } from '../service';
@@ -16,6 +16,7 @@ import { DeleteConfirm } from '@/utils/msg';
 import { PageLoading } from '@ant-design/pro-layout';
 import RecycleList from './RecycleList';
 import SeoForm from '@/components/Content/SeoForm';
+import ExportModal, { ExportModalInstance } from '@/components/Export/ExportModal';
 
 
 const ContentListTable: React.FC<{
@@ -28,6 +29,7 @@ const ContentListTable: React.FC<{
     currentTableFields
 }) => {
         const tableAction = useRef<TableAction>();
+        const exportAction = createRef<ExportModalInstance>();
         const [contentTableColumns, setContentTableColumns] = useState<ProColumns<ColumnContentItem>[]>([]);
         const [contentEdit, setContentEdit] = useState<ContentEditState>({
             visible: false,
@@ -174,6 +176,11 @@ const ContentListTable: React.FC<{
                             })
                         }}
                     >新增</Button>,
+                    <Button onClick={() => {
+                        exportAction.current?.export({
+                            columnNum: currentColumnNum
+                        })
+                    }}>导出数据</Button>,
                     selectedRows && selectedRows.length > 0 && <Button
                         icon={<DeleteOutlined />}
                         type="primary"
@@ -292,6 +299,13 @@ const ContentListTable: React.FC<{
                             visible: false,
                         })
                     }}
+                />
+            </Suspense>
+            <Suspense fallback={<PageLoading />}>
+                <ExportModal
+                    ref={exportAction}
+                    url="/Api/CMS/Content/Export"
+                    tips="确定导出数据？"
                 />
             </Suspense>
         </Spin>

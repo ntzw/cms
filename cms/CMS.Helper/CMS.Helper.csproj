@@ -16,4 +16,8 @@
       <ProjectReference Include="..\CMS.Extension\CMS.Extension.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="DotNetCore.NPOI" Version="1.2.2" />
+    </ItemGroup>
+
 </Project>

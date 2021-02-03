@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CMS.Modules.Account.Abstractions.Interface.Service;
@@ -8,7 +10,9 @@ using CMS.Modules.Content.Abstractions.Model.Content;
 using CMS.React.Model;
 using Extension;
 using Foundation.Attribute;
+using Foundation.Modal;
 using Foundation.Modal.Result;
+using Foundation.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
@@ -109,6 +113,58 @@ namespace CMS.Modules.Content.Controllers
         public Task<PageResponse> Page([FromBody] JObject form)
         {
             return _service.Page(form);
+        }
+
+        public async Task<HandleResult> Export([FromBody] JObject form)
+        {
+            string columnNum = form["columnNum"].ToStr();
+            if (columnNum.IsEmpty()) return HandleResult.Error();
+
+
+            var fields = await _columnFieldService.GetByColumnNum(columnNum);
+
+            var dataResp = await _service.PageByColumn(columnNum, new SqlServerPageRequest
+            {
+                Current = 1,
+                Size = 1000
+            });
+            if (dataResp.Data.Count() <= 0) return HandleResult.Error("未能查询出数据");
+
+            var fullPath = Path.GetFullPath("wwwroot/Export.xls");
+            var webPath = $"/temp/数据导出_{DateTime.Now:yyyyMMddHHmmss}.xls";
+            var saveFullPath = Path.GetFullPath($"wwwroot/{webPath}");
+            using (var excel = new ExcelUtil(fullPath))
+            {
+                var column = new ExcelRowItem();
+                
+                var columnIndex = 0;
+                foreach (var columnField in fields)
+                {
+                    column.Add(columnField.Explain, excel.GetColumnLetter(columnIndex));
+                    columnIndex++;
+                }
+                excel.SetRowValue(0, column);
+
+                var contentData = dataResp.Data.ToList();
+               
+                excel.CirculateLetterSetValue(1, (dataIndex, row) =>
+                {
+                    var item = contentData[dataIndex];
+                    var contentDataColumnIndex = 0;
+                    
+                    foreach (var columnField in fields)
+                    {
+                        row.Add(item[columnField.Name].ToStr(), excel.GetColumnLetter(contentDataColumnIndex));
+                        contentDataColumnIndex++;
+                    }
+
+                    return contentData.Count - 1 > dataIndex;
+                });
+
+                excel.Save(saveFullPath);
+            }
+
+            return HandleResult.Success(webPath);
         }
 
         /// <summary>
